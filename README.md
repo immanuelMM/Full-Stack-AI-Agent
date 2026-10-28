@@ -58,3 +58,12 @@ Plan → Build → Test → Review → Docs → Deploy pipeline, and a live acti
 - Different port: set `TEAM_VIZ_PORT`.
 
 It only listens on `127.0.0.1` and stops itself after 3 hours with no activity.
+
+## Portfolio site
+
+`portfolio/` is a static documentation site for this project (`index.html`) with
+the Agent Studio demo embedded (`studio.html`, which loops the demo with no server).
+Deploy the folder as-is to GitHub Pages, Netlify or Cloudflare Pages.
+
+After changing `.claude/team-viz/index.html`, refresh the copy:
+`cp .claude/team-viz/index.html portfolio/studio.html`

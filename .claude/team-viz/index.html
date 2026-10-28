@@ -195,6 +195,8 @@ const TOOL_ICON = { Read: '📖', Edit: '✏️', MultiEdit: '✏️', Write: '�
   Glob: '🔍', WebSearch: '🌐', WebFetch: '🌐', Agent: '📨', Task: '📨', Skill: '🧩', SendMessage: '💬' };
 const REVIEW_SKILLS = /review|security/i;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const params = new URLSearchParams(location.search);
+const EMBED = params.has('embed'); // hosted demo (e.g. portfolio site): no live server, demo loops
 
 const $ = (id) => document.getElementById(id);
 const floor = $('floor'), wires = $('wires');
@@ -444,6 +446,7 @@ function initRoster() {
 
 /* ---------- live connection ---------- */
 function connect() {
+  if (EMBED) { $('conn').classList.add('live'); $('connText').textContent = 'Demo'; $('resetBtn').hidden = true; return; }
   if (location.protocol === 'file:') { $('connText').textContent = 'Offline (demo only)'; return; }
   const es = new EventSource('/events');
   es.onopen = () => { $('conn').classList.add('live'); $('connText').textContent = 'Live'; };
@@ -505,11 +508,12 @@ $('demoBtn').onclick = () => {
     at += delay;
     demoTimers.push(setTimeout(() => handle({ ...evt, t: Date.now() }), at));
   }
+  if (EMBED) demoTimers.push(setTimeout(() => $('demoBtn').click(), at + 6000));
 };
 
 initRoster();
 connect();
-if (new URLSearchParams(location.search).has('demo')) $('demoBtn').click();
+if (params.has('demo') || EMBED) $('demoBtn').click();
 </script>
 </body>
 </html>

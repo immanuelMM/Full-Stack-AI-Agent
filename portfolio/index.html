@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full Stack Agent</title>
+<meta name="description" content="A team of Claude Code agents that plans, builds, tests, documents and ships web apps — with Agent Studio, a live animation of the team at work.">
+<meta property="og:title" content="Full Stack Agent — an AI dev team in Claude Code">
+<meta property="og:description" content="Seven specialised agents, one workflow, and a live animation of them collaborating.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23a78bfa'/><stop offset='1' stop-color='%2322d3ee'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='url(%23g)'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white'>✦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1d; --bg-2: #0f1530; --panel: #141b38; --panel-2: #1a2347; --line: #26305e;
+    --text: #e8ebf7; --muted: #959dc2; --accent: #8b6cf7; --accent-2: #22d3ee; --ok: #3ddc97;
+    --grad: linear-gradient(135deg, #a78bfa, #22d3ee);
+    --code-bg: #0c1126;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f6f7fc; --bg-2: #eef1f9; --panel: #ffffff; --panel-2: #f3f5fb; --line: #dde2f0;
+      --text: #161b36; --muted: #5a6386; --accent: #6d4ee8; --accent-2: #0891b2; --code-bg: #f1f3fa;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f7fc; --bg-2: #eef1f9; --panel: #ffffff; --panel-2: #f3f5fb; --line: #dde2f0;
+    --text: #161b36; --muted: #5a6386; --accent: #6d4ee8; --accent-2: #0891b2; --code-bg: #f1f3fa;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 Inter, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre { font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-size: .88em; }
+  :not(pre) > code { background: var(--panel-2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; }
+  .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+  /* nav */
+  .nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--line); }
+  .nav .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 750; color: var(--text); }
+  .logo:hover { text-decoration: none; }
+  .logo i { width: 28px; height: 28px; border-radius: 8px; background: var(--grad); display: grid; place-items: center;
+    font-style: normal; color: #fff; font-size: 14px; }
+  .nav ul { display: flex; gap: 18px; list-style: none; margin: 0 0 0 auto; padding: 0; }
+  .nav ul a { color: var(--muted); font-size: 14px; font-weight: 500; }
+  .nav ul a:hover { color: var(--text); text-decoration: none; }
+  @media (max-width: 860px) { .nav ul { display: none; } .nav .gh { margin-left: auto; } }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-weight: 600;
+    font-size: 15px; border: 1px solid var(--line); color: var(--text); background: var(--panel); }
+  .btn:hover { text-decoration: none; background: var(--panel-2); }
+  .btn.primary { background: var(--grad); color: #fff; border-color: transparent; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.sm { padding: 6px 12px; font-size: 13px; }
+
+  /* hero */
+  .hero { position: relative; padding: 88px 0 56px; text-align: center; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: -40% -20% auto; height: 640px; z-index: -1;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 30%, transparent), transparent); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; font-size: 13px;
+    color: var(--muted); background: var(--panel); border: 1px solid var(--line); }
+  .eyebrow b { color: var(--ok); }
+  h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.08; letter-spacing: -.03em; margin: 22px auto 18px; max-width: 900px; }
+  .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 720px; margin: 0 auto 32px; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .team-strip { display: flex; justify-content: center; gap: 10px; margin-top: 44px; flex-wrap: wrap; }
+  .team-strip span { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 22px;
+    background: var(--panel); border: 2px solid var(--c); animation: float 3s ease-in-out infinite; }
+  .team-strip span:nth-child(2n) { animation-delay: .4s; } .team-strip span:nth-child(3n) { animation-delay: .8s; }
+  @keyframes float { 50% { transform: translateY(-6px); } }
+
+  /* sections */
+  section { padding: 72px 0; }
+  section.alt { background: var(--bg-2); border-block: 1px solid var(--line); }
+  .kicker { color: var(--accent-2); font-weight: 650; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+  h2 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -.02em; line-height: 1.15; margin: 8px 0 14px; }
+  h3 { font-size: 18px; margin: 0 0 6px; }
+  .sub { color: var(--muted); max-width: 720px; margin: 0 0 36px; font-size: 17px; }
+
+  /* demo */
+  .demo-frame { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: var(--panel);
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,.45); }
+  .demo-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .demo-bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+  .demo-bar span { margin-left: 8px; font: 12px "JetBrains Mono", monospace; color: var(--muted); flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-frame iframe { display: block; width: 100%; height: 760px; border: 0; background: var(--bg); }
+  @media (max-width: 960px) { .demo-frame iframe { height: 1180px; } }
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 22px; }
+  .legend div { color: var(--muted); font-size: 14px; }
+  .legend b { color: var(--text); display: block; }
+
+  /* cards */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; position: relative;
+    transition: transform .25s, border-color .25s; }
+  .card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--c, var(--accent)) 60%, var(--line)); }
+  .agent-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .agent-head .av { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 22px;
+    background: var(--panel-2); border: 2px solid var(--c); flex: none; }
+  .agent-head code { font-size: 12px; }
+  .card p { color: var(--muted); margin: 0 0 12px; font-size: 15px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tags span { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--muted); }
+  .owns { font-size: 13px; color: var(--muted); margin-top: 12px; }
+  .owns code { font-size: 12px; }
+
+  /* workflow */
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; counter-reset: s; }
+  .steps li { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .steps .num { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-weight: 800;
+    background: var(--grad); color: #fff; }
+  .steps p { margin: 0; color: var(--muted); font-size: 15px; }
+  .q { margin-top: 10px; display: grid; gap: 6px; }
+  .q span { font-size: 14px; padding: 8px 12px; border-radius: 10px; background: var(--panel-2); border-left: 3px solid var(--accent); }
+
+  /* architecture */
+  .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin-bottom: 18px; }
+  .node { flex: 1 1 150px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+  .node b { display: block; font-size: 15px; }
+  .node small { color: var(--muted); font-size: 13px; display: block; }
+  .node code { font-size: 12px; }
+  .link { flex: 0 0 44px; display: grid; place-items: center; color: var(--accent-2); font-size: 20px; }
+  @media (max-width: 760px) {
+    .flow { flex-direction: column; } .link { flex-basis: 30px; transform: rotate(90deg); }
+  }
+  .flow-title { font-weight: 650; margin: 28px 0 12px; color: var(--muted); font-size: 14px; text-transform: uppercase; letter-spacing: .08em; }
+
+  /* tables + code */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 15px; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; background: var(--panel-2); }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; overflow-x: auto;
+    line-height: 1.6; margin: 0; }
+  .c { color: var(--muted); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+  .feature { display: flex; gap: 14px; align-items: flex-start; }
+  .feature .ic { flex: none; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 19px;
+    background: var(--panel-2); border: 1px solid var(--line); }
+  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; } html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======= EDIT ME: your name and links ======= -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="logo" href="#top"><i>✦</i>Full Stack Agent</a>
+    <ul>
+      <li><a href="#studio">Agent Studio</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#workflow">Workflow</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#stack">Tech stack</a></li>
+      <li><a href="#start">Get started</a></li>
+    </ul>
+    <a class="btn sm gh" href="https://github.com/YOUR-GITHUB/full-stack-agent" target="_blank" rel="noopener">GitHub ↗</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow"><b>●</b> Built with Claude Code subagents</span>
+    <h1>An AI dev team that <span class="grad">plans, builds, tests and ships</span> web apps</h1>
+    <p class="lede">Full Stack Agent is a set of seven specialised Claude Code agents with one shared workflow,
+      house coding standards and automatic quality gates. <strong>Agent Studio</strong> opens in your browser and
+      shows them working together in real time.</p>
+    <div class="cta">
+      <a class="btn primary" href="#studio">▶ Watch the team work</a>
+      <a class="btn" href="#start">Get started</a>
+    </div>
+    <div class="team-strip" aria-hidden="true">
+      <span style="--c:#a78bfa">🧠</span><span style="--c:#22d3ee">🧭</span><span style="--c:#60a5fa">🛠️</span>
+      <span style="--c:#f472b6">🎨</span><span style="--c:#34d399">🧪</span><span style="--c:#fbbf24">📝</span><span style="--c:#fb923c">🚀</span>
+    </div>
+  </div>
+</header>
+
+<section id="studio" class="alt">
+  <div class="wrap reveal">
+    <div class="kicker">Live demo</div>
+    <h2>Agent Studio</h2>
+    <p class="sub">When the Lead hands work to an agent, Claude Code hooks stream every step to a small local server,
+      and this page animates it. The demo below replays a real-shaped run: adding a loyalty-points feature to a
+      café point-of-sale app.</p>
+    <div class="demo-frame">
+      <div class="demo-bar"><i></i><i></i><i></i><span>http://localhost:4747</span>
+        <a class="btn sm" href="studio.html?embed" target="_blank" rel="noopener">Open full screen ↗</a></div>
+      <iframe src="studio.html?embed" title="Agent Studio demo: animated AI agents collaborating on a feature" loading="lazy"></iframe>
+    </div>
+    <div class="legend">
+      <div><b>📨 Hand-offs</b>Task envelopes fly from the Lead to an agent; ✅ flies back when it finishes.</div>
+      <div><b>💬 Live bubbles</b>Each agent shows what it's doing right now: reading, editing, running a build.</div>
+      <div><b>📊 Pipeline</b>Plan → Build → Test → Review → Docs → Deploy lights up as stages run.</div>
+      <div><b>📜 Activity feed</b>Every action, timestamped, with counts of agents, actions and files.</div>
+    </div>
+  </div>
+</section>
+
+<section id="team">
+  <div class="wrap reveal">
+    <div class="kicker">The team</div>
+    <h2>Seven roles, clear ownership</h2>
+    <p class="sub">Each agent is a Markdown file with its own instructions, tools and model. Each one owns one part of
+      the app, so they can work in parallel without overwriting each other.</p>
+    <div class="grid">
+      <article class="card" style="--c:#a78bfa">
+        <div class="agent-head"><span class="av">🧠</span><div><h3>Lead</h3><code>main Claude session</code></div></div>
+        <p>Talks to you, asks the up-front questions, splits work into tasks, dispatches agents and pulls the results together.</p>
+        <div class="tags"><span>Orchestration</span><span>Review</span></div>
+      </article>
+      <article class="card" style="--c:#22d3ee">
+        <div class="agent-head"><span class="av">🧭</span><div><h3>Planner</h3><code>research-planner</code></div></div>
+        <p>Searches the web for current UI/UX and stack best practices and writes a concrete plan: features, data model, API, screens, stack and CI.</p>
+        <div class="tags"><span>WebSearch</span><span>WebFetch</span><span>Write</span></div>
+        <div class="owns">Owns <code>&lt;app&gt;/docs/plan/</code></div>
+      </article>
+      <article class="card" style="--c:#60a5fa">
+        <div class="agent-head"><span class="av">🛠️</span><div><h3>Backend</h3><code>backend-dotnet-dev</code></div></div>
+        <p>Builds the ASP.NET Core Web API with Clean Architecture, EF Core + PostgreSQL, JWT auth and OpenAPI. Builds and tests before committing.</p>
+        <div class="tags"><span>.NET 10</span><span>EF Core</span><span>JWT</span></div>
+        <div class="owns">Owns <code>&lt;app&gt;/backend/</code></div>
+      </article>
+      <article class="card" style="--c:#f472b6">
+        <div class="agent-head"><span class="av">🎨</span><div><h3>Frontend</h3><code>frontend-react-dev</code></div></div>
+        <p>Builds responsive, accessible React + TypeScript UIs with API types generated from the backend's OpenAPI spec. Uses Astro for static sites.</p>
+        <div class="tags"><span>React</span><span>TypeScript</span><span>TanStack Query</span></div>
+        <div class="owns">Owns <code>&lt;app&gt;/frontend/</code> or <code>site/</code></div>
+      </article>
+      <article class="card" style="--c:#34d399">
+        <div class="agent-head"><span class="av">🧪</span><div><h3>QA</h3><code>qa-automation</code></div></div>
+        <p>Writes and runs unit, integration and end-to-end tests against a real database and real browsers, and reports actual pass/fail results.</p>
+        <div class="tags"><span>xUnit</span><span>Vitest</span><span>Playwright</span></div>
+        <div class="owns">Owns the test folders</div>
+      </article>
+      <article class="card" style="--c:#fbbf24">
+        <div class="agent-head"><span class="av">📝</span><div><h3>Docs</h3><code>docs-writer</code></div></div>
+        <p>Documents only behavior it has verified in the code: README, setup, API reference, architecture, configuration and deployment.</p>
+        <div class="tags"><span>Markdown</span><span>OpenAPI</span></div>
+        <div class="owns">Owns <code>&lt;app&gt;/README.md</code> and <code>docs/</code></div>
+      </article>
+      <article class="card" style="--c:#fb923c">
+        <div class="agent-head"><span class="av">🚀</span><div><h3>DevOps</h3><code>devops-engineer</code></div></div>
+        <p>Sets up Dockerfiles, Docker Compose, GitHub Actions CI and hosting. Never pushes or deploys without your confirmation.</p>
+        <div class="tags"><span>Docker</span><span>GitHub Actions</span></div>
+        <div class="owns">Owns CI, Docker and deploy config</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="workflow" class="alt">
+  <div class="wrap reveal">
+    <div class="kicker">Workflow</div>
+    <h2>From idea to shipped, in order</h2>
+    <p class="sub">The rules live in <code>CLAUDE.md</code>, so every session follows the same steps. Each new app gets its own
+      folder and its own git repo, next to the agent workspace.</p>
+    <ol class="steps">
+      <li><span class="num">0</span><div><h3>Two questions first</h3><p>Before any planning, the Lead always asks:</p>
+        <div class="q"><span>1. What is the name of the app?</span><span>2. Is this a static website or a full stack web app?</span></div></div></li>
+      <li><span class="num">1</span><div><h3>Plan</h3><p>The Planner researches current best practices and writes the plan to <code>&lt;app&gt;/docs/plan/</code>.</p></div></li>
+      <li><span class="num">2</span><div><h3>Build</h3><p>Backend and Frontend work in parallel. The backend's OpenAPI spec is the contract, and the frontend generates its types from it.</p></div></li>
+      <li><span class="num">3</span><div><h3>Test</h3><p>QA writes and runs unit, integration and end-to-end tests against what was built.</p></div></li>
+      <li><span class="num">4</span><div><h3>Review</h3><p><code>/code-review</code> on every change; <code>/security-review</code> whenever auth, payments, user data or secrets are touched.</p></div></li>
+      <li><span class="num">5</span><div><h3>Document</h3><p>Docs describes only verified behavior, plus every config variable and the deploy steps.</p></div></li>
+      <li><span class="num">6</span><div><h3>Ship</h3><p>DevOps adds Docker, CI on every push and pull request, and the hosting setup.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="wrap reveal">
+    <div class="kicker">Architecture</div>
+    <h2>How it fits together</h2>
+    <p class="sub">The agents are plain configuration files. Agent Studio and the quality gate are Claude Code
+      hooks: small scripts that run on agent events, with no extra npm packages.</p>
+
+    <div class="flow-title">Doing the work</div>
+    <div class="flow">
+      <div class="node"><b>You</b><small>describe a feature or a new app</small></div>
+      <div class="link">→</div>
+      <div class="node"><b>Lead</b><small>Claude Code, guided by <code>CLAUDE.md</code></small></div>
+      <div class="link">→</div>
+      <div class="node"><b>Subagents</b><small><code>.claude/agents/*.md</code> + standards skills</small></div>
+      <div class="link">→</div>
+      <div class="node"><b>App folders</b><small><code>../&lt;app&gt;/</code>, one git repo each</small></div>
+    </div>
+
+    <div class="flow-title">Watching it live</div>
+    <div class="flow">
+      <div class="node"><b>Hook events</b><small>PreToolUse, SubagentStart/Stop, Stop…</small></div>
+      <div class="link">→</div>
+      <div class="node"><b>hook.js</b><small>summarises each action and starts the server on the first dispatch</small></div>
+      <div class="link">→</div>
+      <div class="node"><b>server.js</b><small>Node server on <code>127.0.0.1:4747</code>, streams events (SSE)</small></div>
+      <div class="link">→</div>
+      <div class="node"><b>Agent Studio</b><small>opens in the browser automatically</small></div>
+    </div>
+
+    <div class="flow-title">Keeping it honest</div>
+    <div class="flow">
+      <div class="node"><b>Agent finishes</b><small>SubagentStop / TaskCompleted hook</small></div>
+      <div class="link">→</div>
+      <div class="node"><b>verify-app.sh</b><small>builds and lints every app with changed code</small></div>
+      <div class="link">→</div>
+      <div class="node"><b>Pass → commit</b><small>Fail → errors are sent back and the agent keeps working</small></div>
+    </div>
+
+    <div class="two" style="margin-top:36px">
+      <div class="feature"><span class="ic">🛡️</span><div><h3>Guardrails</h3><p>Agents commit only after builds and tests pass, never push without asking,
+        keep secrets in user-secrets or env vars, and never put secrets in <code>VITE_</code> variables.</p></div></div>
+      <div class="feature"><span class="ic">📐</span><div><h3>House standards</h3><p>Two skills define the defaults: <code>dotnet-backend-standards</code>
+        (Clean Architecture, repository + unit of work, JWT) and <code>react-frontend-standards</code>.</p></div></div>
+      <div class="feature"><span class="ic">🔒</span><div><h3>Local and private</h3><p>Agent Studio listens on localhost only, sends short summaries of actions (not file
+        contents) and stops itself after 3 idle hours.</p></div></div>
+      <div class="feature"><span class="ic">🧩</span><div><h3>Agent teams ready</h3><p>Any agent can also be started as a teammate in Claude Code's agent teams,
+        sharing a task list and messaging each other directly.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="stack" class="alt">
+  <div class="wrap reveal">
+    <div class="kicker">Tech stack</div>
+    <h2>Defaults for every new app</h2>
+    <p class="sub">The Planner starts from these choices and changes one only when its research gives a clear reason. Existing apps keep their own versions.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Full stack web app</th><th>Static website</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend</td><td>React + TypeScript, Vite, React Router, TanStack Query, React Hook Form + Zod, Zustand</td><td>Astro + TypeScript</td></tr>
+          <tr><td>Backend</td><td>ASP.NET Core Web API on .NET 10 LTS, Clean Architecture, JWT access + refresh tokens</td><td>—</td></tr>
+          <tr><td>Database</td><td>PostgreSQL via EF Core (Npgsql), Docker Compose locally</td><td>—</td></tr>
+          <tr><td>API contract</td><td>OpenAPI → TypeScript types with <code>openapi-typescript</code></td><td>—</td></tr>
+          <tr><td>Testing</td><td>xUnit + Testcontainers, Vitest + React Testing Library, Playwright</td><td>Playwright + axe</td></tr>
+          <tr><td>CI</td><td>GitHub Actions: build, lint and test on every push and pull request</td><td>GitHub Actions: build, link and accessibility checks</td></tr>
+          <tr><td>Hosting</td><td>Container host + managed PostgreSQL</td><td>Cloudflare Pages, Netlify or GitHub Pages</td></tr>
+          <tr><td>Agents</td><td colspan="2">Claude Code subagents and hooks, Node.js (no npm packages) for Agent Studio</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap reveal">
+    <div class="kicker">Get started</div>
+    <h2>Run it yourself</h2>
+    <p class="sub">You need Claude Code, Node.js 18+, the .NET SDK and Docker (for PostgreSQL).</p>
+    <div class="two">
+      <div>
+        <h3>1 · Start the agents</h3>
+<pre><span class="c"># the workspace holds the agents and every app</span>
+git clone https://github.com/YOUR-GITHUB/full-stack-agent
+cd full-stack-agent
+claude</pre>
+        <h3 style="margin-top:24px">2 · Ask for an app</h3>
+<pre><span class="c"># the Lead asks for the name and type first</span>
+&gt; Build me a booking app for a barber shop
+
+<span class="c"># or work on an existing one</span>
+&gt; Add loyalty points to cafe-pos-system</pre>
+      </div>
+      <div>
+        <h3>3 · Watch Agent Studio</h3>
+<pre><span class="c"># opens on the first agent dispatch; or by hand:</span>
+node .claude/team-viz/server.js --open
+
+<span class="c"># replay the demo</span>
+http://localhost:4747/?demo
+
+<span class="c"># turn it off / change the port</span>
+TEAM_VIZ=off
+TEAM_VIZ_PORT=5050</pre>
+        <h3 style="margin-top:24px">Workspace layout</h3>
+<pre>Agentic-fullstack-web-dev/
+├── full-stack-agent/   <span class="c"># agents, skills, hooks</span>
+│   ├── CLAUDE.md
+│   └── .claude/
+│       ├── agents/     <span class="c"># 6 agent definitions</span>
+│       ├── skills/     <span class="c"># frontend standards</span>
+│       ├── hooks/      <span class="c"># quality gate</span>
+│       └── team-viz/   <span class="c"># Agent Studio</span>
+├── cafe-pos-system/    <span class="c"># full stack app</span>
+└── &lt;new-app&gt;/          <span class="c"># one folder per app</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Built by <strong>YOUR NAME</strong> with Claude Code.</span>
+    <span><a href="https://github.com/YOUR-GITHUB" target="_blank" rel="noopener">GitHub</a> ·
+      <a href="https://www.linkedin.com/in/YOUR-LINKEDIN" target="_blank" rel="noopener">LinkedIn</a> ·
+      <a href="#top">Back to top ↑</a></span>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+</script>
+</body>
+</html>
