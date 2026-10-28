@@ -207,8 +207,8 @@
       café point-of-sale app.</p>
     <div class="demo-frame">
       <div class="demo-bar"><i></i><i></i><i></i><span>http://localhost:4747</span>
-        <a class="btn sm" href="studio.html?embed" target="_blank" rel="noopener">Open full screen ↗</a></div>
-      <iframe src="studio.html?embed" title="Agent Studio demo: animated AI agents collaborating on a feature" loading="lazy"></iframe>
+        <a class="btn sm" id="studioLink" href="studio.html?embed" target="_blank" rel="noopener">Open full screen ↗</a></div>
+      <iframe id="studioFrame" title="Agent Studio demo: animated AI agents collaborating on a feature" loading="lazy"></iframe>
     </div>
     <div class="legend">
       <div><b>📨 Hand-offs</b>Task envelopes fly from the Lead to an agent; ✅ flies back when it finishes.</div>
@@ -420,6 +420,14 @@ TEAM_VIZ_PORT=5050</pre>
 </footer>
 
 <script>
+  // Resolve studio.html next to this page even when it's served as /portfolio (no trailing slash),
+  // where a plain relative link would point at /studio.html instead.
+  const path = location.pathname;
+  const dir = path.endsWith('/') || /\.html?$/.test(path) ? path.replace(/[^/]*$/, '') : path + '/';
+  const studioUrl = dir + 'studio.html?embed';
+  document.getElementById('studioFrame').src = studioUrl;
+  document.getElementById('studioLink').href = studioUrl;
+
   const io = new IntersectionObserver((entries) => entries.forEach((e) => {
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { threshold: 0.08 });
