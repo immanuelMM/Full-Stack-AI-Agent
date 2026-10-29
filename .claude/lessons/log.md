@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · cafe-pos-system (backend-dotnet-dev) · tooling
+- Applied to backend-dotnet-dev Constraints (Write/Edit over heredocs; no `using var _`).
+### 2026-10-30 · backend-dotnet-dev · cafe-pos-system
+- target: .claude/agents/backend-dotnet-dev.md
+- lesson: Write multi-line C# or Python files with the Write/Edit tools, not Bash heredocs; in this environment heredocs containing quotes failed with "unexpected EOF" and applied nothing. Also never name a using variable `_` in tests (CS1656).
+- why: two heredoc attempts failed silently before any file changed; `using var _ = factory` broke the build.
+
 ## 2026-10-30 · cafe-pos-system (lead) · owner recovery
 - Applied to devops-engineer (first-user bullet: ship a recovery path) and CLAUDE.md (confirm login before deleting bootstrap vars).
 ### 2026-10-30 · lead · cafe-pos-system

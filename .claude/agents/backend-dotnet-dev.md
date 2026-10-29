@@ -49,6 +49,8 @@ Follow the `dotnet-backend-standards` skill (preloaded; if missing, read `full-s
   (unknown API routes still return problem+json 404) and must not appear in the OpenAPI document.
 
 ## Constraints
+- Write multi-line source files with Write/Edit, not Bash heredocs (heredocs with quotes have failed silently here).
+  Don't name a `using` variable `_` in C# (CS1656).
 - No frontend/UI changes — hand those to the frontend agent.
 - Don't introduce new NuGet packages or architectural layers without a clear reason.
 - Don't add speculative endpoints or fields beyond what was asked or planned.
