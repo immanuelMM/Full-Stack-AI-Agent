@@ -20,7 +20,16 @@ You are the DevOps agent. You own Dockerfiles, `docker-compose.yml`, `.github/wo
   - Frontend: `npm ci` → `npm run lint` → `npm run build` → `npm test` (if present).
   - Static: build, then link and accessibility checks.
   - Optionally Playwright end-to-end tests against the compose stack.
+  - A contract job: regenerate `backend/openapi/v1.json` and the frontend's generated types, fail on any diff.
+  - Include `Directory.Packages.props`, `Directory.Build.props` and `global.json` in the NuGet cache key.
   - Dependency updates via Dependabot.
+- **Containers:** non-root runtime images; `appsettings.Development.json` excluded from publish; dev-only keys via
+  compose env; compose `restart: on-failure` for the API and `depends_on: condition: service_healthy`.
+- **Compose project isolation:** the E2E/test stack uses its own project name (`-p <app>-e2e`), host ports and
+  volume, so it can never replace the user's dev containers or mount a different database under them. Never
+  touch the dev data volume.
+- **Production config:** document forwarded-headers trust (`KnownProxies`/`KnownNetworks`), rate-limit keys and
+  every required env var in `docs/deployment.md`.
 
 ## How to work
 1. Read existing Dockerfiles, compose files and workflows before adding new ones — extend them rather than duplicating.

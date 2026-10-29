@@ -96,8 +96,10 @@ async function main() {
   const evt = summarize(JSON.parse(raw || '{}'));
   if (await post(evt, 400)) return;
 
-  // Server not running: only start it (and open the browser) when an agent is dispatched.
-  const startsTeam = (evt.event === 'PreToolUse' && evt.target) || evt.event === 'SubagentStart';
+  // Server not running: start it (and open the browser) on the first prompt of a session or when an agent is
+  // dispatched, so the studio is already open before the team starts work.
+  const startsTeam = evt.event === 'UserPromptSubmit' ||
+    (evt.event === 'PreToolUse' && evt.target) || evt.event === 'SubagentStart';
   if (!startsTeam) return;
   spawn(process.execPath, [path.join(__dirname, 'server.js'), '--open'],
     { detached: true, stdio: 'ignore', windowsHide: true }).unref();

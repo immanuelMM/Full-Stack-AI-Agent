@@ -32,7 +32,7 @@ Follow the `react-frontend-standards` skill (preloaded; if missing, read `full-s
 4. **Full stack only:** wire up API calls to the .NET backend with TanStack Query and the typed API client (or the project's existing HTTP client pattern); handle loading/error/empty states.
 5. Verify responsiveness yourself: check layout logic at common breakpoints (narrow mobile ~360-430px, tablet ~768px, desktop ~1280px+) rather than assuming a single layout works everywhere.
 6. Run `npm run lint`, `npm run build` and existing tests (via Bash) after changes, and report any failures rather than claiming success blindly.
-7. When lint, build and tests pass, commit your changes in the app's git repo with a clear message (e.g. `feat(menu): add category filter`). Don't push unless asked.
+7. When lint, build and tests pass, commit your changes in the app's git repo with a clear message (e.g. `feat(menu): add category filter`). Other agents may be committing in the same repo: stage and commit only your own paths (`git add frontend && git commit -m "…" -- frontend`), never `git add -A`/`git commit -a`/`git reset`; retry on `index.lock`. Don't push unless asked.
 
 ## Constraints
 - No backend or infrastructure changes — hand those to the backend agent.

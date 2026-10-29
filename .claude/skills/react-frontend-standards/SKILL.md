@@ -33,13 +33,24 @@ frontend/
 - **TanStack Query** for all server state (queries, mutations, cache invalidation). Don't copy server data into
   global state.
 - **Types come from the backend's OpenAPI spec**, generated with `openapi-typescript` into `src/api/schema.d.ts`
-  via an npm script (e.g. `"api:types": "openapi-typescript http://localhost:5080/openapi/v1.json -o src/api/schema.d.ts"`).
+  via an npm script that reads the backend's **committed** snapshot, not a running server
+  (`"gen:api": "openapi-typescript ../backend/openapi/v1.json -o src/api/schema.d.ts"`); commit the generated file
+  and let CI fail when regenerating it produces a diff.
   Use `openapi-fetch` (or a thin typed `fetch` wrapper) so request/response shapes are checked at compile time.
   Regenerate whenever the backend contract changes — a contract change should break the build, not production.
 - API base URL from `import.meta.env.VITE_API_BASE_URL`.
 - Every query/mutation UI handles loading, error and empty states.
 - Auth (with the house JWT backend): access token kept in memory, refresh token in an HttpOnly cookie; on a 401,
   refresh once and retry, then redirect to login. Never store tokens in localStorage.
+  - **Clear the session only when the refresh returns 401/403.** A 429, 5xx or network error keeps the session and
+    fails only the current request — otherwise a throttled refresh logs everyone out.
+  - **Single-flight refresh across tabs** with the Web Locks API (`navigator.locks.request('<app>-refresh', …)`),
+    falling back to per-tab single-flight. Two tabs refreshing with the same rotated cookie trip the backend's
+    token-theft detection and log the user out everywhere.
+  - Rebuild a retried request lazily (only after a 401) — don't clone every request body up front (large uploads).
+- **Query keys are derived from the params actually sent** (`queryKey: ['orders', query]`), never maintained
+  separately from them.
+- Validate `VITE_API_BASE_URL` format at startup with a clear error rather than string-replacing path suffixes.
 
 ## 4. Routing, forms, state
 - **React Router** (v7+) with lazy-loaded route modules for large pages.
@@ -60,6 +71,7 @@ frontend/
 - **Vitest + React Testing Library** for components and hooks (query by role/label, not by class names).
 - Mock the network with MSW rather than mocking fetch by hand.
 - **Playwright** for end-to-end flows and mobile/desktop viewports.
+- Set `configure({ asyncUtilTimeout: 5000 })` in the test setup — the 1 s default flakes on loaded machines and CI.
 
 ## 8. Static websites
 - **Astro + TypeScript** by default (content collections for blog/docs-style content, zero JS unless an

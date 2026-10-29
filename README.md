@@ -9,7 +9,7 @@ Agentic-fullstack-web-dev/
 │   ├── CLAUDE.md        workflow, default tech stack, git + secrets rules
 │   ├── .claude/agents/  research-planner, frontend-react-dev, backend-dotnet-dev,
 │   │                    qa-automation, docs-writer, devops-engineer
-│   ├── .claude/skills/  react-frontend-standards (backend uses ~/.claude/skills/dotnet-backend-standards)
+│   ├── .claude/skills/  react-frontend-standards, dotnet-backend-standards
 │   ├── .claude/hooks/   verify-app.sh — build/lint quality gate when an agent finishes
 │   ├── .claude/team-viz/ Agent Studio — live browser animation of the agents at work
 │   ├── .claude/settings.json
@@ -47,7 +47,7 @@ as an agent team.
 
 ## Agent Studio (live animation)
 
-The first time an agent is dispatched in a session, a hook starts a small local
+On the first prompt of a session (or the first agent dispatch), a hook starts a small local
 server and opens <http://localhost:4747> in your browser. The page shows the Lead
 (Claude) handing tasks to each agent, what each agent is doing right now, the
 Plan → Build → Test → Review → Docs → Deploy pipeline, and a live activity feed.
