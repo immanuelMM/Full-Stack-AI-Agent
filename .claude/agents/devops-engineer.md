@@ -41,7 +41,9 @@ You are the DevOps agent. You own Dockerfiles, `docker-compose.yml`, `.github/wo
   (escaping handled in C#) instead of shell wrappers that splice passwords into a connection string.
 - **First user in production:** a host with no shell needs a config-driven owner bootstrap (`Bootstrap__*`, `sync: false`,
   "remove after first login"). List example values for everything the user must type (e.g. IANA time zones like
-  `Asia/Manila`, not `GMT+8`) — an invalid value silently skipped the owner on the first deploy.
+  `Asia/Manila`, not `GMT+8`) — an invalid value silently skipped the owner on the first deploy. Ship it together with
+  a config-driven recovery path (one-time owner password reset that also clears lockout); without one, a mistyped
+  password on a shell-less host needs a new feature and a redeploy.
 - **Blueprints/IaC read from the remote:** the platform reads `render.yaml` from GitHub, so commit and push (with the
   user's OK) *before* giving dashboard steps; validate it against the platform's published schema.
 - **CI gotchas:** `dotnet ef migrations bundle -r <rid>` needs `dotnet restore -r <rid>` first on a fresh runner; build the

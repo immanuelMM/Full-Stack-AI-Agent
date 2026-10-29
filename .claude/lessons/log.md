@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · cafe-pos-system (lead) · owner recovery
+- Applied to devops-engineer (first-user bullet: ship a recovery path) and CLAUDE.md (confirm login before deleting bootstrap vars).
+### 2026-10-30 · lead · cafe-pos-system
+- target: .claude/agents/devops-engineer.md (and CLAUDE.md lead section)
+- lesson: Any first-user bootstrap ships together with a config-driven recovery path (one-time owner password reset + lockout clear), and the lead confirms the user has actually logged in before telling them to delete the bootstrap settings.
+- why: On Render (no shell) the user deleted the bootstrap vars and then couldn't log in; there was no way back without a new backend feature and a redeploy.
+
 ## 2026-10-30 · cafe-pos-system (Render deploy + tablet UI refactor)
 Applied directly by the lead in `chore(agents): apply Render + tablet UI lessons`:
 - devops-engineer: single same-origin service on Public Suffix List domains; no proxy hop or hard-coded platform

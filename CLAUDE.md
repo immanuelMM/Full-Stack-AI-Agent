@@ -58,7 +58,8 @@ layout for new full stack apps.
   suites once. For UI work, open the agents' screenshots yourself; passing tests once hid a clipped keypad row.
 - Run `/code-review` on deploy and security-relevant designs *before* the user acts on them: the first Render design
   (static-site proxy in front of the API) passed tests but let one attacker lock out every login.
-- When the user has to type config (env vars, dashboard fields), give exact valid example values up front.
+- When the user has to type config (env vars, dashboard fields), give exact valid example values up front. Before
+  telling them to delete one-time credentials (bootstrap vars), have them confirm they actually logged in.
 - Start a fresh agent for a new milestone once an agent's context is large; send all review fixes in one batch.
 - On Windows, clone or build in short temp paths (`$TEMP/<short>`) — the scratchpad path hits the 260-char limit.
 
