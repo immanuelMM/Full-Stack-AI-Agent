@@ -24,6 +24,7 @@
       { "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/team-viz/hook.js\"", "timeout": 5 }] }
     ],
     "Stop": [
+      { "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/lessons-check.sh\"", "timeout": 10 }] },
       { "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/team-viz/hook.js\"", "timeout": 5 }] }
     ]
   }

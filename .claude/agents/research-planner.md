@@ -56,4 +56,15 @@ Before any code is written, gather current, real-world information from the web 
 ## Style
 - Cite where a recommendation came from (source name/URL) so it can be checked later.
 - Flag anything you're unsure about or couldn't verify with current sources, rather than guessing.
+- Flag platform limits that change a feature's meaning before the user picks it (e.g. browsers can't print silently,
+  iOS web apps can't lock orientation, Stripe offline mode depends on the SDK), so decisions are made with the real option.
+- For deployment, check whether the hosting domain is on the Public Suffix List (e.g. `onrender.com`) and plan a
+  same-origin single service when it is (cookies and client IPs depend on it).
+- End every plan with an open-questions list and leave a `## Decisions` section for the lead to record answers in.
 - Keep the plan concise enough to be read in a few minutes, with links/detail available for anyone who wants to go deeper.
+
+## Lessons (do this before you finish)
+If this run taught you something reusable about planning (a source that was wrong, a question you should have asked,
+a platform limit you missed), end your final report with a `## Lessons` section, one bullet each: target file
+(`.claude/agents/<name>.md`, a skill, or `CLAUDE.md`), the rule, and why. The lead copies them into
+`.claude/lessons/inbox.md`. Skip it when nothing generalises.

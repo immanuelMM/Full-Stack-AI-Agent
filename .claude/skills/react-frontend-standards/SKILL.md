@@ -62,6 +62,19 @@ frontend/
 - Mobile-first. Check ~360–430px, ~768px and ~1280px+.
 - Use the project's existing approach (CSS modules / Tailwind); for new projects either is fine — pick one and stick to it.
 - Semantic HTML, labelled inputs, visible focus, keyboard navigation, tap targets ≥ 44px, colour contrast WCAG AA.
+- **CSS structure:** tokens (custom properties) plus `@layer` files (reset, tokens, base, layout, components, features,
+  utilities); the layer-order statement must be the first CSS the bundle emits (import it first in `main.tsx`). Print CSS
+  that needs `!important` stays unlayered. Brand colours set at runtime stay as inline vars that tokens reference.
+- **Scope every size-specific rule inside its media/container query.** Unit tests run without CSS (jsdom), so a phone rule
+  that leaks onto tablets passes every Vitest test — only a real browser at each size catches it.
+- **Touch/tablet (POS-style) apps:** one DOM for every size (CSS changes the layout, never a second copy of the nav, or
+  `getByRole` queries break); the shell fills `100dvh` with `env(safe-area-*)` and `viewport-fit=cover`, and only the
+  content area scrolls; default controls 56px, primary 64px, never under 48px; money/PIN entry uses an on-screen keypad
+  with the real `<input>` kept (`inputMode="none"` on `(pointer: coarse)`, no autofocus) so the OS keyboard never covers
+  the screen; check the smallest phone too (375×667), not just 390×844.
+- Browsers cannot print silently: "auto-print" means calling `window.print()` once per document (guard against StrictMode
+  double effects) and keeping a "Print again" button. Silent printing needs a kiosk flag or a local print agent.
+- For same-origin hosting (API serves the SPA), allow a root-relative API base (`/api/v1`) so no hostname is baked in.
 
 ## 6. Env and secrets
 - `.env` is git-ignored; `.env.example` is committed with every variable and a safe placeholder.
@@ -72,6 +85,8 @@ frontend/
 - Mock the network with MSW rather than mocking fetch by hand.
 - **Playwright** for end-to-end flows and mobile/desktop viewports.
 - Set `configure({ asyncUtilTimeout: 5000 })` in the test setup — the 1 s default flakes on loaded machines and CI.
+- `npm run format:check` covers Markdown too (README tables fail CI). Never run `prettier --write` on generated files
+  (`src/api/schema.d.ts`); keep them in `.prettierignore`.
 
 ## 8. Static websites
 - **Astro + TypeScript** by default (content collections for blog/docs-style content, zero JS unless an
@@ -86,5 +101,8 @@ frontend/
 - [ ] API types regenerated if the backend contract changed; no hand-written duplicates of API shapes
 - [ ] Loading / error / empty states handled
 - [ ] Works at mobile, tablet and desktop widths; keyboard accessible
+- [ ] For UI changes: screenshots taken at each target size **and looked at** (key buttons fully on screen, nothing
+      clipped) — passing tests alone missed a hidden keypad row
+- [ ] `npm run format:check` passes
 - [ ] No secrets in `VITE_` vars or source; `.env.example` updated
 - [ ] Tests added/updated for the changed behavior

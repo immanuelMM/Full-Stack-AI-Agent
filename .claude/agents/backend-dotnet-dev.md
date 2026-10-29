@@ -36,7 +36,35 @@ Follow the `dotnet-backend-standards` skill (preloaded; if missing, read `full-s
 8. When build and tests pass, commit your changes in the app's git repo with a clear message (e.g. `feat(orders): add checkout endpoint`). Other agents may be committing in the same repo: stage and commit only your own paths (`git add backend && git commit -m "…" -- backend`), never `git add -A`/`git commit -a`/`git reset`; retry on `index.lock`. Don't push unless asked.
 9. If the contract may have changed, regenerate `backend/openapi/v1.json` and report the diff (empty, or every change explained).
 
+## Deployment-facing code (lessons from cafe-pos-system on Render)
+- **Startup helpers never crash-loop the container:** migrations retry transient errors; optional startup work (owner
+  bootstrap, seeding) logs and continues on any non-transient error, and runs independently of `MigrateOnStartup` (a
+  pre-deploy migration step must not disable it). Never log secrets or full emails (mask them).
+- **First-owner bootstrap from config** for hosts without a shell: acts only when the users table is empty, inside a
+  transaction with an advisory lock; validates every value up front (password policy, IANA time zone, ranges) and logs a
+  clear reason when it skips; warns on every start while the password env var is still set.
+- Accept `DATABASE_URL` (`postgres://`) via `NpgsqlConnectionStringBuilder`, with an explicit connection string winning.
+- `ForwardedHeaders:ForwardLimit` must be configurable, and unwound hops must all be trusted proxies.
+- Optional SPA hosting (`Spa:RootPath`): the `index.html` fallback must never answer `/api`, `/health`, `/openapi`
+  (unknown API routes still return problem+json 404) and must not appear in the OpenAPI document.
+
 ## Constraints
 - No frontend/UI changes — hand those to the frontend agent.
 - Don't introduce new NuGet packages or architectural layers without a clear reason.
 - Don't add speculative endpoints or fields beyond what was asked or planned.
+
+## Lessons (do this before you finish)
+If this run taught you something **reusable** that would change how an agent works next time (a mistake you made or
+fixed, a tool/platform gotcha, a check that caught a real bug), append an entry to
+`C:\Users\merin\AI\Agentic-fullstack-web-dev\full-stack-agent\.claude\lessons\inbox.md` (use Edit to append at the end;
+never rewrite or delete other entries) in this exact form:
+
+```
+### <YYYY-MM-DD> · <your agent name> · <app-folder>
+- target: <file to change, e.g. .claude/agents/qa-automation.md, .claude/skills/react-frontend-standards/SKILL.md, CLAUDE.md>
+- lesson: <one or two sentences, phrased as the rule to follow>
+- why: <what happened this run that proves it>
+```
+
+Skip it when nothing generalises. App-specific facts (a URL, a seed value) are not lessons. Never edit agent, skill or
+settings files yourself; the lead applies the inbox. Mention in your final report how many lessons you added.

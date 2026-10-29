@@ -30,7 +30,8 @@ Follow the `react-frontend-standards` skill (preloaded; if missing, read `full-s
 2. Look at the existing codebase structure (`Glob`/`Grep`/`Read`) before adding new files — match existing patterns, naming conventions, and folder structure instead of inventing new ones.
 3. Build components that are small, composable, and testable. Keep business logic out of presentational components where practical.
 4. **Full stack only:** wire up API calls to the .NET backend with TanStack Query and the typed API client (or the project's existing HTTP client pattern); handle loading/error/empty states.
-5. Verify responsiveness yourself: check layout logic at common breakpoints (narrow mobile ~360-430px, tablet ~768px, desktop ~1280px+) rather than assuming a single layout works everywhere.
+5. Verify responsiveness yourself: check layout logic at common breakpoints (narrow mobile ~360-430px, tablet ~768px, desktop ~1280px+) rather than assuming a single layout works everywhere. For UI work, capture Playwright screenshots at each target size against the isolated E2E stack (never the dev stack), **open them and look**, and measure that the key controls (Charge, Complete, keypad keys, nav, Log out) are fully inside the viewport — unit tests run without CSS and miss leaked media queries and clipped controls.
+   For a CSS refactor that should not change the look, ask for (or reuse) a before/after pixel-diff baseline and confirm every non-zero diff is intended.
 6. Run `npm run lint`, `npm run build` and existing tests (via Bash) after changes, and report any failures rather than claiming success blindly.
 7. When lint, build and tests pass, commit your changes in the app's git repo with a clear message (e.g. `feat(menu): add category filter`). Other agents may be committing in the same repo: stage and commit only your own paths (`git add frontend && git commit -m "…" -- frontend`), never `git add -A`/`git commit -a`/`git reset`; retry on `index.lock`. Don't push unless asked.
 
@@ -38,3 +39,19 @@ Follow the `react-frontend-standards` skill (preloaded; if missing, read `full-s
 - No backend or infrastructure changes — hand those to the backend agent.
 - Don't introduce new dependencies/frameworks without a clear reason; prefer what's already in `package.json`.
 - Don't add speculative features or abstractions beyond what was asked.
+
+## Lessons (do this before you finish)
+If this run taught you something **reusable** that would change how an agent works next time (a mistake you made or
+fixed, a tool/platform gotcha, a check that caught a real bug), append an entry to
+`C:\Users\merin\AI\Agentic-fullstack-web-dev\full-stack-agent\.claude\lessons\inbox.md` (use Edit to append at the end;
+never rewrite or delete other entries) in this exact form:
+
+```
+### <YYYY-MM-DD> · <your agent name> · <app-folder>
+- target: <file to change, e.g. .claude/agents/qa-automation.md, .claude/skills/react-frontend-standards/SKILL.md, CLAUDE.md>
+- lesson: <one or two sentences, phrased as the rule to follow>
+- why: <what happened this run that proves it>
+```
+
+Skip it when nothing generalises. App-specific facts (a URL, a seed value) are not lessons. Never edit agent, skill or
+settings files yourself; the lead applies the inbox. Mention in your final report how many lessons you added.
