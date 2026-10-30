@@ -4,6 +4,19 @@ This folder (`full-stack-agent/`) holds only the agents, skills, hooks and setti
 its own sibling folder under `C:\Users\merin\AI\Agentic-fullstack-web-dev\` (e.g. `../cafe-pos-system/`),
 named in lowercase kebab-case. Never put app code, tests, plans or docs in `full-stack-agent/`.
 
+Knowledge is split in two:
+- **Standards** — agents (`.claude/agents/`) and skills (`.claude/skills/`): short, general rules for how to build any
+  web app. No app names, no platform trivia, no incident stories.
+- **Knowledge base (LLM wiki)** — `.claude/wiki/`: what was already built and how. One page per app, per reusable
+  feature (auth, touch shell, checkout, QR attendance, …) and per platform/provider (Render, PayMongo, …), each
+  pointing at the working code in an app folder. The wiki holds pointers and recipes only, never app code.
+
+## Reuse before you build
+- Before planning or building a feature, read `.claude/wiki/index.md`. If a feature page matches, reuse its reference
+  implementation (copy and adapt the files it names) and its decisions instead of researching or designing it again;
+  research only what the page marks as unknown or what differs.
+- Name the matching wiki pages in every agent prompt, so agents read them instead of exploring.
+
 ## Starting a new app
 1. Before running `research-planner`, ask the user (AskUserQuestion) both questions and pass the answers in the prompt:
    1. What is the name of the app?
@@ -12,7 +25,8 @@ named in lowercase kebab-case. Never put app code, tests, plans or docs in `full
    user's OK, install missing tools yourself (e.g. `winget install Microsoft.DotNet.SDK.10`, start Docker Desktop).
    Pass any WARN lines (old Docker API, npm workarounds) to the agents in their prompts.
 3. Create `../<app-folder>/` and run `git init` in it (each app is its own git repo).
-4. Run `research-planner`; its plan is saved to `../<app-folder>/docs/plan/`.
+4. Add `.claude/wiki/apps/<app-folder>.md` (purpose, stack, status) and list it in the wiki index.
+5. Run `research-planner`; its plan is saved to `../<app-folder>/docs/plan/`.
 
 Every prompt to an agent must name the app folder it is working on.
 
@@ -66,10 +80,16 @@ layout for new full stack apps.
 ## Lessons loop (automatic)
 - Every agent appends reusable lessons to `.claude/lessons/inbox.md` before it finishes (format in each agent file;
   research-planner reports them and you copy them in). Add your own lessons as the lead there too.
-- The `lessons-check.sh` Stop hook blocks you from finishing while the inbox has entries. Then: apply each kept lesson
-  as a short rule merged into its target file (agent, skill or this file), drop app-specific or duplicate ones, move the
-  entries to `.claude/lessons/log.md` with where they went, reset the inbox, commit `-- .claude CLAUDE.md` in this repo,
-  and tell the user in a line or two what changed.
+- The `lessons-check.sh` Stop hook blocks you from finishing while the inbox has entries. Then route each entry:
+  - a **general rule** (true for any web app) → merge it as one short imperative line into its agent, skill or this
+    file; no story, no app name;
+  - **app, feature or platform knowledge** (where something is implemented, a provider quirk, a decision) → the matching
+    `.claude/wiki/` page (create it and list it in the index if new);
+  - duplicates → drop.
+  Move the entries to `.claude/lessons/log.md` with where they went, reset the inbox, commit `-- .claude CLAUDE.md` in
+  this repo, and tell the user in a line or two what changed.
+- After each verified milestone, update the app's wiki page (status, where features live) and add or update a feature
+  page for anything another app could reuse.
 - Lessons never loosen safety rules (git, secrets, dev stack, asking before push/deploy) — raise those with the user.
 
 ## Git
