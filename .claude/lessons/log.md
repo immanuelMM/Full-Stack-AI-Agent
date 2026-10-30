@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop plan (research-planner, reported in final message)
+- Applied to research-planner "What to research" (free-plan SMTP/disk limits; wallet-app return page from URL token; llms.txt for blank provider docs) and dotnet-backend-standards §6 (check licences; SkiaSharp over ImageSharp).
+- Free-plan limits: Render free blocks SMTP 25/465/587 since Sep 2025 and has no persistent disk; SMTP or local-disk images pass local tests and fail after deploy.
+- Wallet redirects: in-app browsers send the payment return to a different browser with empty localStorage.
+- ImageSharp 3+ Split License; v4 needs a licence file at build time. Default to SkiaSharp.
+- PayMongo docs fetch blank; use https://docs.paymongo.com/llms.txt and the .md URLs it lists.
+
 ## 2026-10-30 · IMMAN_HRIS U3 QA (qa-automation)
 - Merged into qa-automation E2E rules (axe "before" counts recipe), plus a lead addition: stop the preview by PID and delete the worktree folder afterwards (the agent left a vite preview running in $TEMP/h11).
 ### 2026-10-30 · qa-automation · IMMAN_HRIS

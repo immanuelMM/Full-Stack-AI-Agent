@@ -39,6 +39,11 @@ Before any code is written, gather current, real-world information from the web 
 - Frontend best practices — for full stack: React component architecture, state management, data fetching, routing; for static: static-site tooling, SEO, performance, hosting options. Verify library versions are current, not stale.
 - **Full stack only:** current .NET LTS Web API best practices (controllers vs minimal APIs, EF Core + PostgreSQL, auth, validation, versioning, logging).
 - Deployment and hosting options suited to the app type, and anything security-sensitive in the domain (payments, personal data).
+  Check the host's free-plan network and disk limits before choosing email or file storage (Render free blocks outbound
+  SMTP since Sep 2025 and has no persistent disk: use an HTTP email API and object storage).
+- Payment flows that redirect to a wallet app (GCash, Maya) return in a different browser when started from an in-app
+  browser (Facebook, Messenger): plan the return/order page to work from the URL token alone, not local state.
+- Provider docs that fetch blank: try the site's `llms.txt` and the `.md` URLs it lists (e.g. docs.paymongo.com/llms.txt).
 - Domain-specific concerns for the app being planned (e.g. for a POS: menu catalog, cart/order lifecycle, payments, roles, offline resilience).
 
 ## How to work
