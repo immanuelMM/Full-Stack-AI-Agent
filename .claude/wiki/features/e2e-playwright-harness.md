@@ -50,6 +50,10 @@ Status: **implemented** — cafe-pos-system `d04812d`, IMMAN_HRIS `d4c2e28`, bet
   small (cell ≤ 6px). Every other spec on a camera page stubs `getUserMedia` to reject, or the fake QR scans by itself.
 
 ## Gotchas
+- Stopping a backgrounded `playwright test` by its CLI pid leaves `serve-preview.mjs`/`vite preview` holding the port
+  ("already used" on every later run): kill the tree (`taskkill //F //T /PID <pid>`) or the port's listener.
+- When the app allowlists redirect hosts (beth: `https://checkout.paymongo.com`), answer that host with `context.route`
+  instead of a same-origin stub.
 - Full-card/segmented radios: `getByRole('radio', { name }).check()`, never `getByText(label).click()` (the transparent
   input covers the text → 45 s "intercepts pointer events").
 - Layered mocks: a `mockAdmin(context)` answering GETs from fixtures, recording POST bodies and ending in

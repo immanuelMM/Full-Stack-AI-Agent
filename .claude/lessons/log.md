@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop frontend review fixes (frontend-react-dev)
+- Wiki: e2e-playwright-harness gotchas (kill the preview process tree; route allowlisted redirect hosts). The general "stop servers by port/PID" rule already exists in qa-automation.
+### 2026-10-31 · frontend-react-dev · beth-online-shop
+- target: .claude/wiki/features/e2e-playwright-harness.md
+- lesson: Killing a backgrounded `playwright test` run (taskkill on the CLI pid) leaves its `serve-preview.mjs` and `vite preview` children holding the preview port, so every later run fails with "already used". Kill the whole tree (`taskkill //F //T`) or the listener on the port before re-running. Also, when the app restricts redirects (e.g. only `https://checkout.paymongo.com`), the harness must answer that host with `context.route` instead of a same-origin stub.
+- why: after stopping a run, four chained projects all failed instantly on port 4175; and the same-origin `/pay-stub` URL broke two checkout specs once `redirectTo` got an allowlist.
+
 ## 2026-10-31 · beth-online-shop review fixes (backend-dotnet-dev)
 - Wiki: jwt-refresh-auth (per-IP lockout, active-user cache), rate-limiting-forwarded-headers (test IP filter, size-limit test), cash-on-delivery (abuse caps), same-origin-single-image-deploy (security headers). Standards: dotnet-backend-standards §6 (in-place data migrations, HasData defaults, optional PUT fields) and §7a (OnCompleted lookups, test IP filter). Dropped: rebuild-after-migration (already a rule).
 ### 2026-10-31 · backend-dotnet-dev · beth-online-shop
