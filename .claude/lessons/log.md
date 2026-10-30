@@ -2,6 +2,10 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS (research-planner) · refactor planning
+- Applied to research-planner Style: real-data refactor checks (startup Migrate + EF upgrade, secret-derived values with
+  golden tests, free-plan Postgres) and the `.git/index` fallback when Glob/Grep fail.
+
 ## 2026-10-30 · cafe-pos-system (backend-dotnet-dev) · tooling
 - Applied to backend-dotnet-dev Constraints (Write/Edit over heredocs; no `using var _`).
 ### 2026-10-30 · backend-dotnet-dev · cafe-pos-system

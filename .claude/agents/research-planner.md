@@ -60,6 +60,11 @@ Before any code is written, gather current, real-world information from the web 
   iOS web apps can't lock orientation, Stripe offline mode depends on the SDK), so decisions are made with the real option.
 - For deployment, check whether the hosting domain is on the Public Suffix List (e.g. `onrender.com`) and plan a
   same-origin single service when it is (cookies and client IPs depend on it).
+- Refactors of apps with real data: check for startup `Migrate()` combined with an EF major upgrade (EF 9+ throws on
+  model drift) and plan `has-pending-model-changes` + a restore rehearsal for each milestone touching the model; list
+  every persisted/printed value derived from a secret (QR/HMAC signatures, Data Protection app name + purpose, hash
+  formats) with a golden test before any key rotation; ask early whether production Postgres is on a free plan.
+- If Glob/Grep fail (`uv_spawn`), read `<app>/.git/index` with Read for the tracked-file list, then read by path.
 - End every plan with an open-questions list and leave a `## Decisions` section for the lead to record answers in.
 - Keep the plan concise enough to be read in a few minutes, with links/detail available for anyone who wants to go deeper.
 
