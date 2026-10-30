@@ -22,7 +22,11 @@ Doc pages may fetch blank: read `https://docs.paymongo.com/llms.txt` and the `.m
   parsing. Skip the timestamp age check: retries replay the original `t`.
 - **Webhook envelope:** `data.id` (`evt_…`), `data.attributes.{type, livemode, data}`; event `checkout_session.payment.paid`.
   Up to 12 retries (the "3" on one page is stale).
-- `payment_method_types` values seen: `gcash`, `paymaya`, `grab_pay`, `card`, `qrph`, `atome`.
+- `payment_method_types` values seen: `gcash`, `paymaya`, `grab_pay`, `card`, `qrph`, `atome` (beth default: gcash,
+  paymaya, card, qrph). A QR Ph code's own 30-min validity does not expire the session.
+- `Idempotency-Key`: create only, valid 24 h, different parameters under the same key are rejected; not on retrieve/expire.
+- Webhook reply: 200–209 with a JSON body within 30 s; retries use exponential backoff. At most one paid payment per
+  session; retrieve's `payments[]` has the same shape as the webhook's (`paid_at` in unix seconds).
 
 ## Still assumed
 Retrieve/expire work on v2-created sessions; `paid_at` present in the webhook payload; signature hex case; `?t=` survives
@@ -56,8 +60,19 @@ an event id — confirm the real envelope on the first test-mode event.
 Shoppers from Facebook/Messenger pay in the GCash/Maya **apps**, and the return often opens a **different browser** with
 empty local state: the order/return page must work from the URL (`number` + token) alone.
 
+Unknown-shape events are ignored with a warning and a 200; if the real test delivery uses the flat envelope, adjust the
+event parser. The golden signature vector was computed from the documented algorithm, not a real delivery.
+
 ## Keys and modes
-`PayMongo__SecretKey`, `PayMongo__WebhookSecret` (secrets; required outside Development). Demo = test-mode keys; going
+- `PayMongo__SecretKey` (`sk_test_…` / `sk_live_…`) and `PayMongo__WebhookSecret` (`whsk_…`, shown when the webhook
+  endpoint is created): secrets, required outside Development.
+- `PayMongo__LiveMode` (default false; must match the key prefix or startup fails; picks `te` vs `li`),
+  `PayMongo__BaseUrl` (default `https://api.paymongo.com`), `PayMongo__TimeoutSeconds` (10).
+- `Seo__PublicBaseUrl` is required outside Development: PayMongo returns the shopper there and emails link to it.
+- Register the webhook for `checkout_session.payment.paid` at `https://<host>/api/v1/webhooks/paymongo`; one endpoint
+  and one secret per mode. On a sleeping free host, PayMongo retries plus reconcile-on-read cover the cold start.
+
+Demo = test-mode keys; going
 live = live keys + a new live webhook (new secret). Webhooks need a public HTTPS URL: in dev use a tunnel
 (`cloudflared`) or post locally signed fake events. Refunds via the PayMongo dashboard in the MVP. Account activation
 needs business documents — apply early.
