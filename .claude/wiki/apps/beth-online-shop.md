@@ -1,6 +1,6 @@
 # beth-online-shop
 
-Reflects app commit `5cf759c` (2026-10-30: B0–B2b verified — 528 backend tests; F0–F2 verified — 153 Vitest, E2E at 5 viewports; B3 admin orders in progress).
+Reflects app commit `b2bc927` (2026-10-31: B0–B3 verified — 617 backend tests; F0–F3 verified — 187 Vitest, E2E at 5 viewports. Next: QA passes, review, D1 deploy, docs).
 Paths are relative to `C:\Users\merin\AI\Agentic-fullstack-web-dev\`.
 
 ## Purpose
@@ -42,6 +42,14 @@ docs/plan/online-shop-plan.md, docker-compose.yml (db on :5434)
 - `cd backend && dotnet test` (Testcontainers, or `TEST_PG_CONNECTION`).
 - Frontend: lint/build/test/format:check. E2E harness: `cd e2e && npm run screens:<project>` (builds into
   `dist-e2e`, `vite preview` on :4175, API fulfilled by `context.route`).
+
+## Back office (F3, `b2bc927`)
+- Pages: `beth-online-shop/frontend/src/features/{dashboard,adminOrders,inventory,users,codBlocks,settings}`; shared CSS
+  `frontend/src/features/admin/admin.css`.
+- Order detail renders buttons only from `allowedActions` (steps in a sticky action bar, exceptions under "Other
+  actions"); every 409 (`InvalidTransition`, `StockUnavailable`, `Conflict`) closes the dialog, shows the API message and
+  refetches. Orders list keeps filters in the URL (`orderFilters.ts`), so dashboard tiles are plain links. Settings
+  tabs send the whole `ShopSettings` with the tab's fields changed and remount on `version`.
 
 ## PH address data (PSGC)
 `beth-online-shop/frontend/scripts/build-psgc.mjs` builds `frontend/src/features/checkout/psgc.json` (82 provinces,

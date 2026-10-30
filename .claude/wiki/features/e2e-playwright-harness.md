@@ -50,6 +50,11 @@ Status: **implemented** — cafe-pos-system `d04812d`, IMMAN_HRIS `d4c2e28`, bet
   small (cell ≤ 6px). Every other spec on a camera page stubs `getUserMedia` to reject, or the fake QR scans by itself.
 
 ## Gotchas
+- Full-card/segmented radios: `getByRole('radio', { name }).check()`, never `getByText(label).click()` (the transparent
+  input covers the text → 45 s "intercepts pointer events").
+- Layered mocks: a `mockAdmin(context)` answering GETs from fixtures, recording POST bodies and ending in
+  `route.fallback()` stacks on `mockApi`, so specs assert both the screen and the request a dialog sent
+  (`beth-online-shop/e2e/support/admin.ts`). Keep fixtures realistic (e.g. ship dates never on Sunday).
 - `expectBodyDoesNotScroll` catches `sr-only` elements escaping an unpositioned `overflow:auto` panel (page 7–11 px
   too tall); "intercepts pointer events" on `check()` means a positioned sibling paints over a full-card input.
 - cafe-pos `npm run stack:up` (`docker-compose.e2e.yml` alone) **reuses the dev container names** — always add the

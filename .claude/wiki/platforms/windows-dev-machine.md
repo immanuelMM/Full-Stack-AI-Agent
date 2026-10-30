@@ -17,4 +17,6 @@
 - Ports in use by dev databases: 5432 (IMMAN_HRIS), 5433 (cafe-pos), 5434 (beth); pick free ones for new apps and E2E stacks (15xxx).
 
 ## Python
+- Python from Git Bash reads/writes cp1252 by default: edit scripts touching non-ASCII (`₱`) use
+  `io.open(path, encoding='utf-8')`, or they crash halfway with some files already edited.
 - `python` is Python 3.12; `python3` is the Microsoft Store stub and fails. Scripts and skills (ui-ux-pro-max) must call `python`.
