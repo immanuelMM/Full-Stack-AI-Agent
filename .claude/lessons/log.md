@@ -2,6 +2,9 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop B3 verification (lead)
+- Applied to qa-automation How to work: date-dependent tests share a fake clock with the server. Found by the lead: the dashboard test failed in a run that crossed Manila midnight; the agent had called it load.
+
 ## 2026-10-30 · beth-online-shop B3 verification (lead)
 - Applied to dotnet-backend-standards §6: timestamp-ordered lists need a stable tie-breaker. Found by the lead's re-run: Delivered and Completed shared a timestamp and the timeline came back reversed (failed 3/3 alone though the agent reported green).
 
