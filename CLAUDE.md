@@ -109,4 +109,5 @@ The reference layout for new full stack apps (architecture doc, ADRs, scaffold) 
 
 ## Quality gate
 `.claude/hooks/verify-app.sh` builds and lints/type-checks any app with uncommitted code changes when an agent
-finishes, and sends failures back to it. Agents must still run the full test suites themselves and report real results.
+finishes, and sends failures back to it — once per session per failure (`handback-guard.sh`), so a teammate whose
+spawning agent has exited, or one blocked by another agent's work, can still finish; you catch the rest when verifying. Agents must still run the full test suites themselves and report real results.

@@ -8,11 +8,16 @@ input=$(cat)
 echo "$input" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true' && exit 0
 
 root="$(cd "${CLAUDE_PROJECT_DIR:-$(dirname "$0")/../..}/.." && pwd)"
+. "$root/full-stack-agent/.claude/hooks/handback-guard.sh"
 report=""
+failed=""
 
 check() { # <label> <dir> <command>
   local out
-  out=$(cd "$2" && eval "$3" 2>&1) || report+=$'\n'"### $1 failed: $3"$'\n'"$(echo "$out" | tail -n 40)"$'\n'
+  out=$(cd "$2" && eval "$3" 2>&1) || {
+    report+=$'\n'"### $1 failed: $3"$'\n'"$(echo "$out" | tail -n 40)"$'\n'
+    failed+="$1;"
+  }
 }
 
 for app in "$root"/*/; do
@@ -39,7 +44,9 @@ for app in "$root"/*/; do
 done
 
 if [ -n "$report" ]; then
-  echo "Quality gate failed — fix these before finishing:$report" >&2
-  exit 2
+  # Once per session per set of failing checks: a failure in another agent's in-progress work, or a teammate whose
+  # spawning agent has exited, must not keep this agent from finishing (TaskCompleted has no stop_hook_active).
+  handback "Quality gate failed — fix these before finishing (if a failure is in files another agent owns, say so in
+your report and finish):$report" "verify:$failed"
 fi
 exit 0
