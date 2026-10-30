@@ -15,3 +15,6 @@
 - Local Node may be 20.x while CI/Docker use 22: don't commit anything that only works on one.
 - `gh` is not installed (see [GitHub](github.md)).
 - Ports in use by dev databases: 5432 (IMMAN_HRIS), 5433 (cafe-pos), 5434 (beth); pick free ones for new apps and E2E stacks (15xxx).
+
+## Python
+- `python` is Python 3.12; `python3` is the Microsoft Store stub and fails. Scripts and skills (ui-ux-pro-max) must call `python`.

@@ -44,6 +44,22 @@ Every prompt to an agent must name the app folder it is working on.
 6. `devops-engineer` — Docker, CI (GitHub Actions) and deployment config. Once per app, then whenever build,
    infrastructure or environment config changes.
 
+## Skills and lead tools
+| Who | Skills / tools | Source |
+|---|---|---|
+| research-planner | `brainstorming`, `writing-plans`, `executing-plans` (superpowers), `skill-creator` | obra/superpowers (MIT), anthropics/skills (Apache-2.0) |
+| frontend-react-dev | `react-frontend-standards`, `frontend-design`, `ui-ux-pro-max` | anthropics/claude-plugins-official (Apache-2.0), nextlevelbuilder/ui-ux-pro-max-skill (MIT) |
+| backend-dotnet-dev | `dotnet-backend-standards` | workspace |
+| lead | `/feature-dev` command + `code-explorer`, `code-architect`, `code-reviewer` agents | anthropics/claude-plugins-official (Apache-2.0) |
+- Third-party skills are vendored unchanged except where `.claude/skills/VENDOR.md` says; update them from there.
+- **Workspace rules win** over any skill or command text (git staging, no push without asking, `docs/plan/` paths,
+  dev-stack isolation, secrets). Skip steps that reference skills not installed here.
+- `/feature-dev` for a big feature in an existing app: run its discovery, exploration, clarifying-question and
+  architecture phases yourself (code-explorer / code-architect agents), then hand implementation to the build agents per
+  the Workflow, and use code-reviewer alongside `/code-review` in the review step.
+- Brainstorm with the user yourself (the `brainstorming` skill) when a new app's request is vague; subagents can't ask
+  the user, so the planner returns its questions with defaults.
+
 ## Default stack (new apps)
 | Layer | Full stack web app | Static website |
 |---|---|---|

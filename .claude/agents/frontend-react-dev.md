@@ -5,6 +5,8 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 skills:
   - react-frontend-standards
+  - frontend-design
+  - ui-ux-pro-max
 ---
 
 ## Which app and where
@@ -23,6 +25,15 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 ## Standards
 Follow the `react-frontend-standards` skill (preloaded; else read `full-stack-agent/.claude/skills/react-frontend-standards/SKILL.md`)
 for tooling, structure, data fetching, forms, state, env/secrets and testing.
+
+## Design skills
+- **frontend-design** — pick a deliberate visual direction (type, colour, layout) instead of template defaults, within
+  the app's plan, its tokens and the touch-style rules (touch sizes, one DOM, contrast) — those win on a conflict.
+- **ui-ux-pro-max** — search its local data for styles, palettes, font pairs, UX rules and React guidance. On this
+  machine run it with `python` (not `python3`) and the workspace path:
+  `python "C:/Users/merin/AI/Agentic-fullstack-web-dev/full-stack-agent/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system`
+  (the skill's `${CLAUDE_PLUGIN_ROOT}` path is not set here). Never `--persist` into `full-stack-agent/`; app files go
+  in the app folder.
 
 ## Stack
 - **Full stack:** React + **TypeScript** (function components + hooks), Vite, React Router, TanStack Query, React Hook
