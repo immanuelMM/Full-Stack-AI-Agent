@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop frontend contract UI (frontend-react-dev)
+- Applied to react-frontend-standards §3 (tile-to-list query test). Dropped: `.check` vs `Segmented` (app-specific class names).
+### 2026-10-31 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: Prove a dashboard tile is honest with a test that renders the list page at each tile's link and asserts the exact API query (ignoring sort/paging) against a table of expected queries. Never reuse the checkbox-styled `.check` class for radios; use the shared `Segmented` (and import the stylesheet it needs) for a one-of-N choice in a dialog.
+- why: tile links silently opened a different set than they counted (no lower date bound, cancelled included); the first cancel-related dialog drew its radios as checkboxes.
+
 ## 2026-10-31 · beth-online-shop frontend review fixes (frontend-react-dev)
 - Wiki: e2e-playwright-harness gotchas (kill the preview process tree; route allowlisted redirect hosts). The general "stop servers by port/PID" rule already exists in qa-automation.
 ### 2026-10-31 · frontend-react-dev · beth-online-shop

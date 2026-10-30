@@ -58,6 +58,8 @@ modules `<thing>Model.ts` or `<thing>Schema.ts`.
   - Reference client: `.claude/wiki/features/jwt-refresh-auth.md`.
 - Redirects to a payment provider allow only `https:` and the provider's exact hostname.
 - Show timestamps in the app's time zone (`Intl` with `timeZone`), never by slicing an ISO UTC string.
+- A summary tile/count that links to a list is proven by a test that renders the list at the tile's link and asserts
+  the exact API query; the backend asserts count = list total.
 - **Query keys are derived from the params actually sent** (`queryKey: ['orders', query]`), never maintained
   separately from them.
 - Validate `VITE_API_BASE_URL` format at startup with a clear error rather than string-replacing path suffixes.
