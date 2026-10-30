@@ -7,6 +7,9 @@ description: House standards for any C# / ASP.NET Core Web API backend — solut
 
 These are the default rules for every .NET backend. A project's own CLAUDE.md or existing,
 deliberate conventions win over this file — when they conflict, follow the project and say so.
+Working code for these rules lives in the knowledge base: check
+`C:\Users\merin\AI\Agentic-fullstack-web-dev\full-stack-agent\.claude\wiki\index.md` and copy the reference
+implementation (scaffold, auth, OpenAPI, rate limiting, deploy helpers) before writing it yourself.
 
 ## 1. Target framework & tooling
 - **New projects:** latest .NET **LTS** (currently **.NET 10**, C# 14). Run `dotnet --list-sdks`
@@ -127,24 +130,21 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
 - No MediatR by default — plain services are enough. Add CQRS/mediator only if the user asks.
 
 ## 6. Infrastructure layer
-- EF Core with the provider the project chose (PostgreSQL/Npgsql or SQL Server). Configurations via
-  `ApplyConfigurationsFromAssembly`.
+- EF Core with the project's provider (PostgreSQL/Npgsql or SQL Server); configurations via `ApplyConfigurationsFromAssembly`.
 - **Migrations are committed** and generated via `dotnet ef migrations add` — never hand-edit the DB schema.
   Apply with a migration bundle or explicit step in deployment, not automatically at startup in production.
   Use a `dotnet-ef` matching the EF major (a temp `--tool-path` if the global one is older).
-- **Major upgrades (e.g. .NET 8 → 10):** Npgsql 10 returns `DateOnly` for `date` columns from raw ADO reads
-  (`ExecuteScalar`, readers), so `Convert.ChangeType`-style helpers break; drop references the framework now ships
-  (NU1510) and fix MSB3277 version conflicts by aligning EF package versions.
-- Check a library's licence before recommending it: ImageSharp 3+ is under the Six Labors Split License (paid above
-  US$1M revenue; v4 needs a licence file at build time). Re-encode uploads with SkiaSharp (MIT) by default.
-  Read header dimensions (`SKCodec.Info`) to refuse oversized images before decoding, and apply the EXIF orientation to
-  the pixels before re-encoding (Skia's decode ignores it) — or every phone portrait is saved sideways. Test with a JPEG
-  carrying an injected Orientation tag.
+- **Major upgrades:** run the full suites unchanged on the new framework; check raw ADO reads for changed CLR types,
+  drop references the framework now ships (NU1510) and align EF package versions (MSB3277). Known .NET 8 → 10
+  breaks: `.claude/wiki/features/characterization-refactor.md`.
+- Check a library's licence before recommending it. Re-encode uploads with SkiaSharp (MIT) by default; refuse
+  oversized images from header dimensions (`SKCodec.Info`) before decoding; apply the EXIF orientation to the pixels
+  before re-encoding (Skia's decode ignores it); test with a JPEG carrying an injected Orientation tag.
+  Pipeline + licence notes: `.claude/wiki/features/image-upload-pipeline.md`.
 - EF queries: filter/order/page before the final `Select` into a record constructor (`new Dto(...)`); filtering or
-  ordering on such a projection fails at runtime with "could not be translated".
+  ordering on such a projection fails at runtime ("could not be translated").
 - Interceptors for audit fields / soft delete. Optimistic concurrency (`RowVersion` / `xmin`) on entities edited concurrently.
-- Strongly-typed options (`JwtOptions`, `DatabaseOptions`) bound with
-  `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()`.
+- Strongly-typed options (`JwtOptions`, …) via `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()`.
 
 ## 7. Authentication — JWT access + refresh tokens
 - Package: `Microsoft.AspNetCore.Authentication.JwtBearer`. Passwords via ASP.NET Core Identity
@@ -152,16 +152,14 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
 - **Access token:** short-lived (**5–15 min**), signed HMAC-SHA256 with a key ≥ 32 bytes (or RSA/ECDSA
   when other services must validate). Claims: `sub` (user id), `jti`, `email`/`name`, `role`s — nothing sensitive.
 - **Refresh token:** long-lived (7–30 days), cryptographically random (`RandomNumberGenerator.GetBytes(64)`),
-  stored **hashed** in a `RefreshTokens` table (UserId, TokenHash, ExpiresAt, CreatedAt, RevokedAt,
+  stored **hashed** (SHA-256) in a `RefreshTokens` table (UserId, TokenHash, ExpiresAt, CreatedAt, RevokedAt,
   ReplacedByTokenHash, CreatedByIp).
   - **Rotate on every refresh**; revoke the old one. If a revoked token is reused → revoke the whole family
     (token-theft detection).
   - Browser SPA clients: send refresh token as `HttpOnly; Secure; SameSite=Strict` cookie; access token
     in memory (not localStorage). Mobile/server clients may receive it in the body.
-- Endpoints: `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout` (revoke),
-  `GET /auth/me`.
-- Validation parameters: `ValidateIssuer`, `ValidateAudience`, `ValidateLifetime`,
-  `ValidateIssuerSigningKey` all `true`; `ClockSkew = TimeSpan.FromSeconds(30)`; `MapInboundClaims = false`.
+- Endpoints: `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout` (revoke); `GET /auth/me`.
+- Validate issuer, audience, lifetime and signing key (all `true`); `ClockSkew = TimeSpan.FromSeconds(30)`; `MapInboundClaims = false`.
 - **Secure by default:** `FallbackPolicy = RequireAuthenticatedUser()`; mark public endpoints `[AllowAnonymous]`.
 - Authorize with **named policies** (`"AdminOnly"`, `"CanManageInventory"`) rather than scattered role strings.
 - `ICurrentUser` (Application interface, Api implementation over `IHttpContextAccessor`) — services never read `HttpContext`.
@@ -172,17 +170,16 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   grep every consumer that silently relied on it (golden tests, an E2E stack running as Production, docker docs)
   and give each its own throwaway key.
 
-### 7a. Security hardening (each of these was a real review finding — don't skip them)
+### 7a. Security hardening (apply all of these)
 - **Rate-limit keys must equal what the endpoint binds.** If a partition key comes from the request body (e.g. the
   login email), parse it the way MVC binds it (case-insensitive) and reject bodies with duplicate/ambiguous keys
-  (`JsonSerializerOptions.AllowDuplicateProperties = false` on .NET 10). Otherwise `{"email":"x","Email":"victim"}`
-  gets a fresh bucket per request. Normalise like Identity (`Normalize().ToUpperInvariant()`). Add a coarser
-  per-IP limit alongside any per-account limit.
+  (`JsonSerializerOptions.AllowDuplicateProperties = false` on .NET 10), or `{"email":"x","Email":"victim"}` gets a
+  fresh bucket per request. Normalise like Identity (`Normalize().ToUpperInvariant()`). Add a coarser per-IP limit
+  alongside any per-account limit.
 - **Behind a proxy:** `UseForwardedHeaders` (XForwardedFor + XForwardedProto) first in the pipeline, trusting only
-  configured `KnownProxies`/`KnownNetworks` (empty = trust nothing). Without it, every client shares the proxy IP
-  in rate limits and `Request.IsHttps` is false. Document the setting in the deployment doc.
-- **Cookies:** refresh cookie `Secure` everywhere except plain-http Development; HSTS + HTTPS redirection outside
-  Development.
+  configured `KnownProxies`/`KnownNetworks` (empty = trust nothing); otherwise all clients share the proxy IP in rate
+  limits and `Request.IsHttps` is false. Document the setting in the deployment doc.
+- **Cookies:** refresh cookie `Secure` everywhere except plain-http Development; HSTS + HTTPS redirection outside it.
 - **Concurrency-safe counters and tokens:** never read-modify-write a security counter (failed logins, PIN
   attempts) — increment atomically (`ExecuteUpdateAsync(s => s.SetProperty(x => x.Count, x => x.Count + 1))`).
   Claim refresh tokens atomically (`UPDATE … WHERE TokenHash = @h AND RevokedAt IS NULL`, 0 rows = reuse) inside
@@ -195,39 +192,7 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   when the DB is slow to start; add `GSS Encryption Mode=Disable` to Npgsql connection strings in containers
   unless Kerberos is used.
 
-```csharp
-// Infrastructure/Auth/JwtTokenService.cs (sketch)
-internal sealed class JwtTokenService(IOptions<JwtOptions> opt, TimeProvider clock) : ITokenService
-{
-    public AccessToken CreateAccessToken(User user, IEnumerable<string> roles)
-    {
-        var o = opt.Value;
-        var now = clock.GetUtcNow();
-        var claims = new List<Claim>
-        {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
-        };
-        claims.AddRange(roles.Select(r => new Claim("role", r)));
-
-        var descriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(claims),
-            Issuer = o.Issuer, Audience = o.Audience,
-            NotBefore = now.UtcDateTime, Expires = now.AddMinutes(o.AccessTokenMinutes).UtcDateTime,
-            SigningCredentials = new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(o.Key)),
-                                     SecurityAlgorithms.HmacSha256),
-        };
-        var token = new JsonWebTokenHandler().CreateToken(descriptor);
-        return new AccessToken(token, descriptor.Expires!.Value);
-    }
-
-    public string CreateRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-    public string Hash(string refreshToken) =>
-        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
-}
-```
+Reference implementation (token service, atomic rotation, lockout, SPA client): `.claude/wiki/features/jwt-refresh-auth.md`.
 
 ## 8. API layer
 - Follow the project's existing style (controllers vs minimal APIs). For new projects either is fine;
@@ -241,7 +206,7 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> opt, TimeProvider clo
 - **OpenAPI:** built-in `Microsoft.AspNetCore.OpenApi` (`AddOpenApi()` / `MapOpenApi()`) with Scalar UI
   in Development — not Swashbuckle on new projects. Add the Bearer security scheme.
   - String enums: register `JsonStringEnumConverter` in `ConfigureHttpJsonOptions` too (the generator reads those, not
-    the MVC `AddJsonOptions`), then check enum schemas in the snapshot — B0 published `DayOfWeek` as integer.
+    the MVC `AddJsonOptions`), then check that enum schemas in the snapshot are strings.
   - Commit the document as `backend/openapi/v1.json`, generated at build time on demand
     (`Microsoft.Extensions.ApiDescription.Server`, `dotnet build -p:OpenApiGenerateDocuments=true`), plus a test
     that the live `/openapi/v1.json` equals the snapshot. The frontend generates its types from that file.

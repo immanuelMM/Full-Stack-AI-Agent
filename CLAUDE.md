@@ -56,8 +56,7 @@ Every prompt to an agent must name the app folder it is working on.
 | Hosting | Container host (e.g. Azure Container Apps / App Service) + managed PostgreSQL; on a shared PaaS domain (Render, Fly, Railway) one same-origin service serving API + SPA (see `devops-engineer`) | Cloudflare Pages, Netlify or GitHub Pages |
 
 Existing apps keep their current versions and libraries; upgrade only when the user asks.
-`cafe-pos-system` is on .NET 10 (refactored Oct 2026); its `docs/architecture.md` and `docs/adr/` are the reference
-layout for new full stack apps.
+The reference layout for new full stack apps (architecture doc, ADRs, scaffold) is named in `.claude/wiki/index.md`.
 
 ## Lead responsibilities
 - **Verify every agent report yourself** before accepting it or starting the next step: re-run the build and test
@@ -68,14 +67,14 @@ layout for new full stack apps.
 - Keep briefs milestone-sized so a usage-limit stop loses little; if an agent stops early, resume it with
   SendMessage (its work is saved) instead of starting a new one, after checking what it left uncommitted.
 - Never let an agent repoint the user's dev stack or dev database (see the E2E rules in `qa-automation`).
-- When you run suites in a loop or chain, confirm each one printed a result line — a wrong path silently skipped two
-  suites once. For UI work, open the agents' screenshots yourself; passing tests once hid a clipped keypad row.
-- Run `/code-review` on deploy and security-relevant designs *before* the user acts on them: the first Render design
-  (static-site proxy in front of the API) passed tests but let one attacker lock out every login.
+- When you run suites in a loop or chain, confirm each one printed a result line (a wrong path skips silently). For UI
+  work, open the agents' screenshots yourself — passing tests miss clipped controls.
+- Run `/code-review` on deploy and security-relevant designs *before* the user acts on them; passing tests don't prove
+  a design safe.
 - When the user has to type config (env vars, dashboard fields), give exact valid example values up front. Before
   telling them to delete one-time credentials (bootstrap vars), have them confirm they actually logged in.
 - Start a fresh agent for a new milestone once an agent's context is large; send all review fixes in one batch.
-- On Windows, clone or build in short temp paths (`$TEMP/<short>`) — the scratchpad path hits the 260-char limit.
+- Clone or build in short temp paths (`$TEMP/<short>`), never the scratchpad (Windows 260-char limit; see the wiki's windows page).
 
 ## Lessons loop (automatic)
 - Every agent appends reusable lessons to `.claude/lessons/inbox.md` before it finishes (format in each agent file;
@@ -95,8 +94,8 @@ layout for new full stack apps.
 ## Git
 - Each app folder is its own repo. Commit after each verified step (build + tests passing) with a clear
   message, e.g. `feat(orders): add checkout endpoint`. Ask before pushing, force-pushing or rewriting history.
-- Once an app has a remote, suggest pushing early so CI runs on GitHub — it has failed on its first real run before.
-  Anything a platform reads from the repo (`render.yaml`) must be pushed before you give the user dashboard steps.
+- Once an app has a remote, suggest pushing early so CI really runs on GitHub. Anything a platform reads from the repo
+  (`render.yaml`) must be pushed before you give dashboard steps (who runs git network commands: wiki `platforms/github.md`).
 - **Parallel agents share one git index.** Every agent stages and commits only its own paths
   (`git add backend && git commit -m "…" -- backend`) — never `git add -A`, `git add .`, `git commit -a` or
   `git reset` on the shared index. For long parallel work that touches overlapping paths, use

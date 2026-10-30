@@ -6,7 +6,9 @@ description: House standards for React + TypeScript frontends and static website
 # Frontend Standards
 
 Default rules for every frontend. A project's existing, deliberate conventions win over this file — when
-they conflict, follow the project and say so.
+they conflict, follow the project and say so. Working code for these rules lives in the knowledge base: check
+`C:\Users\merin\AI\Agentic-fullstack-web-dev\full-stack-agent\.claude\wiki\index.md` and copy the reference
+implementation (API client, touch shell, keypad, E2E harness) before writing it yourself.
 
 ## 1. Tooling
 - **TypeScript everywhere**, `strict: true`. No `any` without a comment explaining why.
@@ -43,13 +45,13 @@ frontend/
 - Auth (with the house JWT backend): access token kept in memory, refresh token in an HttpOnly cookie; on a 401,
   refresh once and retry, then redirect to login. Never store tokens in localStorage.
   - **Clear the session only when the refresh returns 401/403.** A 429, 5xx or network error keeps the session and
-    fails only the current request — otherwise a throttled refresh logs everyone out.
+    fails only the current request.
   - **Single-flight refresh across tabs** with the Web Locks API (`navigator.locks.request('<app>-refresh', …)`),
-    falling back to per-tab single-flight. Two tabs refreshing with the same rotated cookie trip the backend's
-    token-theft detection and log the user out everywhere.
+    falling back to per-tab single-flight; two tabs sending the same rotated cookie trip token-theft detection.
   - Rebuild a retried request lazily (only after a 401) — don't clone every request body up front (large uploads).
   - Re-authentication prompts (e.g. "exit kiosk" asking for the admin password) call the login endpoint outside the
-    shared client's 401 handling, or a wrong password signs the device out. Discard the returned token.
+    shared client's 401 handling (a wrong password must not sign the device out). Discard the returned token.
+  - Reference client: `.claude/wiki/features/jwt-refresh-auth.md`.
 - **Query keys are derived from the params actually sent** (`queryKey: ['orders', query]`), never maintained
   separately from them.
 - Validate `VITE_API_BASE_URL` format at startup with a clear error rather than string-replacing path suffixes.
@@ -64,26 +66,25 @@ frontend/
 - **Three versions, always:** every screen is designed, built and screenshot-checked for **web** (desktop ≥ 1024px,
   mouse; denser layout is fine), **tablet** (768–1180px, portrait and landscape) and **phone** (360–430px, down to
   375×667). Mobile-first CSS. Tablet and phone always get the touch style below, styled like
-  `../cafe-pos-system/frontend` (the reference: read its tokens, shell, nav and buttons before designing): big
-  buttons, large type, generous spacing, one obvious primary action per screen.
+  `../cafe-pos-system/frontend` (the reference: read its tokens, shell, nav and buttons before designing; file list in
+  `.claude/wiki/features/touch-ui-shell.md`): big buttons, large type, generous spacing, one obvious primary action per screen.
 - Use the project's existing approach (CSS modules / Tailwind); for new projects either is fine — pick one and stick to it.
 - Semantic HTML, labelled inputs (field errors outside the `<label>`, linked with `aria-describedby`, so the accessible
   name stays stable), visible focus, keyboard navigation, tap targets ≥ 44px, colour contrast WCAG AA.
 - **CSS structure:** tokens (custom properties) plus `@layer` files (reset, tokens, base, layout, components, features,
-  utilities); the layer-order statement must be the first CSS the bundle emits (import it first in `main.tsx`). Print CSS
-  that needs `!important` stays unlayered. Brand colours set at runtime stay as inline vars that tokens reference.
-  When splitting a flat stylesheet into layers, check every rule that lands in a higher layer than a rule that used to
-  come after it: the winner silently flips (keep such a rule ahead of its sibling in the same layer). Vite's lightningcss
-  drops the leading `@layer` statement when first appearance already gives the order, so check `--minify false` output,
-  and give every layer a non-empty block in the eagerly loaded CSS (a layer first seen in a lazy chunk lands on top).
-- **Scope every size-specific rule inside its media/container query.** Unit tests run without CSS (jsdom), so a phone rule
-  that leaks onto tablets passes every Vitest test — only a real browser at each size catches it.
-- **Touch style (tablet + phone, every app):** one DOM for every size (CSS changes the layout, never a second copy of the nav, or
-  `getByRole` queries break); the shell fills `100dvh` with `env(safe-area-*)` and `viewport-fit=cover`, and only the
-  content area scrolls (build it as a flex column — header `flex: none`, content `flex: 1 1 0; min-height: 0` — not a
-  fixed-row grid, which leaves a gap when an optional banner is absent); long phone forms get a sticky action bar; default controls 56px, primary 64px, never under 48px; money/PIN entry uses an on-screen keypad
-  with the real `<input>` kept (`inputMode="none"` on `(pointer: coarse)`, no autofocus) so the OS keyboard never covers
-  the screen; check the smallest phone too (375×667), not just 390×844.
+  utilities); the layer-order statement is the first CSS the bundle emits (import it first in `main.tsx`). Print CSS
+  needing `!important` stays unlayered; runtime brand colours stay inline vars that tokens reference. When splitting a
+  flat stylesheet into layers, check every rule that lands in a higher layer than a rule that used to follow it (the
+  winner silently flips; keep such a rule ahead of its sibling in one layer). Check `--minify false` output still has
+  the leading `@layer` statement, and give every layer a non-empty block in eager CSS (a layer first seen in a lazy chunk lands on top).
+- **Scope every size-specific rule inside its media/container query.** Unit tests run without CSS (jsdom), so a leaked
+  phone rule passes every Vitest test — only a real browser at each size catches it.
+- **Touch style (tablet + phone, every app):** one DOM for every size (CSS changes the layout; a second nav copy breaks
+  `getByRole`); the shell fills `100dvh` with `env(safe-area-*)` and `viewport-fit=cover`, and only the content scrolls
+  (a flex column — header `flex: none`, content `flex: 1 1 0; min-height: 0` — not a fixed-row grid, which leaves a gap
+  when an optional banner is absent); long phone forms get a sticky action bar; controls 56px, primary 64px, never
+  under 48px; money/PIN entry uses an on-screen keypad with the real `<input>` kept (`inputMode="none"` on
+  `(pointer: coarse)`, no autofocus) so the OS keyboard never covers the screen; check 375×667, not just 390×844.
 - Browsers cannot print silently: "auto-print" means calling `window.print()` once per document (guard against StrictMode
   double effects) and keeping a "Print again" button. Silent printing needs a kiosk flag or a local print agent.
 - For same-origin hosting (API serves the SPA), allow a root-relative API base (`/api/v1`) so no hostname is baked in.
@@ -114,7 +115,7 @@ frontend/
 - [ ] Loading / error / empty states handled
 - [ ] Works at mobile, tablet and desktop widths; keyboard accessible
 - [ ] For UI changes: screenshots taken at each target size **and looked at** (key buttons fully on screen, nothing
-      clipped) — passing tests alone missed a hidden keypad row
+      clipped) — passing tests are not enough
 - [ ] `npm run format:check` passes
 - [ ] No secrets in `VITE_` vars or source; `.env.example` updated
 - [ ] Tests added/updated for the changed behavior
