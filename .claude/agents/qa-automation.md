@@ -35,13 +35,18 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
   with the override remapping host ports (e.g. 15xxx) and naming a separate volume. Never reuse the dev project name,
   never `down -v` a volume you didn't create, and check `docker ps` afterwards that the dev stack is as you found it.
 - E2E specs must be re-runnable on the same database (assert on deltas, restock in global setup — including stock that
-  other agents' screenshot runs drain; a low-stock item can be topped up to just below its threshold).
+  other agents' screenshot runs drain; a low-stock item can be topped up to just below its threshold). One-shot
+  actions (a scan or time-in allowed once a day) reset their record through the admin API before each test, so the same
+  test runs on every project and on re-runs.
 - **Layout regressions are invisible to unit tests.** For responsive/touch apps, give Playwright one project per target
   viewport (e.g. 1180×820, 1366×1024, 1133×744, 820×1180, 390×844, plus a 375×667 check) — phone and tablet projects
-  with `hasTouch: true, isMobile: true`, or every `(pointer: coarse)` path (keypads, touch sizes) goes untested — run the full suite on the
+  with `hasTouch: true, isMobile: true`, or every `(pointer: coarse)` path (keypads, touch sizes) goes untested; tag touch-only specs `@touch` and add it to those
+  projects' `grep` — run the full suite on the
   primary one and `@layout|@a11y` on the rest, one project at a time. Keep helpers for: no horizontal scroll, body
   doesn't scroll, controls ≥ the tap minimum, key controls fully in the viewport (poll until animations settle), min font
-  size. Axe with the `wcag22aa` tag; any allowlist entry names the rule and the milestone that fixes it.
+  size. Axe with the `wcag22aa` tag; any allowlist entry names the rule and the milestone that fixes it. Store axe counts per
+  milestone; a missing "before" count comes from building the old commit in a `git worktree` (short temp path) and
+  running the axe spec against it with the same fixed data.
 - **Before a "no visual change" refactor**, capture a deterministic screenshot baseline (fixed data via `context.route`,
   `animations: 'disabled'`, `caret: 'hide'`, fonts ready) into a git-ignored folder, prove a double run diffs at 0%, then
   pixel-diff after the change. For zero tolerance also freeze time (`page.clock.setFixedTime`), stub `getUserMedia`,
@@ -53,7 +58,8 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
   When projects filter by tag (`grep: /@layout|@a11y/`), tag probe specs too or they silently find no tests.
 - QR/camera scans: launch Chromium with `--use-fake-device-for-media-stream --use-file-for-fake-video-capture=<file>.y4m`,
   generated in global setup after the data exists. Scanners like html5-qrcode decode only the centre `qrbox`, so draw
-  the QR small (fits inside it); a full-frame QR silently never decodes.
+  the QR small (fits inside it); a full-frame QR silently never decodes. Every other spec on a camera page stubs
+  `getUserMedia` to reject: the fake QR otherwise scans by itself, races assertions and slows taps (1s tests took 50s).
 - On Windows/npm 10, if installing test deps fails with `reading 'edgesOut'`, commit a `.npmrc` with
   `legacy-peer-deps=true` (and add `@testing-library/dom` explicitly) so local installs and CI `npm ci` agree.
 - Navigate like the user at each size (e.g. phone manage pages via the "More" sheet) and wait on content inside
@@ -63,6 +69,7 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
 
 ## Constraints
 - Don't implement new product features — only tests (and, if asked, small test-supporting fixtures/mocks).
+- Stop servers by listening port or PID, never by command-line pattern (`*port*` also matched and killed the agent's own shell).
 - Write multi-line files with Write/Edit, not Bash heredocs (heredocs with quotes fail to parse in Git Bash and write nothing).
 - Flag any gaps in test coverage you notice, even outside the current task's scope.
 

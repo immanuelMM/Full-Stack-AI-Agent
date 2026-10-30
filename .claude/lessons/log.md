@@ -2,6 +2,28 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS U5 QA (qa-automation)
+- Applied to qa-automation E2E rules: @touch tag in touch project grep, reset one-shot actions via admin API, axe "before" counts via git worktree, stub getUserMedia on non-camera specs; Constraints: stop servers by port/PID, not command-line pattern.
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: Every viewport project below the desktop breakpoint must set `hasTouch: true, isMobile: true` so `(pointer: coarse)` code paths (PIN keypad, full-screen overlays, 48px sizes) are exercised; keep one mouse desktop project. Tag touch-only specs `@touch` and add the tag to the non-desktop `grep`.
+- why: only tablet-landscape was touch, so the phone keypad and kiosk overlay were never run at phone sizes.
+
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: A fake-camera scan on a shared E2E database is one-shot per day: before each such test delete the scan employee's attendance through the admin API (GET then DELETE /admin/attendance/{id}) instead of relying on a fresh DB, so the same scan runs on several projects and re-runs.
+- why: running the scan smoke on tablet-landscape and desktop in one invocation would have hit "already timed in".
+
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: To get an axe "before" count for a finished milestone, build the old commit in a throwaway `git worktree` under a short temp path, serve it with `vite preview` and run the axe spec against fixed `context.route` data. Do not kill processes by command-line pattern (`*port*`): it also kills your own shell; kill by listening port or PID.
+- why: the baseline counts were never stored; a pattern kill of the preview server terminated the agent's own shell.
+
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: UI specs on a page that uses the camera (scan kiosk) must stub `getUserMedia` to reject (init script) unless the test is the camera test; with the fake video running, the QR scans by itself, races overlay assertions, and the decode load makes taps slow (tests grew from 1s to 50s and flaked at the 60s timeout).
+- why: U5 kiosk tests failed intermittently on phone/tablet until the camera was stubbed off; afterwards each ran in 1-2s.
+
 ## 2026-10-30 · IMMAN_HRIS U5 (frontend-react-dev)
 - Applied to react-frontend-standards §3 Auth (re-auth prompts bypass the shared 401 handler) and qa-automation E2E rules (phone/tablet projects get hasTouch + isMobile) instead of the temporary-config workaround.
 ### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
