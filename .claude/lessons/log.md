@@ -2,6 +2,18 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS U5 (frontend-react-dev)
+- Applied to react-frontend-standards §3 Auth (re-auth prompts bypass the shared 401 handler) and qa-automation E2E rules (phone/tablet projects get hasTouch + isMobile) instead of the temporary-config workaround.
+### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: A "check credentials" call made with the shared API client signs the user out on a wrong password if that client has a global 401 handler; use a bare HTTP call (or a client without the interceptor) for re-authentication prompts such as exiting kiosk mode.
+- why: the planned kiosk exit re-used the admin login endpoint through apiClient, whose 401 interceptor clears the stored session and redirects to /login; a Vitest case (wrong password keeps kiosk and session) caught the design before it shipped.
+
+### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
+- target: .claude/agents/frontend-react-dev.md
+- lesson: Playwright size projects without hasTouch/isMobile report (pointer: fine), so touch-only UI (PIN keypad, inputMode none) never shows in them; to review it, capture with a temporary untracked config that adds hasTouch and isMobile, and delete it afterwards.
+- why: the U5 phone and phone-small screenshots showed no keypad until a temporary touch-emulated spec revealed that Sign in was clipped by 26px at 375x667.
+
 ## 2026-10-30 · IMMAN_HRIS U2 QA (qa-automation)
 - Applied to qa-automation E2E rules (stub bullet): init scripts re-seed sessions on reload; tag probe specs when projects grep by tag.
 ### 2026-10-30 · qa-automation · IMMAN_HRIS

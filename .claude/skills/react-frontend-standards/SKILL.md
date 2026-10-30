@@ -48,6 +48,8 @@ frontend/
     falling back to per-tab single-flight. Two tabs refreshing with the same rotated cookie trip the backend's
     token-theft detection and log the user out everywhere.
   - Rebuild a retried request lazily (only after a 401) — don't clone every request body up front (large uploads).
+  - Re-authentication prompts (e.g. "exit kiosk" asking for the admin password) call the login endpoint outside the
+    shared client's 401 handling, or a wrong password signs the device out. Discard the returned token.
 - **Query keys are derived from the params actually sent** (`queryKey: ['orders', query]`), never maintained
   separately from them.
 - Validate `VITE_API_BASE_URL` format at startup with a clear error rather than string-replacing path suffixes.

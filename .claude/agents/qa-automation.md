@@ -37,7 +37,8 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
 - E2E specs must be re-runnable on the same database (assert on deltas, restock in global setup — including stock that
   other agents' screenshot runs drain; a low-stock item can be topped up to just below its threshold).
 - **Layout regressions are invisible to unit tests.** For responsive/touch apps, give Playwright one project per target
-  viewport (e.g. 1180×820, 1366×1024, 1133×744, 820×1180, 390×844, plus a 375×667 check), run the full suite on the
+  viewport (e.g. 1180×820, 1366×1024, 1133×744, 820×1180, 390×844, plus a 375×667 check) — phone and tablet projects
+  with `hasTouch: true, isMobile: true`, or every `(pointer: coarse)` path (keypads, touch sizes) goes untested — run the full suite on the
   primary one and `@layout|@a11y` on the rest, one project at a time. Keep helpers for: no horizontal scroll, body
   doesn't scroll, controls ≥ the tap minimum, key controls fully in the viewport (poll until animations settle), min font
   size. Axe with the `wcag22aa` tag; any allowlist entry names the rule and the milestone that fixes it.
