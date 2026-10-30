@@ -1,6 +1,6 @@
 # beth-online-shop
 
-Reflects app commit `19c543e` (2026-10-30: B2a verified by the lead — 455 backend tests green; F1 in progress).
+Reflects app commit `855f2a6` (2026-10-30: B2a verified — 455 backend tests; F1 storefront + admin products verified — 101 Vitest, E2E green at 5 viewports; B2b in progress).
 Paths are relative to `C:\Users\merin\AI\Agentic-fullstack-web-dev\`.
 
 ## Purpose
