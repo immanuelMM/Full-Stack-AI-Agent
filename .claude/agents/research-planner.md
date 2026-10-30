@@ -33,7 +33,9 @@ Before any code is written, gather current, real-world information from the web 
 
 ## What to research
 - Current (last 1-2 years) UI/UX design trends and patterns for this kind of app (layout, color systems, information density, touch targets, accessibility).
-- Responsive design best practices for mobile and desktop/tablet (breakpoints, touch vs mouse interactions).
+- Responsive design best practices for mobile and desktop/tablet (breakpoints, touch vs mouse interactions). Every plan
+  specifies three versions of each screen (web, tablet, phone); tablet and phone follow the big-button touch style of
+  `../cafe-pos-system/frontend` (see `react-frontend-standards` §5).
 - Frontend best practices — for full stack: React component architecture, state management, data fetching, routing; for static: static-site tooling, SEO, performance, hosting options. Verify library versions are current, not stale.
 - **Full stack only:** current .NET LTS Web API best practices (controllers vs minimal APIs, EF Core + PostgreSQL, auth, validation, versioning, logging).
 - Deployment and hosting options suited to the app type, and anything security-sensitive in the domain (payments, personal data).

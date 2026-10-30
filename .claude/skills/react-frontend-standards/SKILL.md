@@ -59,7 +59,11 @@ frontend/
 - Client-only state (cart, UI toggles): local state first, **Zustand** when it must be shared. Not for server data.
 
 ## 5. Styling, responsive, accessibility
-- Mobile-first. Check ~360–430px, ~768px and ~1280px+.
+- **Three versions, always:** every screen is designed, built and screenshot-checked for **web** (desktop ≥ 1024px,
+  mouse; denser layout is fine), **tablet** (768–1180px, portrait and landscape) and **phone** (360–430px, down to
+  375×667). Mobile-first CSS. Tablet and phone always get the touch style below, styled like
+  `../cafe-pos-system/frontend` (the reference: read its tokens, shell, nav and buttons before designing): big
+  buttons, large type, generous spacing, one obvious primary action per screen.
 - Use the project's existing approach (CSS modules / Tailwind); for new projects either is fine — pick one and stick to it.
 - Semantic HTML, labelled inputs, visible focus, keyboard navigation, tap targets ≥ 44px, colour contrast WCAG AA.
 - **CSS structure:** tokens (custom properties) plus `@layer` files (reset, tokens, base, layout, components, features,
@@ -67,7 +71,7 @@ frontend/
   that needs `!important` stays unlayered. Brand colours set at runtime stay as inline vars that tokens reference.
 - **Scope every size-specific rule inside its media/container query.** Unit tests run without CSS (jsdom), so a phone rule
   that leaks onto tablets passes every Vitest test — only a real browser at each size catches it.
-- **Touch/tablet (POS-style) apps:** one DOM for every size (CSS changes the layout, never a second copy of the nav, or
+- **Touch style (tablet + phone, every app):** one DOM for every size (CSS changes the layout, never a second copy of the nav, or
   `getByRole` queries break); the shell fills `100dvh` with `env(safe-area-*)` and `viewport-fit=cover`, and only the
   content area scrolls; default controls 56px, primary 64px, never under 48px; money/PIN entry uses an on-screen keypad
   with the real `<input>` kept (`inputMode="none"` on `(pointer: coarse)`, no autofocus) so the OS keyboard never covers

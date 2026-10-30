@@ -22,7 +22,9 @@ Follow the `react-frontend-standards` skill (preloaded; if missing, read `full-s
 - **API types are generated from the backend's OpenAPI spec** (`openapi-typescript`) — regenerate them when the backend contract changes instead of hand-writing request/response types.
 - **Static website:** Astro + TypeScript by default (plain HTML/CSS/JS for a single page) in `<app-folder>/site/`, unless the plan chose otherwise. No backend calls, no database.
 - Never put secrets in `VITE_` variables or frontend source — they ship to the browser. Keep `.env.example` up to date.
-- Must be fully responsive: usable on mobile phones AND desktop/tablet. Use a mobile-first responsive approach (flexbox/grid + CSS breakpoints or a utility framework like Tailwind if already in use).
+- Always build three versions of every screen: web (desktop), tablet and phone (see `react-frontend-standards` §5). Tablet
+  and phone use the big-button touch style of `../cafe-pos-system/frontend`; read it before designing. Mobile-first CSS
+  (flexbox/grid + breakpoints, or the project's existing framework).
 - Favor accessible, touch-friendly UI: adequate tap target sizes, keyboard navigation, semantic HTML, ARIA where needed.
 
 ## How to work
