@@ -2,6 +2,28 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop B1 (backend-dotnet-dev)
+- Applied to dotnet-backend-standards §6 (image header/EXIF orientation; EF project-last) and backend-dotnet-dev (dev seeder environment guard + test; no escape-bearing edits via one-liners).
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: In EF Core repositories apply Where/OrderBy/Skip before the final Select when it builds a record through its constructor (`new Dto(...)`); filtering or ordering on such a projection (or a GroupBy over a join with Max) fails at runtime with "LINQ expression could not be translated". Project last, or use anonymous/member-initialised types when the caller still needs to filter.
+- why: B1 category lists, the public category query and the sitemap category dates all returned 500 on first run until the filter moved before the projection.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: An image upload pipeline that re-encodes to strip EXIF must apply the EXIF orientation to the pixels first (SkiaSharp's SKCodec/SKBitmap.Decode do not), and read the header dimensions (SKCodec.Info) to refuse oversized images before decoding. Test with a JPEG that has an injected APP1 Orientation tag and a marker string.
+- why: Dropping the tag without rotating would have saved every phone portrait photo sideways; the orientation tests (6, 8, 3) and the marked-corner pixel check caught the matrix maths.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/agents/backend-dotnet-dev.md
+- lesson: A dev-data seeder must check `IHostEnvironment.IsDevelopment()` itself, not only a `SeedDevData` config switch, and have a test that boots a Production-environment host with the switch on and asserts no users or catalog rows exist (verify the test fails with the guard removed).
+- why: The B0 review found known passwords would seed in production on a wrong env var; the guard plus a mutation check (guard disabled -> test fails) proved the test is real.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/agents/backend-dotnet-dev.md
+- lesson: Do not make C# edits that contain backslash escapes ("\n", "\"") through a Python or sed one-liner in Bash: the escaping is consumed once and the file gets literal line breaks inside string constants. Use the Edit tool for those lines.
+- why: A python replace of `"\n"` wrote a real newline into a const string and cost three build-fix rounds.
+
 ## 2026-10-30 · beth-online-shop F0 (frontend-react-dev)
 - Applied to react-frontend-standards §5 (non-empty layer blocks in eager CSS; flex-column shell; sticky phone action bar; field errors outside the label via aria-describedby instead of regex label queries) and frontend-react-dev (backend-free screenshot harness; run Prettier from frontend/).
 ### 2026-10-30 · frontend-react-dev · beth-online-shop

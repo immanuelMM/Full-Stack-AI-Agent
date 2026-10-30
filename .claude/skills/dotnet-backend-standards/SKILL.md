@@ -137,6 +137,11 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   (NU1510) and fix MSB3277 version conflicts by aligning EF package versions.
 - Check a library's licence before recommending it: ImageSharp 3+ is under the Six Labors Split License (paid above
   US$1M revenue; v4 needs a licence file at build time). Re-encode uploads with SkiaSharp (MIT) by default.
+  Read header dimensions (`SKCodec.Info`) to refuse oversized images before decoding, and apply the EXIF orientation to
+  the pixels before re-encoding (Skia's decode ignores it) — or every phone portrait is saved sideways. Test with a JPEG
+  carrying an injected Orientation tag.
+- EF queries: filter/order/page before the final `Select` into a record constructor (`new Dto(...)`); filtering or
+  ordering on such a projection fails at runtime with "could not be translated".
 - Interceptors for audit fields / soft delete. Optimistic concurrency (`RowVersion` / `xmin`) on entities edited concurrently.
 - Strongly-typed options (`JwtOptions`, `DatabaseOptions`) bound with
   `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()`.

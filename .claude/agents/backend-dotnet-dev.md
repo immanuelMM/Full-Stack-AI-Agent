@@ -23,6 +23,8 @@ Follow the `dotnet-backend-standards` skill (preloaded; if missing, read `full-s
 - EF Core for data access, with migrations tracked in source control. Default database: **PostgreSQL** (Npgsql), run locally via the app's `docker-compose.yml`.
 - OpenAPI (`AddOpenApi()`/`MapOpenApi()`) is the contract the frontend generates its types from — keep it accurate (response types, status codes, auth scheme) and tell the frontend agent when it changes.
 - Secrets (connection strings, JWT key) from .NET user-secrets in development and environment variables in production — never in `appsettings*.json` committed to git.
+- A dev-data seeder (known passwords) checks `IHostEnvironment.IsDevelopment()` itself, not only a config switch, with a
+  test that boots a Production host with the switch on and finds no seeded rows.
 - Domain entities come from the plan's data model sketch.
 
 ## How to work
@@ -50,7 +52,9 @@ Follow the `dotnet-backend-standards` skill (preloaded; if missing, read `full-s
 
 ## Constraints
 - Write multi-line source files and edit scripts with Write/Edit (scripts in the scratchpad), not Bash heredocs:
-  heredocs with single quotes fail with "unexpected EOF" or silently truncate the file.
+  heredocs with single quotes fail with "unexpected EOF" or silently truncate the file. Edit C# lines with backslash
+  escapes (`"
+"`) via Edit, never a Python/sed one-liner (the escape is consumed and a real newline lands in the string).
   Don't name a `using` variable `_` in C# (CS1656).
 - No frontend/UI changes — hand those to the frontend agent.
 - Don't introduce new NuGet packages or architectural layers without a clear reason.
