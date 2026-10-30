@@ -45,8 +45,10 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
   primary one and `@layout|@a11y` on the rest, one project at a time. Keep helpers for: no horizontal scroll, body
   doesn't scroll, controls ≥ the tap minimum, key controls fully in the viewport (poll until animations settle), min font
   size. Axe with the `wcag22aa` tag; any allowlist entry names the rule and the milestone that fixes it. Store axe counts per
-  milestone; a missing "before" count comes from building the old commit in a `git worktree` (short temp path) and
-  running the axe spec against it with the same fixed data.
+  milestone; a missing "before" count needs no backend: `git worktree add --detach $TEMP/<short> <sha>`, build its
+  frontend, `vite preview --port <free> --strictPort`, and run the mock-data spec through a throwaway config (no
+  globalSetup, `baseURL: http://localhost:<port>`; preview binds localhost, not 127.0.0.1). Afterwards stop the preview by
+  PID, `git worktree remove`, and delete the folder and the throwaway config.
 - **Before a "no visual change" refactor**, capture a deterministic screenshot baseline (fixed data via `context.route`,
   `animations: 'disabled'`, `caret: 'hide'`, fonts ready) into a git-ignored folder, prove a double run diffs at 0%, then
   pixel-diff after the change. For zero tolerance also freeze time (`page.clock.setFixedTime`), stub `getUserMedia`,

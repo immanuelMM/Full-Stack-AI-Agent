@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS U3 QA (qa-automation)
+- Merged into qa-automation E2E rules (axe "before" counts recipe), plus a lead addition: stop the preview by PID and delete the worktree folder afterwards (the agent left a vite preview running in $TEMP/h11).
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: A "before" axe/screenshot count for an old commit needs no backend: `git worktree add --detach $TEMP/<short> <sha>`, `npm ci --legacy-peer-deps && npm run build` in its frontend, `npx vite preview --port <free> --strictPort`, and run the mock-API spec through a throwaway Playwright config (no globalSetup, `baseURL: http://localhost:<port>` — vite preview binds localhost/IPv6, 127.0.0.1 is refused). Delete the throwaway config afterwards.
+- why: U3 before-counts for five projects took about 4 minutes this way without touching the E2E stack or the dev stack.
+
 ## 2026-10-30 · IMMAN_HRIS U5 QA (qa-automation)
 - Applied to qa-automation E2E rules: @touch tag in touch project grep, reset one-shot actions via admin API, axe "before" counts via git worktree, stub getUserMedia on non-camera specs; Constraints: stop servers by port/PID, not command-line pattern.
 ### 2026-10-30 · qa-automation · IMMAN_HRIS
