@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS M2 (backend-dotnet-dev)
+- Applied to dotnet-backend-standards §6: matching dotnet-ef version; major-upgrade notes (Npgsql 10 DateOnly, NU1510, MSB3277 alignment — the last added by the lead after verifying).
+### 2026-10-30 · backend-dotnet-dev · IMMAN_HRIS
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: When moving to Npgsql 10 / .NET 10, raw `ExecuteScalar` on a `date` column returns `DateOnly` (not `DateTime`); test helpers using `Convert.ChangeType` break. Also install a matching `dotnet-ef` 10 (`--tool-path` in temp) because the global one may be older, and drop the now-redundant `Microsoft.Extensions.Identity.Core` reference (NU1510).
+- why: M2 upgrade failed 1 of 209 characterization tests only because of the DateOnly change; the global dotnet-ef was 9.0.7.
+
 ## 2026-10-30 · IMMAN_HRIS D1 (devops-engineer)
 - Applied to devops-engineer: live action-version lookup without `gh` (How to work 2); `--reporter=list,html` for the CI Playwright artifact (Defaults/CI).
 ### 2026-10-30 · devops-engineer · IMMAN_HRIS

@@ -131,6 +131,10 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   `ApplyConfigurationsFromAssembly`.
 - **Migrations are committed** and generated via `dotnet ef migrations add` — never hand-edit the DB schema.
   Apply with a migration bundle or explicit step in deployment, not automatically at startup in production.
+  Use a `dotnet-ef` matching the EF major (a temp `--tool-path` if the global one is older).
+- **Major upgrades (e.g. .NET 8 → 10):** Npgsql 10 returns `DateOnly` for `date` columns from raw ADO reads
+  (`ExecuteScalar`, readers), so `Convert.ChangeType`-style helpers break; drop references the framework now ships
+  (NU1510) and fix MSB3277 version conflicts by aligning EF package versions.
 - Interceptors for audit fields / soft delete. Optimistic concurrency (`RowVersion` / `xmin`) on entities edited concurrently.
 - Strongly-typed options (`JwtOptions`, `DatabaseOptions`) bound with
   `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()`.
