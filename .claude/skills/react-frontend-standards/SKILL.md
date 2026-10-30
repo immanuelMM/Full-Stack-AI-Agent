@@ -69,6 +69,9 @@ frontend/
 - **CSS structure:** tokens (custom properties) plus `@layer` files (reset, tokens, base, layout, components, features,
   utilities); the layer-order statement must be the first CSS the bundle emits (import it first in `main.tsx`). Print CSS
   that needs `!important` stays unlayered. Brand colours set at runtime stay as inline vars that tokens reference.
+  When splitting a flat stylesheet into layers, check every rule that lands in a higher layer than a rule that used to
+  come after it: the winner silently flips (keep such a rule ahead of its sibling in the same layer). Vite's lightningcss
+  drops the leading `@layer` statement when first appearance already gives the order, so check `--minify false` output.
 - **Scope every size-specific rule inside its media/container query.** Unit tests run without CSS (jsdom), so a phone rule
   that leaks onto tablets passes every Vitest test — only a real browser at each size catches it.
 - **Touch style (tablet + phone, every app):** one DOM for every size (CSS changes the layout, never a second copy of the nav, or

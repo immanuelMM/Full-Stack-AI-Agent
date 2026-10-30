@@ -41,6 +41,8 @@ Follow the `react-frontend-standards` skill (preloaded; if missing, read `full-s
 - No backend or infrastructure changes — hand those to the backend agent.
 - Don't introduce new dependencies/frameworks without a clear reason; prefer what's already in `package.json`.
 - Don't add speculative features or abstractions beyond what was asked.
+- Write multi-line files with Write/Edit, not Bash heredocs (quotes/apostrophes make Git Bash heredocs fail and write
+  nothing). With `core.autocrlf=true`, set Prettier `"endOfLine": "auto"` before `prettier --write` on an existing repo.
 
 ## Lessons (do this before you finish)
 If this run taught you something **reusable** that would change how an agent works next time (a mistake you made or

@@ -2,6 +2,23 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS F0/U1 (frontend-react-dev)
+- Applied to react-frontend-standards §5 CSS structure (layer split winner flips; lightningcss drops the @layer statement) and frontend-react-dev Constraints (no heredocs; Prettier endOfLine auto with autocrlf).
+### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: When splitting a flat stylesheet into `@layer` files, assign layers by original file position first, then check every rule that moves to a higher layer than a rule that originally came after it (a postcss script comparing property overlap plus class co-occurrence in the TSX finds them). Such pairs silently flip the winner; the one found here was `.btn-large` placed before `.btn`, so `.btn` was winning and `.btn-large` had no effect. Keep such a rule ahead of its sibling in the same layer to stay pixel-identical.
+- why: IMMAN_HRIS U1: layering `.btn-large` (portal feature) above `.btn` (components) would have changed Time In/Out sizing, which only a real-browser screenshot diff would show.
+
+### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: Production CSS minified by lightningcss (Vite 8) drops the leading `@layer a, b, c;` statement when the layers already first appear in that order, and the order survives only by first appearance. Check `vite build --minify false` to confirm the statement is emitted, and do not rely on the statement alone when a later file might introduce a layer out of order.
+- why: IMMAN_HRIS U1: `dist/assets/index-*.css` began with `@layer reset{` while the source file began with the order statement.
+
+### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
+- target: .claude/agents/frontend-react-dev.md
+- lesson: On Windows with `core.autocrlf=true`, set `"endOfLine": "auto"` in `.prettierrc` before running `prettier --write` over an existing repo, and write heredocs to files with the Write tool, not bash (quoted `'E'` heredocs with apostrophes in the body failed to parse and ran nothing).
+- why: IMMAN_HRIS F0: Prettier's default `lf` would fail `format:check` on fresh CRLF checkouts; a bash heredoc containing an apostrophe aborted the whole command.
+
 ## 2026-10-30 · IMMAN_HRIS U0 baseline (qa-automation)
 - Applied to qa-automation: zero-tolerance screenshot flags + 3-frame check (E2E rules, visual baseline bullet); Write/Edit over heredocs (Constraints; second time it bit an agent).
 ### 2026-10-30 · qa-automation · IMMAN_HRIS
