@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS F3 (backend-dotnet-dev)
+- Applied to dotnet-backend-standards §7 Secrets: env-scoped fail-fast validator with a unit test; grep all consumers before removing a committed secret.
+### 2026-10-30 · backend-dotnet-dev · IMMAN_HRIS
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: When removing a committed secret from appsettings.json, grep every consumer that silently relied on it (golden/QR tests without an override, E2E stacks running as Production, docker run docs) and give each its own throwaway key; add a fail-fast config validator that is skipped only for Development/Testing and is unit-tested with a stub IHostEnvironment.
+- why: The M1 "committed key" golden test and the E2E stack (ASPNETCORE_ENVIRONMENT=Production) both read Jwt:Key from appsettings.json and would have broken or crashed once the key was removed.
+
 ## 2026-10-30 · IMMAN_HRIS M2 (backend-dotnet-dev)
 - Applied to dotnet-backend-standards §6: matching dotnet-ef version; major-upgrade notes (Npgsql 10 DateOnly, NU1510, MSB3277 alignment — the last added by the lead after verifying).
 ### 2026-10-30 · backend-dotnet-dev · IMMAN_HRIS

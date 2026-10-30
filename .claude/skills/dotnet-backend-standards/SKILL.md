@@ -160,7 +160,10 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
 - `ICurrentUser` (Application interface, Api implementation over `IHttpContextAccessor`) — services never read `HttpContext`.
 - Rate-limit `login`/`refresh`/`register` with the built-in rate limiter; lock out after repeated failures.
 - **Secrets:** signing key and connection strings come from user-secrets (dev) or environment variables /
-  a vault (prod). Never committed. Fail at startup if the key is missing or too short.
+  a vault (prod). Never committed. Fail at startup if the key is missing or too short (skip only in
+  Development/Testing; unit-test the validator with a stub `IHostEnvironment`). When removing a committed secret,
+  grep every consumer that silently relied on it (golden tests, an E2E stack running as Production, docker docs)
+  and give each its own throwaway key.
 
 ### 7a. Security hardening (each of these was a real review finding — don't skip them)
 - **Rate-limit keys must equal what the endpoint binds.** If a partition key comes from the request body (e.g. the
