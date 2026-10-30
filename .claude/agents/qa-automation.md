@@ -75,6 +75,8 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 - Navigate like the user at each size (e.g. phone manage pages via the "More" sheet) and wait on content inside
   `getByRole('main')`, never on nav text that may be hidden at that size. With sticky bars, scroll a control to the
   centre (`scrollIntoView({block:'center'})`) and click normally; never `force: true`.
+- Before a Playwright run, check its preview/API ports are free (`netstat -ano | grep :<port>`); a busy port means another
+  run is active — wait for it, never start a second one. When the lead says it is running E2E, don't run Playwright.
 - Testcontainers/Playwright suites are heavy: don't run them while another agent runs its suites; report instead of
   retrying flaky failures under load, and re-run once on a quiet machine before calling something flaky.
 

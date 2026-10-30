@@ -2,6 +2,9 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop E2E collision (lead)
+- Applied to qa-automation and frontend-react-dev: check E2E ports are free before running; never run Playwright while the lead says it is. A fix agent ran Playwright during the lead's run despite being told not to: both runs shared preview port 4175, 89 tests timed out in the lead's run and the agent lost four runs.
+
 ## 2026-10-31 · beth-online-shop frontend contract UI (frontend-react-dev)
 - Applied to react-frontend-standards §3 (tile-to-list query test). Dropped: `.check` vs `Segmented` (app-specific class names).
 ### 2026-10-31 · frontend-react-dev · beth-online-shop
