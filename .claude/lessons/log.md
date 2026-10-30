@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS U2 QA (qa-automation)
+- Applied to qa-automation E2E rules (stub bullet): init scripts re-seed sessions on reload; tag probe specs when projects grep by tag.
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: In projects that filter non-primary sizes with `grep: /@layout|@a11y/`, put `@layout` in the title of throwaway probe specs too, or Playwright reports "No tests found" and the probe silently prints nothing. When mocking auth with `addInitScript`, a post-logout reload re-seeds the session, so assert on localStorage instead of reloading.
+- why: U2 touch-target probe printed nothing on phone/tablet until renamed; the first logout tests failed because the init script restored the token.
+
 ## 2026-10-30 · IMMAN_HRIS U2 (frontend-react-dev)
 - Applied to frontend-react-dev How to work 5: rebuild before screenshots when the E2E stack serves a prebuilt dist. Dropped the grid-cell z-index note (general CSS, not a workspace rule).
 ### 2026-10-30 · frontend-react-dev · IMMAN_HRIS

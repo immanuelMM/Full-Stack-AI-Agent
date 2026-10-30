@@ -48,6 +48,8 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
   --disable-gpu-compositing --disable-partial-raster` (never `--disable-threaded-compositing`: capture fails), and shoot
   until 3 consecutive frames are byte-identical.
 - Stub browser side effects (`window.print` via `addInitScript`) and assert call counts instead of skipping the flow.
+  Init scripts re-run on reload, so a session seeded that way comes back after logout + reload: assert on storage instead.
+  When projects filter by tag (`grep: /@layout|@a11y/`), tag probe specs too or they silently find no tests.
 - QR/camera scans: launch Chromium with `--use-fake-device-for-media-stream --use-file-for-fake-video-capture=<file>.y4m`,
   generated in global setup after the data exists. Scanners like html5-qrcode decode only the centre `qrbox`, so draw
   the QR small (fits inside it); a full-frame QR silently never decodes.
