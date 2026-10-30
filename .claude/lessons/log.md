@@ -2,6 +2,33 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop B2b (backend-dotnet-dev)
+- Wiki: platforms/paymongo.md rewritten (confirmed vs assumed, reference files, FakePayMongo test double — placed there instead of same-origin deploy); features/idempotent-checkout-reservations.md gained the payment-apply recipe. Standards: dotnet-backend-standards §7a (required settings in test factory; layered guards tested alone; xmin lock via SELECT 1 FOR UPDATE). Dropped: CA1068 and internal typed-client notes (compiler tells you).
+### 2026-10-30 · backend-dotnet-dev (beth-b2b) · beth-online-shop
+- target: .claude/wiki/platforms/paymongo.md
+- lesson: Confirmed from the docs (2026-10-30, llms.txt .md pages): signature header `t=,te=,li=`, string to sign `"{t}.{raw body}"`, HMAC-SHA256 hex, `te` test / `li` live, timestamp check optional (retries replay the old timestamp, so skip it); amounts are integer centavos (examples 10000 = P100, 49900 with fee 760 = payment 50660); create = `POST /v2/checkout_sessions` (Basic auth, `checkout_url` in `data.attributes`), retrieve = `GET /v1/checkout_sessions/{id}` (`attributes.status` active|expired, `payments[]` with `attributes.status=paid`, `amount`, `currency`, `paid_at`, `source.type`), expire = `POST /v1/checkout_sessions/{id}/expire` (400 if already expired / paid / ongoing); sessions NEVER expire on their own and PayMongo sends no event on expiry, so the shop must call expire; payments on an expired session are rejected by PayMongo; `payment_method_types` seen: gcash, paymaya, grab_pay, card, qrph, atome; webhook retries are 12 (the "3" is stale); event envelope is `data.id (evt_), data.attributes.{type,livemode,data}` but the Hosted Checkout page shows a flatter `send.webhook` shape without an event id. Still assumed: retrieve/expire on v2-created sessions, `paid_at` present in the webhook, hex case, `?t=` in success_url, line-name length.
+- why: read all of it from docs.paymongo.com for B2b; recorded in beth backend/README.md ("confirmed vs assumed"); no test keys, so nothing was called live.
+
+### 2026-10-30 · backend-dotnet-dev (beth-b2b) · beth-online-shop
+- target: .claude/wiki/features/idempotent-checkout-reservations.md
+- lesson: Payment-apply recipe (beth `PaymentApplier`/`PaymentService`): one code path for webhook, reconcile-on-read and sweeper; inside one transaction take `pg_advisory_xact_lock('order:'||number)`, then `ChangeTracker.Clear()` and reload the order (EF identity resolution keeps a stale tracked copy otherwise), lock variants FOR UPDATE in id order, consume reservations + stock movements, set Confirmed/Paid, queue the email, save; keep the `xmin` token as a backstop and let the webhook answer 503 on a conflict so the provider retries. Insert the webhook event id (unique key) first in the same transaction so a concurrent duplicate waits and then hits the violation. Paid-after-expiry: re-take stock only if `OnHand - heldByOthers >= qty`, else Confirmed + NeedsAttention and move nothing. Sweep each overdue order in its own transaction under the same lock.
+- why: 8 parallel webhooks and 12 webhook-vs-reconcile and webhook-vs-sweeper races stay consistent; removing the order lock made 1 to 7 deliveries answer 503 in three tests.
+
+### 2026-10-30 · backend-dotnet-dev (beth-online-shop)
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: Layered guards hide a removed guard: when a state check, a unique event row and an advisory lock all protect the same operation, deleting one lock leaves the test green. Design each concurrency test so one guard is the only defence (distinct event ids for the lock, assert the dedup row count for the unique insert, assert every response is 200 so an `xmin` backstop conflict shows as a 503), then mutation-check by commenting the guard out and seeing the test fail. Also: adding a REQUIRED production setting (ValidateOnStart) breaks every existing test that boots a non-Development host, so add the new keys to the test factory's base config (https base URL in non-Development) in the same change.
+- why: removing the order lock alone still left state consistent (xmin backstop), only the 200-assertions failed; adding PayMongo keys as required broke the 4 existing Production/Staging seed and R2 tests until the factory supplied them.
+
+### 2026-10-30 · backend-dotnet-dev (beth-b2b) · beth-online-shop
+- target: .claude/wiki/features/same-origin-single-image-deploy.md
+- lesson: Reusable test double: `FakePayMongo` (WireMock.Net 2.21 callbacks backed by a session dictionary: idempotent create by Idempotency-Key, retrieve with a paid payment, expire that answers 400 for expired/paid, failure switches, a signed `PaidWebhook` builder) plus a `PayMongoHost` xunit collection fixture with its own fake and factory, in `beth-online-shop/backend/tests/BethShop.Api.IntegrationTests/FakePayMongo.cs` and `PaymentTestSupport.cs`. Copy for any provider with hosted sessions; WireMock responses are `ResponseMessage` with `BodyData`, request headers are an `IDictionary<string, WireMockList<string>>` (look them up case-insensitively); raw-string JSON with `}}` needs `$$"""` or use JsonObject.
+- why: built for B2b; 52 payment tests run against it in about 25 s without touching the real API.
+
+### 2026-10-30 · backend-dotnet-dev (beth-b2b) · beth-online-shop
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: Small .NET gotchas hit while building a typed HttpClient and EF raw SQL: CA1068 requires CancellationToken as the LAST parameter (also on private overloads with a bool); `FromSql("SELECT * ...")` does not return the `xmin` system column, so entities with an xmin concurrency token must be locked with a separate `SELECT 1 ... FOR UPDATE` and then loaded normally; a typed `AddHttpClient<IService, Impl>` with an `internal` implementation works inside the same assembly.
+- why: each cost a build or design iteration in B2b.
+
 ## 2026-10-30 · beth-online-shop F1 (frontend-react-dev)
 - Applied to react-frontend-standards §2 (no case-only file name pairs), §5 (stretched real inputs, Modal onClose ref, tab bar hides only for text entry) and qa-automation E2E rules (centre-scroll under sticky bars, no force clicks).
 ### 2026-10-30 · frontend-react-dev · beth-online-shop

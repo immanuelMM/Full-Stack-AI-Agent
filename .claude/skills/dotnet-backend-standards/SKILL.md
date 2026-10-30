@@ -188,7 +188,11 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   attempts) — increment atomically (`ExecuteUpdateAsync(s => s.SetProperty(x => x.Count, x => x.Count + 1))`).
   Claim refresh tokens atomically (`UPDATE … WHERE TokenHash = @h AND RevokedAt IS NULL`, 0 rows = reuse) inside
   the same transaction that issues the replacement. Test each with parallel requests.
-- **Options:** validate nested option objects too (`ValidateDataAnnotations` does not recurse) and fail at start.
+- **Options:** validate nested option objects too (`ValidateDataAnnotations` does not recurse) and fail at start. A new
+  required production setting goes into the test factory's base config in the same change.
+- **Layered concurrency guards** (state check + unique row + lock): test each guard alone as the only defence (assert
+  every response succeeds, assert dedup row counts) and mutation-check it, or a removed guard stays green.
+- Entities with an `xmin` token: lock with a separate `SELECT 1 … FOR UPDATE` (`FromSql` doesn't return `xmin`), then load.
 - **Store client IPs safely:** strip the IPv6 zone id and cap to the column length before saving.
 - **Dev config never ships:** `appsettings.Development.json` has `CopyToPublishDirectory=Never` and holds no
   secrets; dev keys come from user-secrets or the compose environment.

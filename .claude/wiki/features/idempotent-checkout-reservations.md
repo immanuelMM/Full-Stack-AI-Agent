@@ -45,6 +45,18 @@ COD-cap and idempotency tests in `beth-online-shop/backend/tests/BethShop.Api.In
 Two checkouts for the last unit (exactly one wins); last MTO capacity slot; same `Idempotency-Key` twice (one order);
 COD per-phone cap race; webhook replay (one stock movement).
 
+## Applying a payment (beth B2b)
+One path for webhook, reconcile-on-read and sweeper (`beth-online-shop/backend/src/BethShop.Application/Features/Payments/PaymentApplier.cs`):
+1. In one transaction insert the webhook event id first (unique key), so a concurrent duplicate waits, then hits the violation.
+2. `pg_advisory_xact_lock` on the order number (every payment/stock path — webhook, reconcile, sweeper, `/pay`, admin
+   transitions — takes it), then `ChangeTracker.Clear()` and reload the order (EF would keep a stale tracked copy).
+3. Lock variants `FOR UPDATE` in id order (separate `SELECT 1 … FOR UPDATE`: `FromSql` doesn't return `xmin`).
+4. Consume reservations + write stock movements, set Confirmed/Paid, recompute ship date, queue the email, save.
+   Paid after expiry: re-take stock only if `OnHand - heldByOthers >= qty`, else Confirmed + NeedsAttention.
+5. Keep `xmin` as a backstop; a conflict on the webhook answers 503 so the provider retries.
+Sweep each overdue order in its own transaction under the same lock. Tests: webhook vs reconcile, webhook vs sweeper,
+8 concurrent deliveries — in `beth-online-shop/backend/tests/BethShop.Api.IntegrationTests/`.
+
 ## Gotchas
 - Lock in one global order (keys, then contacts, then products, then variants, each sorted) or concurrent checkouts deadlock.
 - Return pages must work from the URL token alone: wallet apps return into a different browser.

@@ -1,39 +1,63 @@
 # PayMongo (Philippine payments: GCash, Maya, cards, QR Ph)
 
-Status: **planned** — beth-online-shop B2b (design in `beth-online-shop/docs/plan/online-shop-plan.md` §5.2, §5.4, §6, §7).
-Nothing below is verified in code yet; items marked *unconfirmed* must be checked with a test-mode event and kept as
-golden tests.
+Status: **implemented** — beth-online-shop `0a5d0b6`, `99b97c8`, `2cb1e97` (B2b, verified by the lead: 528 tests green).
+Built against the docs and a WireMock fake only — no test keys yet, nothing called live. Facts below were read from the
+docs on 2026-10-30; items under "Still assumed" must be checked with a test-mode payment and kept as golden tests.
 
 ## Docs access
 Doc pages may fetch blank: read `https://docs.paymongo.com/llms.txt` and the `.md` URLs it lists.
 
-## Hosted Checkout Sessions (chosen)
-- Create (v2 endpoint recommended for new integrations; v1 retrieve/expire) via a typed `HttpClient`, no SDK.
-  Send `reference_number = order number`, server-priced `line_items`, enabled `payment_method_types`,
-  `success_url`/`cancel_url` = `/order/{number}?t={token}`, and an `Idempotency-Key` (= Payment.Id).
-- Create the session **after** the order commit; on failure the order stays PendingPayment and the client can retry `/pay`.
-- Expire the session when the reservation expires so a stale one can't be paid.
-- Amounts are integer centavos (`decimal * 100`). *Unconfirmed:* docs only imply centavos — confirm with a ₱1.00 test.
-- Hosted checkout keeps card data off our pages (SAQ A-like). Never embed card fields; the public key isn't needed.
+## Confirmed from the docs
+- **Create:** `POST /v2/checkout_sessions`, Basic auth (secret key as username); the page URL is
+  `data.attributes.checkout_url`. Send `reference_number`, server-priced `line_items`, `payment_method_types`,
+  `success_url`/`cancel_url`, and an `Idempotency-Key` (= Payment.Id).
+- **Retrieve:** `GET /v1/checkout_sessions/{id}` → `attributes.status` (`active`|`expired`) and `payments[]` with
+  `attributes.status=paid`, `amount`, `currency`, `paid_at`, `source.type`.
+- **Expire:** `POST /v1/checkout_sessions/{id}/expire` → 400 if already expired, paid or mid-payment.
+- **Sessions never expire on their own** and no event is sent on expiry: the shop must call expire when its reservation
+  window ends. Payments on an expired session are rejected.
+- **Amounts** are integer centavos (10000 = ₱100; 49900 + fee 760 → payment 50660).
+- **Webhook signature:** header `Paymongo-Signature: t=…,te=…,li=…`; HMAC-SHA256(webhook secret, `"{t}.{rawBody}"`),
+  hex, compared with `te` (test) or `li` (live) via `CryptographicOperations.FixedTimeEquals`, on the raw body before
+  parsing. Skip the timestamp age check: retries replay the original `t`.
+- **Webhook envelope:** `data.id` (`evt_…`), `data.attributes.{type, livemode, data}`; event `checkout_session.payment.paid`.
+  Up to 12 retries (the "3" on one page is stale).
+- `payment_method_types` values seen: `gcash`, `paymaya`, `grab_pay`, `card`, `qrph`, `atome`.
 
-## Webhook `checkout_session.payment.paid`
-- Verify the signature against the **raw body** before parsing: header `t=…,te=…,li=…`; HMAC-SHA256(webhookSecret,
-  `"{t}.{rawBody}"`) compared with `li` (live) or `te` (test) using `CryptographicOperations.FixedTimeEquals`.
-  *Unconfirmed:* exact string-to-sign.
-- Dedup by event id (unique insert → already processed → 200). Check amount + currency equal the order total.
-- Respond 200 well within 30 s; queue emails. Retries: up to 12 per one docs page, 3 per another — be idempotent.
-- No rate limit on the webhook (signature-gated). Never log full bodies (event id + type only).
-- The return URL is not proof of payment: poll the order and reconcile by retrieving the session if the webhook is late
-  (cold start). *Unconfirmed:* which retrieve fields expose payment status.
+## Still assumed
+Retrieve/expire work on v2-created sessions; `paid_at` present in the webhook payload; signature hex case; `?t=` survives
+in `success_url`; maximum line-item name length. The Hosted Checkout docs page shows a flatter `send.webhook` shape without
+an event id — confirm the real envelope on the first test-mode event.
+
+## Reference implementation (beth-online-shop)
+- Client: `beth-online-shop/backend/src/BethShop.Infrastructure/Payments/PayMongoClient.cs`, options
+  `beth-online-shop/backend/src/BethShop.Infrastructure/Payments/PayMongoOptions.cs` (validated at startup outside Development).
+- Webhook: `beth-online-shop/backend/src/BethShop.Api/Controllers/WebhooksController.cs` (128 KB limit, outside auth
+  fallback and rate limits, not in the OpenAPI contract), parsing/signature
+  `beth-online-shop/backend/src/BethShop.Application/Features/Payments/PayMongoWebhook.cs`.
+- One payment-apply path for webhook, reconcile-on-read and sweeper:
+  `beth-online-shop/backend/src/BethShop.Application/Features/Payments/PaymentApplier.cs`, `PaymentService.cs`; sweeper
+  `beth-online-shop/backend/src/BethShop.Infrastructure/Payments/OrderSweeperWorker.cs` (every 60 s). Recipe on
+  [idempotent checkout](../features/idempotent-checkout-reservations.md).
+- `POST /api/v1/orders/{number}/pay` (`X-Order-Token`) → `{checkoutUrl, expiresAt}`; 409 `AlreadyPaid` |
+  `PaymentWindowClosed` | `PaymentInProgress` | `NotOnlineOrder`; 503 when PayMongo is unreachable.
+
+## Testing (copy for any hosted-session provider)
+- `beth-online-shop/backend/tests/BethShop.Api.IntegrationTests/FakePayMongo.cs`: WireMock.Net callbacks over a session
+  dictionary — idempotent create by Idempotency-Key, retrieve with a paid payment, expire answering 400 when expired/paid,
+  failure switches, a signed `PaidWebhook` builder.
+- `beth-online-shop/backend/tests/BethShop.Api.IntegrationTests/PaymentTestSupport.cs`: xUnit collection fixture with its
+  own fake and factory. Golden signature tests: `beth-online-shop/backend/tests/BethShop.Application.Tests/PayMongoWebhookTests.cs`.
+- WireMock.Net notes: responses are `ResponseMessage` with `BodyData`; request headers are
+  `IDictionary<string, WireMockList<string>>` (look up case-insensitively); raw JSON with `}}` needs `$$"""`.
+- Never call real PayMongo from CI; E2E uses a stub server.
 
 ## Wallet returns from in-app browsers
-Shoppers coming from Facebook/Messenger pay in the GCash/Maya **apps**, and the return often opens a **different
-browser** with empty local state: the order/return page must work from the URL (`number` + token) alone.
+Shoppers from Facebook/Messenger pay in the GCash/Maya **apps**, and the return often opens a **different browser** with
+empty local state: the order/return page must work from the URL (`number` + token) alone.
 
 ## Keys and modes
-`PayMongo__SecretKey`, `PayMongo__WebhookSecret` (secrets). Demo = test-mode keys; going live = live keys + a new live
-webhook (new secret). Webhooks need a public HTTPS URL: in dev tunnel (`cloudflared`) or post locally signed fake events.
-Refunds via the PayMongo dashboard in the MVP; QR Ph refunds have their own rules.
-
-## Testing
-Never call real PayMongo from CI: WireMock.Net in integration tests, a stub server in E2E.
+`PayMongo__SecretKey`, `PayMongo__WebhookSecret` (secrets; required outside Development). Demo = test-mode keys; going
+live = live keys + a new live webhook (new secret). Webhooks need a public HTTPS URL: in dev use a tunnel
+(`cloudflared`) or post locally signed fake events. Refunds via the PayMongo dashboard in the MVP. Account activation
+needs business documents — apply early.
