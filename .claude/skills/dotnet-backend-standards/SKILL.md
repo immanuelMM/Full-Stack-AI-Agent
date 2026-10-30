@@ -133,7 +133,8 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
 - EF Core with the project's provider (PostgreSQL/Npgsql or SQL Server); configurations via `ApplyConfigurationsFromAssembly`.
 - **Migrations are committed** and generated via `dotnet ef migrations add` — never hand-edit the DB schema.
   Apply with a migration bundle or explicit step in deployment, not automatically at startup in production.
-  Use a `dotnet-ef` matching the EF major (a temp `--tool-path` if the global one is older).
+  Use a `dotnet-ef` matching the EF major (a temp `--tool-path` if the global one is older). Rebuild before running
+  tests after adding a migration (`--no-build` on a stale build fails every test with PendingModelChangesWarning).
 - **Major upgrades:** run the full suites unchanged on the new framework; check raw ADO reads for changed CLR types,
   drop references the framework now ships (NU1510) and align EF package versions (MSB3277). Known .NET 8 → 10
   breaks: `.claude/wiki/features/characterization-refactor.md`.

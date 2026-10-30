@@ -1,7 +1,13 @@
 # Made-to-order products (lead time, daily capacity, ship dates)
 
-Status: **implemented (catalog + checkout)** — beth-online-shop `00a4328` (B1 fields/validation, B2a capacity check +
-estimated ship date). **Planned:** "preparing" emails, ship-date change by staff, admin MTO-due views (B3/F3).
+Status: **backend implemented** — beth-online-shop `00a4328` (B1 fields/validation, B2a capacity + estimated ship
+date), `bd27ae9` (B3: "preparing" email, staff ship-date change, overdue flag). Admin UI: F3 (planned).
+
+Back-office views need no new tables: `HasMadeToOrder` + `EstimatedShipDate` give "overdue" (Confirmed/Preparing, date
+before today in Manila) and "due in 3 days". The sweeper raises a "Ship date passed" segment of `NeedsAttentionReason`
+that clears on ship, cancel or a new date and can't be cleared by hand while true. A ship-date change needs a reason and
+a date not in the past, and emails the customer (`OrderExpiryService.FlagOverdueShipDatesAsync`,
+`AdminOrderService.ChangeShipDateAsync`).
 
 ## What it does
 - Product `FulfilmentType` = InStock or MadeToOrder. MTO products carry `leadTimeDays` (1-60), optional `dailyCapacity`

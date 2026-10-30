@@ -2,6 +2,33 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop B3 (backend-dotnet-dev)
+- Wiki: cash-on-delivery (admin step runner, state table, status), made-to-order (back-office views, status), jwt-refresh-auth (admin reset without token providers). Standards: qa-automation (xmin hides missing locks; differing-outcome races), dotnet-backend-standards §6 (rebuild after migration). Dropped: CA1826 / expression-tree operator notes (compiler reports them).
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/wiki/features/cash-on-delivery.md
+- lesson: Admin order steps (confirm, ship, cash collected, return, cancel, ship date) share one runner: begin transaction, `LockOrderAsync(number)`, `ClearTracking`, reload the order, run the step (variant rows `FOR UPDATE` in id order when it touches stock), save, commit, then reload for the response; a failed step returns an Error and the transaction is disposed uncommitted. Put the state machine in one table (`OrderStateMachine.IsAllowed`) that `Order.Transition` enforces for every caller (payment, sweeper, admin) and test it exhaustively (every from/to pair per payment method and fulfilment). A COD order's stock leaves the shelf when it ships (consume its held reservations then); a late confirm re-checks stock because the hold lapsed; cancel restocks only reservations already consumed. Reference: `beth-online-shop/backend/src/BethShop.Application/Features/AdminOrders/AdminOrderService.cs`, `.../Domain/Orders/OrderStateMachine.cs`, `.../tests/BethShop.Domain.Tests/OrderStateMachineTests.cs`.
+- why: B3 built these with 88 new tests; the exhaustive table test and one runner kept every step consistent and the races tests green.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/agents/qa-automation.md
+- lesson: When you mutation-check a lock, `xmin` (the concurrency token backstop) hides the missing lock in "all requests answer 200" tests: removing the order lock still passed cancel-vs-webhook, ship x8 and cash x2. Tests that caught it were races whose two outcomes differ in stock or status (confirm vs sweeper, cancel vs sweeper, two confirms, parallel stock corrections that must never exceed on-hand). Design a race so one interleaving gives a different final state, assert each outcome's full invariant (status, reserved, on hand, movements, emails) and run it over ~10 orders at once.
+- why: removing `LockOrderAsync` from the admin runner failed 3 of 7 race tests; removing the variant `FOR UPDATE` failed only the parallel-corrections test.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/wiki/features/jwt-refresh-auth.md
+- lesson: An administrator password reset cannot use `UserManager.GeneratePasswordResetTokenAsync` when Identity was added with `AddIdentityCore`/`AddIdentityApiEndpoints`-style setup and no token providers (it throws, a 500). Validate with `users.PasswordValidators`, set `entity.PasswordHash = users.PasswordHasher.HashPassword(...)`, `UpdateAsync`, then revoke all refresh tokens and clear the lockout (`AccessFailedCount`, `LockoutEnd`). Disabling a user: set `Active = false` and revoke refresh tokens; refuse to disable an Owner (and yourself) so the shop cannot lock itself out.
+- why: the first reset test returned 500 until the token step was replaced (`IdentityService.ResetPasswordAsync` in beth-online-shop).
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: After adding an EF migration, never run `dotnet test --no-build` on the integration project from a stale build: the host sees a model with pending changes ("PendingModelChangesWarning") and every test fails at startup. Rebuild first. Also: EF expression trees cannot contain `^`/range operators (compute the string outside the query), and in this solution CA1826 makes `.First()`/`.Last()` on a list a build error in tests (use `[0]`/`[^1]`).
+- why: 303 of 352 tests failed with that warning after the AdminOrders migration until the project was rebuilt.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/wiki/features/made-to-order.md
+- lesson: Back-office views for made-to-order orders need no new tables: `HasMadeToOrder` + `EstimatedShipDate` on the order give "overdue" (Confirmed/Preparing and date before today, Manila) and "due in 3 days" counts; the sweeper raises a "Ship date passed" flag (a segment of `NeedsAttentionReason`) that clears on ship, cancel or moving the date and cannot be cleared by hand while true (otherwise the sweeper re-raises it every minute). A ship-date change needs a reason, a date not in the past, and emails the customer.
+- why: implemented and tested in B3 (`OrderExpiryService.FlagOverdueShipDatesAsync`, `AdminOrderService.ChangeShipDateAsync`).
+
 ## 2026-10-30 · beth-online-shop F2 (frontend-react-dev)
 - Standards: react-frontend-standards §3 (generate from committed snapshot) and §5 (tab bar back ~250 ms after blur; positioned scroll containers); frontend-react-dev (lazy-route CSS chunks). Wiki: touch-ui-shell, e2e-playwright-harness, idempotent-checkout-reservations (client key hook), openapi-contract, apps/beth-online-shop (PSGC data, status).
 ### 2026-10-30 · frontend-react-dev · beth-online-shop

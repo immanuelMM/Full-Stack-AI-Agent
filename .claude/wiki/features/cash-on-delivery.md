@@ -1,8 +1,8 @@
 # Cash on delivery (with staff confirmation and anti-abuse limits)
 
-Status: **partly implemented** — beth-online-shop `00a4328`: eligibility rules in quote + checkout, held reservations,
-per-phone/email advisory lock. **Planned:** staff confirmation, 48 h auto-cancel sweeper, ship/deliver/cash-collected/
-returned flow, `CodBlock` admin (B3/F3).
+Status: **backend implemented** — beth-online-shop `00a4328` (eligibility, holds, per-phone/email lock), `0a5d0b6`
+(48 h auto-cancel sweeper), `bd27ae9` + `fdfd8fe` (B3: staff confirm, ship/deliver/cash-collected/returned, blocklist,
+616 tests). Admin UI: F3 (planned).
 
 ## Design (beth plan §5.3, §6)
 - **Eligibility** (checked in `/cart/quote` with reasons and again in `/checkout`): COD enabled, fulfilment = Delivery,
@@ -24,6 +24,18 @@ returned flow, `CodBlock` admin (B3/F3).
   `beth-online-shop/backend/src/BethShop.Domain/ShopSettings.cs` (COD settings), `beth-online-shop/backend/src/BethShop.Domain/Shipping/ShippingZone.cs`,
   `beth-online-shop/backend/src/BethShop.Domain/Orders/OrderEnums.cs`.
 - Phone normalisation: [PH ship date + phone](ph-ship-date-phone.md).
+
+## Admin order steps (beth B3)
+- One runner for every step (confirm, ship, cash collected, return, cancel, ship date): begin transaction →
+  `LockOrderAsync(number)` → `ClearTracking` → reload → step (variant rows `FOR UPDATE` in id order when it touches
+  stock) → save → commit → reload for the response. Reference:
+  `beth-online-shop/backend/src/BethShop.Application/Features/AdminOrders/AdminOrderService.cs`.
+- One state table, `beth-online-shop/backend/src/BethShop.Domain/Orders/OrderStateMachine.cs`, enforced by
+  `Order.Transition` for every caller (payment, sweeper, admin); exhaustive from/to test
+  `beth-online-shop/backend/tests/BethShop.Domain.Tests/OrderStateMachineTests.cs`. Detail returns `allowedActions`
+  so the UI never repeats the rules.
+- COD stock leaves the shelf at ship (consume held reservations then); a late confirm re-checks stock (hold lapsed →
+  409 `StockUnavailable`); cancel restocks only consumed reservations. Every admin action writes an `AuditEntries` row.
 
 ## Gotchas
 - Custom (MTO) work made for a fake COD order can't be resold — keep MTO COD off by default.

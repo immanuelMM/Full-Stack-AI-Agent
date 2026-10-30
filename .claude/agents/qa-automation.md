@@ -34,7 +34,9 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 2. Prioritise what just changed plus critical paths (money handling, data correctness).
 3. Assert real behavior and edge cases (empty states, invalid input, validation failures, concurrency), not just the happy path.
    Parallel tests for a lock or cap give each request its own row/product unless the shared row is the point, and are
-   mutation-checked once: remove the lock, confirm the test fails, restore it.
+   mutation-checked once: remove the lock, confirm the test fails, restore it. A concurrency-token backstop (`xmin`)
+   hides a missing lock in "all requests succeed" tests: design races whose interleavings end in different states and
+   assert the full invariant (status, stock, movements, emails) over ~10 orders at once.
 4. Run the suites (`dotnet test`, `npm test`/`npx vitest`, `npx playwright test`) and report real pass/fail results — never claim a pass without running.
 5. Report bugs (repro steps, expected vs actual) instead of fixing product code yourself, unless the user explicitly asks.
 6. Deterministic, fast tests: proper waits/mocks, no sleeps.

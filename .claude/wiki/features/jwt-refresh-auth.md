@@ -51,6 +51,10 @@ beth adds change-password. Login returns the access token + `Set-Cookie`.
 3. Copy `apiClient.ts` + `authStore.ts`; regenerate types; copy the hardening tests and adjust routes.
 
 ## Gotchas
+- Admin password reset with `AddIdentityCore` (no token providers): `GeneratePasswordResetTokenAsync` throws. Validate
+  with `users.PasswordValidators`, set `PasswordHash = PasswordHasher.HashPassword(...)`, `UpdateAsync`, revoke all
+  refresh tokens and clear lockout (beth `IdentityService.ResetPasswordAsync`). Disabling a user revokes refresh tokens;
+  never allow disabling an Owner or yourself.
 - Cookie is `SameSite=Lax`/`Strict`: SPA and API must be same-site — on a Public Suffix domain that means one service
   ([same-origin deploy](same-origin-single-image-deploy.md)).
 - Re-auth dialogs (kiosk exit) must call login outside the shared 401 handler and discard the token.
