@@ -152,6 +152,7 @@
   <span class="chip">App <b id="app">—</b></span>
   <span class="chip" id="conn"><span class="dot"></span><span id="connText">Connecting…</span></span>
   <span class="spacer"></span>
+  <button id="voiceBtn" aria-pressed="false" title="Read out what the agents are doing">🔇 Voice off</button>
   <button class="primary" id="demoBtn">▶ Play demo</button>
   <button id="resetBtn">Reset</button>
 </header>
@@ -343,6 +344,62 @@ setInterval(() => {
   $('sTime').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 }, 1000);
 
+/* ---------- voice (browser speech, no API key) ---------- */
+// Speaks only the moments that matter (assignments, agents finishing, reviews, the lead's final reply), not every tool call.
+// Each agent gets its own voice/pitch. Browsers only allow speech after a click, so the toggle doubles as that click.
+const canSpeak = 'speechSynthesis' in window;
+const VOICE_ORDER = Object.keys(ROSTER);
+const PITCH = { lead: 1, 'research-planner': 1.2, 'backend-dotnet-dev': 0.8, 'frontend-react-dev': 1.3,
+  'qa-automation': 1.1, 'docs-writer': 1.15, 'devops-engineer': 0.9 };
+let voiceOn = false, queued = 0, audioCtx = null;
+try { voiceOn = localStorage.getItem('teamviz.voice') === 'on'; } catch {}
+function setVoice(on) {
+  voiceOn = on && canSpeak;
+  const b = $('voiceBtn');
+  b.textContent = !canSpeak ? '🔇 No voice in this browser' : voiceOn ? '🔊 Voice on' : '🔇 Voice off';
+  b.setAttribute('aria-pressed', String(voiceOn));
+  b.disabled = !canSpeak;
+  try { localStorage.setItem('teamviz.voice', voiceOn ? 'on' : 'off'); } catch {}
+  if (!voiceOn && canSpeak) { speechSynthesis.cancel(); queued = 0; }
+}
+function speakable(text) {
+  return String(text || '')
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')   // emoji
+    .replace(/`/g, '').replace(/[\w.-]+[\\/][\w.\\/-]+/g, (p) => p.split(/[\\/]/).pop())   // paths -> file name
+    .replace(/\s+/g, ' ').trim().slice(0, 220);
+}
+function speak(type, text) {
+  if (!voiceOn || !text) return;
+  if (queued >= 3) return;   // don't fall minutes behind when several agents report at once
+  const u = new SpeechSynthesisUtterance(speakable(text));
+  const voices = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang));
+  if (voices.length) u.voice = voices[Math.max(0, VOICE_ORDER.indexOf(type)) % voices.length];
+  u.pitch = PITCH[type] ?? 1;
+  u.rate = 1.05;
+  u.onend = u.onerror = () => { queued = Math.max(0, queued - 1); };
+  queued++;
+  speechSynthesis.speak(u);
+}
+function chime(freq = 880) {
+  if (!voiceOn) return;
+  try {
+    audioCtx = audioCtx || new AudioContext();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.15, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t + 0.4);
+  } catch {}
+}
+$('voiceBtn').onclick = () => {
+  setVoice(!voiceOn);
+  if (voiceOn) speak('lead', 'Voice on. I will tell you when agents start and finish.');
+};
+setVoice(voiceOn);
+if (canSpeak) speechSynthesis.getVoices();   // starts loading voices (Chrome loads them lazily)
+
 /* ---------- event handling ---------- */
 function actorOf(e) {
   if (e.agentType) { if (e.agentId) idMap[e.agentId] = e.agentType; return e.agentType; }
@@ -394,6 +451,7 @@ function handle(e) {
       setBubble(lead, e.message || 'Done for now', '💬');
       feed(lead, 'Finished responding', e.t);
       refreshLead();
+      if (animate) { chime(660); speak('lead', e.message || 'Done for now'); }
       break;
     }
   }
@@ -403,6 +461,7 @@ function dispatch(e, animate) {
   lastDispatched = e.target;
   setBubble(lead, `Assigning → ${d.info.name}`, '📨');
   feed(lead, `→ ${d.info.name}: ${e.text}`, e.t);
+  if (animate) speak('lead', `${d.info.name}, ${e.text}`);
   const arrive = () => {
     setState(d, 'working', 'working');
     setBubble(d, e.text, '📨');
@@ -416,7 +475,10 @@ function activity(actor, e, animate) {
   tools++; d.actions++;
   if (e.file) files.add(e.file);
   setBubble(d, e.text, TOOL_ICON[e.tool] || '⚙️');
-  if (e.tool === 'Skill' && REVIEW_SKILLS.test(e.skill)) updateStages('Review');
+  if (e.tool === 'Skill' && REVIEW_SKILLS.test(e.skill)) {
+    updateStages('Review');
+    if (animate) speak(actor, `Starting ${e.skill.replace(/-/g, ' ')}`);
+  }
   if (animate && (e.tool === 'Edit' || e.tool === 'Write' || e.tool === 'MultiEdit') && e.file) floatChip(d, '+ ' + e.file);
   if (animate && /^(Bash|PowerShell)$/.test(e.tool)) floatChip(d, '⌨️ run');
   feed(d, e.text, e.t);
@@ -429,7 +491,11 @@ function finish(type, e, animate) {
   setState(d, 'done', 'done ✓');
   setBubble(d, e.message || 'Finished — reporting back', '✅');
   feed(d, '✅ Finished' + (e.message ? ': ' + e.message : ''), e.t);
-  if (animate) packet(d.pos, lead.pos, d.info.color, '✅');
+  if (animate) {
+    packet(d.pos, lead.pos, d.info.color, '✅');
+    chime();
+    speak(type, `${d.info.name} finished. ${e.message || ''}`);
+  }
   d.timer = setTimeout(() => { setBubble(d, ''); setState(d, 'idle', `done · ${d.actions} actions`); }, 9000);
 }
 function resetAll() {
