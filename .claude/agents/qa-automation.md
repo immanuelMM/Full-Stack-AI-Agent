@@ -69,7 +69,8 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 - If installing test deps fails with npm's `edgesOut` error, apply the fix in
   `.claude/wiki/platforms/windows-dev-machine.md` so local installs and CI `npm ci` agree.
 - Navigate like the user at each size (e.g. phone manage pages via the "More" sheet) and wait on content inside
-  `getByRole('main')`, never on nav text that may be hidden at that size.
+  `getByRole('main')`, never on nav text that may be hidden at that size. With sticky bars, scroll a control to the
+  centre (`scrollIntoView({block:'center'})`) and click normally; never `force: true`.
 - Testcontainers/Playwright suites are heavy: don't run them while another agent runs its suites; report instead of
   retrying flaky failures under load, and re-run once on a quiet machine before calling something flaky.
 

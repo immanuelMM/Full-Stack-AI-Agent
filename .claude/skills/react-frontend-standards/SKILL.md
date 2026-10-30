@@ -30,6 +30,8 @@ frontend/
 ├─ .env.example
 └─ vite.config.ts
 ```
+Never put two files in one folder whose names differ only by case (`productForm.ts` / `ProductForm.tsx`); name logic
+modules `<thing>Model.ts` or `<thing>Schema.ts`.
 
 ## 3. Data fetching and the API contract
 - **TanStack Query** for all server state (queries, mutations, cache invalidation). Don't copy server data into
@@ -71,6 +73,9 @@ frontend/
 - Use the project's existing approach (CSS modules / Tailwind); for new projects either is fine — pick one and stick to it.
 - Semantic HTML, labelled inputs (field errors outside the `<label>`, linked with `aria-describedby`, so the accessible
   name stays stable), visible focus, keyboard navigation, tap targets ≥ 44px, colour contrast WCAG AA.
+- Custom radios/checkboxes/chips keep the real input stretched over the control (`position:absolute; inset:0;
+  opacity:0`), not 1px `sr-only`; hidden file inputs use the `hidden` attribute.
+- A shared Modal keeps the caller's latest `onClose` in a ref and runs its focus/Escape/scroll-lock effect once per open.
 - **CSS structure:** tokens (custom properties) plus `@layer` files (reset, tokens, base, layout, components, features,
   utilities); the layer-order statement is the first CSS the bundle emits (import it first in `main.tsx`). Print CSS
   needing `!important` stays unlayered; runtime brand colours stay inline vars that tokens reference. When splitting a
@@ -82,7 +87,8 @@ frontend/
 - **Touch style (tablet + phone, every app):** one DOM for every size (CSS changes the layout; a second nav copy breaks
   `getByRole`); the shell fills `100dvh` with `env(safe-area-*)` and `viewport-fit=cover`, and only the content scrolls
   (a flex column — header `flex: none`, content `flex: 1 1 0; min-height: 0` — not a fixed-row grid, which leaves a gap
-  when an optional banner is absent); long phone forms get a sticky action bar; controls 56px, primary 64px, never
+  when an optional banner is absent); long phone forms get a sticky action bar; hide the phone tab bar only while a text field or textarea has focus, never
+  for selects, radios, checkboxes or chips; controls 56px, primary 64px, never
   under 48px; money/PIN entry uses an on-screen keypad with the real `<input>` kept (`inputMode="none"` on
   `(pointer: coarse)`, no autofocus) so the OS keyboard never covers the screen; check 375×667, not just 390×844.
 - Browsers cannot print silently: "auto-print" means calling `window.print()` once per document (guard against StrictMode

@@ -2,6 +2,33 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop F1 (frontend-react-dev)
+- Applied to react-frontend-standards §2 (no case-only file name pairs), §5 (stretched real inputs, Modal onClose ref, tab bar hides only for text entry) and qa-automation E2E rules (centre-scroll under sticky bars, no force clicks).
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md (§5 touch style)
+- lesson: Hide the phone tab bar for text entry only (`:has(input:not([type=radio],[type=checkbox],[type=file]):focus, textarea:focus)`), never for any focused input, and never for selects, radios or checkboxes.
+- why: with the rule on `input:focus`, tapping a variant chip hid the bottom bar and moved the sticky Add-to-cart bar; the next tap on Add landed on the moving layout and was lost (Playwright caught it as a first click that did nothing, only on phone sizes).
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md (§5 accessibility) and .claude/agents/qa-automation.md
+- lesson: Custom radios, checkboxes and chips keep the real input but stretch it over the whole control (`position:absolute; inset:0; opacity:0`), not `sr-only` at 1px, so tap-size checks measure the real hit area; hidden file inputs use the `hidden` attribute.
+- why: the F0 tap-target check flags every `input` under 48px, and 1px visually-hidden inputs would all have failed; the overlay input also makes the whole row the tap target.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md (§2 folder structure)
+- lesson: Never name two files in one folder that differ only by letter case (`productForm.ts` and `ProductForm.tsx`); name the logic module `<thing>Model.ts` or `<thing>Schema.ts`.
+- why: on Windows/macOS `tsc` failed with TS1149 (file name differs only in casing) and the import resolved to the wrong file; it would also break on case-sensitive CI.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md (§5 or §4)
+- lesson: A shared Modal must keep the caller's latest `onClose` in a ref and run its focus/Escape/scroll-lock effect once per open, not on `[onClose]`, because callers pass inline arrows.
+- why: the F0 Modal re-ran its effect on every parent render and moved focus back to the dialog frame each time a filter radio inside the sheet was chosen.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/agents/qa-automation.md and .claude/agents/frontend-react-dev.md (screenshot checks)
+- lesson: In Playwright specs with sticky bars, scroll the control to the centre (`el.scrollIntoView({block:'center'})`) and click it normally; avoid `check({force:true})`, which clicks whatever sits on top (the sticky bar) and reports "did not change its state" only on some sizes.
+- why: the chip click passed at 375x667 and 1280x800 but failed at 390x844 because the sticky buy bar covered the chip at the default scroll position.
+
 ## 2026-10-30 · beth-online-shop B2a (backend-dotnet-dev)
 - Applied to dotnet-backend-standards §7a (fail-closed body rate-limit keys; email links from configured base URL; sealed secrets in idempotent replays) and qa-automation How to work (own row per parallel request; mutation-check locks).
 ### 2026-10-30 · backend-dotnet-dev · beth-online-shop
