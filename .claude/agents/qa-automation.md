@@ -45,6 +45,11 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
   `animations: 'disabled'`, `caret: 'hide'`, fonts ready) into a git-ignored folder, prove a double run diffs at 0%, then
   pixel-diff after the change.
 - Stub browser side effects (`window.print` via `addInitScript`) and assert call counts instead of skipping the flow.
+- QR/camera scans: launch Chromium with `--use-fake-device-for-media-stream --use-file-for-fake-video-capture=<file>.y4m`,
+  generated in global setup after the data exists. Scanners like html5-qrcode decode only the centre `qrbox`, so draw
+  the QR small (fits inside it); a full-frame QR silently never decodes.
+- On Windows/npm 10, if installing test deps fails with `reading 'edgesOut'`, commit a `.npmrc` with
+  `legacy-peer-deps=true` (and add `@testing-library/dom` explicitly) so local installs and CI `npm ci` agree.
 - Navigate like the user at each size (e.g. phone manage pages via the "More" sheet) and wait on content inside
   `getByRole('main')`, never on nav text that may be hidden at that size.
 - Testcontainers/Playwright suites are heavy: don't run them while another agent is running its suites — report

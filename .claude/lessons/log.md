@@ -36,3 +36,17 @@ Applied directly by the lead in `chore(agents): apply Render + tablet UI lessons
 - research-planner: flag platform limits; Public Suffix List check; Decisions section.
 - CLAUDE.md: lead verification (check every suite printed a result, look at screenshots), push early, give exact config
   values, fresh agents per milestone, short temp paths on Windows, the lessons loop itself.
+
+## 2026-10-30 · IMMAN_HRIS M1 (qa-automation)
+- Applied to qa-automation E2E rules: fake-camera QR scans (small QR inside the qrbox); `.npmrc` legacy-peer-deps for the npm `edgesOut` error. Heredoc half dropped (already a rule since 9010b51).
+
+
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: Playwright fake-camera QR tests: html5-qrcode only decodes the centre `qrbox` (240 px) of the video, so render the QR in the .y4m small (cell <= 6 px); a full-frame QR silently never decodes. Generate the video in globalSetup after creating the employee, and launch Chromium with --use-fake-device-for-media-stream --use-file-for-fake-video-capture.
+- why: the first scan test timed out at 30 s with no camera error until the QR was shrunk.
+
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: On Windows with npm 10, `npm i -D jsdom` fails with "Cannot read properties of null (reading 'edgesOut')"; commit a `.npmrc` with `legacy-peer-deps=true` (and install `@testing-library/dom` explicitly) so local installs and `npm ci` agree. Also: a Bash tool call containing many heredocs with apostrophes can fail to parse and write nothing; use the Write tool for source files and check files exist.
+- why: Vitest dependencies could not be installed until the flag was used; a multi-heredoc call wrote zero files.
