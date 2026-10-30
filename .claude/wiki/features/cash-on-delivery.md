@@ -38,5 +38,10 @@ Status: **backend implemented** — beth-online-shop `00a4328` (eligibility, hol
   409 `StockUnavailable`); cancel restocks only consumed reservations. Every admin action writes an `AuditEntries` row.
 
 ## Gotchas
+- Abuse caps (beth `9f52363`): shop-wide unconfirmed-COD count under advisory lock `cod:unconfirmed-cap` and a
+  per-variant share of on-hand (min 1), both quote reasons (`ShopCodBusy`, `ItemCodLimit`); client IP stored on the
+  order (cleared by retention); bulk `cancel-related` (SameIp/SameContact) cancels each order in its own transaction.
+  Late confirm/payment re-checks MTO capacity for the order's day. Shared test fixtures lift the caps; cap tests get
+  their own host (`ApiFactory.CreateHost`, `KeepCodCapsKey`).
 - Custom (MTO) work made for a fake COD order can't be resold — keep MTO COD off by default.
 - Courier COD fees and remittance schedules vary; with no courier API, delivery and remittance are recorded by staff.

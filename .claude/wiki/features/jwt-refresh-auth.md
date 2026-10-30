@@ -51,6 +51,10 @@ beth adds change-password. Login returns the access token + `Set-Cookie`.
 3. Copy `apiClient.ts` + `authStore.ts`; regenerate types; copy the hardening tests and adjust routes.
 
 ## Gotchas
+- Lockout per (account, client IP) (beth `9f52363`/`f75baff`): `LoginFailures` table, atomic `INSERT … ON CONFLICT DO
+  UPDATE` + conditional UPDATE setting `LockedUntil`; check only that pair, delete the row on success, purge in the
+  sweeper; dummy hash verify for unknown accounts (`IdentityService.RecordAccessFailedAsync`/`IsLockedOutAsync`).
+- Disabled users: `JwtBearerEvents.OnTokenValidated` checks a 30 s `ActiveUserCache` that user-disable invalidates.
 - Admin password reset with `AddIdentityCore` (no token providers): `GeneratePasswordResetTokenAsync` throws. Validate
   with `users.PasswordValidators`, set `PasswordHash = PasswordHasher.HashPassword(...)`, `UpdateAsync`, revoke all
   refresh tokens and clear lockout (beth `IdentityService.ResetPasswordAsync`). Disabling a user revokes refresh tokens;

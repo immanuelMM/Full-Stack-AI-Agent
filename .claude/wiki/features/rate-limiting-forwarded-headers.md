@@ -31,6 +31,9 @@ Copy the `RateLimiting/` folder + `ForwardedHeadersSetup.cs` + `ClientIp.cs`, re
 `ForwardLimitTests` and the parallel login tests; document every key in `docs/deployment.md`.
 
 ## Gotchas
+- Test hosts have no socket (`RemoteIpAddress` null): an `IStartupFilter` sets it from a test header (beth
+  `TestClientIpFilter`, `client.FromIp("203.0.113.5")`). TestServer doesn't enforce `[RequestSizeLimit]` — assert the
+  attribute by reflection. Body-derived partitions fail closed (fixed bucket) on chunked/oversize/malformed bodies.
 - Without forwarded headers behind a TLS proxy: every client shares the proxy IP (one attacker locks out all logins)
   and HTTPS redirection loops.
 - Never trust `0.0.0.0/0`, `::/0`, a public or CDN range. Find the proxy's real source address once per environment:

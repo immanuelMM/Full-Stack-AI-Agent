@@ -2,6 +2,33 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop review fixes (backend-dotnet-dev)
+- Wiki: jwt-refresh-auth (per-IP lockout, active-user cache), rate-limiting-forwarded-headers (test IP filter, size-limit test), cash-on-delivery (abuse caps), same-origin-single-image-deploy (security headers). Standards: dotnet-backend-standards §6 (in-place data migrations, HasData defaults, optional PUT fields) and §7a (OnCompleted lookups, test IP filter). Dropped: rebuild-after-migration (already a rule).
+### 2026-10-31 · backend-dotnet-dev · beth-online-shop
+- target: .claude/wiki/features/jwt-refresh-auth.md
+- lesson: Identity's per-account lockout lets anyone who knows a public staff email lock that person out (the check runs before the password). Count failures per (account, client IP) in a small table with an atomic `INSERT ... ON CONFLICT DO UPDATE` and a second conditional UPDATE that sets `LockedUntil`; check lock for that pair only, delete the row on success, purge old rows in the sweeper, and run a dummy hash verify for unknown accounts. Reference: beth `IdentityService.RecordAccessFailedAsync`/`IsLockedOutAsync`, `LoginFailures`, tests `AuthTests.An_attacker_locks_only_their_own_address...`. Also reject access tokens of disabled users in `JwtBearerEvents.OnTokenValidated` through a 30 s cache that user-disable invalidates (beth `ActiveUserCache`); this replaces the "deactivated user keeps access until expiry" trade-off.
+- why: the security review showed 5 bad tries from anywhere locked the Owner for 5 minutes, repeatedly.
+
+### 2026-10-31 · backend-dotnet-dev · beth-online-shop
+- target: .claude/wiki/features/rate-limiting-forwarded-headers.md
+- lesson: Test hosts have no socket (RemoteIpAddress is null), so per-IP behaviour cannot be tested; add an `IStartupFilter` that sets `RemoteIpAddress` from a test header (beth `TestClientIpFilter`, `client.FromIp("203.0.113.5")`). Also: a rate-limit partition that depends on a parsed body must fail closed (fixed shared bucket) when the body is chunked, too big or malformed, otherwise the budget is skipped; and log a startup warning (not a failure) outside Development when KnownProxies/KnownNetworks are empty. The in-memory TestServer does not enforce `[RequestSizeLimit]`, so assert the attribute by reflection (its private `_bytes` field).
+- why: the per-email lookup limiter silently had no partition for chunked bodies; the size-limit test passed 202 for a 5 KB body.
+
+### 2026-10-31 · backend-dotnet-dev · beth-online-shop
+- target: .claude/wiki/features/cash-on-delivery.md
+- lesson: COD costs nothing to place and holds stock, so cap it: a shop-wide count of unconfirmed COD orders (advisory lock "cod:unconfirmed-cap" in checkout so the last slot goes to one buyer) and a per-variant share of on-hand (min 1 unit), both as quote reasons; store the client IP on the order (zone id stripped, cleared by the retention job) and give staff a bulk "cancel unconfirmed COD from the same IP/contact" action that cancels each order in its own transaction under its order lock. A late COD confirmation or late payment must re-check made-to-order daily capacity for the day the order was placed (lapsed orders are excluded from the count, so the slot may be gone), not only stock. Existing shared-fixture tests place many COD orders: lift the caps in the shared test host and give cap tests their own host (beth `ApiFactory.CreateHost`, `KeepCodCapsKey`).
+- why: the security review found fake COD orders could hold stock indefinitely; adding the caps broke 9 unrelated shared-host tests until the fixture lifted them.
+
+### 2026-10-31 · backend-dotnet-dev · beth-online-shop
+- target: .claude/agents/backend-dotnet-dev.md
+- lesson: (1) Order-lookup style "email me my link" endpoints: do one light read in the request and send the link in `Response.OnCompleted`, so match and miss answer alike; tests then poll (beth `Eventually.WaitAsync`). (2) To hash a stored key in place, write the migration SQL (`encode(sha256(convert_to("Key",'UTF8')),'hex')`) instead of dropping rows, and pin it against the C# hash in a test. (3) A new NOT NULL int settings column needs its default in `HasData` (EF emits an UpdateData for the seeded row); make the new PUT fields optional so the existing frontend keeps working until it sends them. (4) After adding a migration run `dotnet build` before `dotnet test --no-build`, otherwise every integration test fails on the missing column.
+- why: each of these cost a failed run or would have broken a live row or client this session.
+
+### 2026-10-31 · backend-dotnet-dev · beth-online-shop
+- target: .claude/wiki/features/same-origin-single-image-deploy.md
+- lesson: The SPA fallback and static files should carry `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff` and a CSP built from config (img-src adds the R2 public origin); the Vite build has no inline scripts or styles (React's `style` prop is CSSOM, allowed by `style-src 'self'`), so no `'unsafe-inline'` was needed. Reference: beth `SpaSecurityHeaders.cs`.
+- why: security review L4; the headers are covered by `SpaHostingTests`.
+
 ## 2026-10-31 · beth-online-shop security + code review (lead)
 - dotnet-backend-standards §7a: lockout per (account, IP); dummy hash for unknown emails; reject disabled users' tokens; RequestSizeLimit for body-derived keys; hashed idempotency keys; SPA security headers + no-proxy warning; shop-wide abuse caps. react-frontend-standards §3: provider-only https redirects; timestamps in app time zone. Source: beth security review M1–M3, L1–L5 and code review findings 4, 8.
 

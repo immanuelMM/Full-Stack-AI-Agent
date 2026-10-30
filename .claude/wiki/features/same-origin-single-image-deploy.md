@@ -40,6 +40,8 @@ Give the user example values: IANA zone `Asia/Manila` (not `GMT+8`), VAT `12`.
 2. Add the CI `docker` job (build + smoke) and, for Render, a `render.yaml` ([Render](../platforms/render.md)).
 
 ## Gotchas
+- Security headers on the SPA fallback and static files from config (beth `SpaSecurityHeaders.cs`): no-referrer,
+  DENY, nosniff, CSP with img-src + R2 origin. Vite output needs no `'unsafe-inline'` (React `style` props are CSSOM).
 - Bootstrap acts only when the users table is empty, inside a transaction with an advisory lock; validates every value
   up front and logs why it skipped; warns on every start while the password var is set. It runs independently of
   `MigrateOnStartup`.

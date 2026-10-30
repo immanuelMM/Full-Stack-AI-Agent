@@ -133,7 +133,9 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
 - EF Core with the project's provider (PostgreSQL/Npgsql or SQL Server); configurations via `ApplyConfigurationsFromAssembly`.
 - **Migrations are committed** and generated via `dotnet ef migrations add` — never hand-edit the DB schema.
   Apply with a migration bundle or explicit step in deployment, not automatically at startup in production.
-  Use a `dotnet-ef` matching the EF major (a temp `--tool-path` if the global one is older). Rebuild before running
+  Use a `dotnet-ef` matching the EF major (a temp `--tool-path` if the global one is older). Transform existing rows in
+  the migration SQL (e.g. hash a column in place) instead of dropping them, pinned by a test against the C# code; a new
+  NOT NULL settings column gets its default in `HasData`, and new PUT fields stay optional for older clients. Rebuild before running
   tests after adding a migration (`--no-build` on a stale build fails every test with PendingModelChangesWarning).
 - **Major upgrades:** run the full suites unchanged on the new framework; check raw ADO reads for changed CLR types,
   drop references the framework now ships (NU1510) and align EF package versions (MSB3277). Known .NET 8 → 10
@@ -206,7 +208,8 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
 - **Lockout per (account, client IP)**, never per account alone: a per-account lock checked before the password lets
   anyone keep the owner locked out. A correct login from an IP without recent failures succeeds.
 - **Unknown login emails** run a dummy password-hash verify (no timing oracle for which accounts exist); lookups that
-  email a link take the same time on a match and a miss.
+  email a link do one light read and send in `Response.OnCompleted`, so a match and a miss answer alike.
+- Per-IP behaviour is testable only with a test `IStartupFilter` that sets `RemoteIpAddress` from a header.
 - **Disabled users:** reject their still-valid access tokens (`OnTokenValidated` checks the user is active, short cache).
 - **Body-derived rate-limit keys:** put `[RequestSizeLimit]` on the endpoint so padded/chunked bodies can't skip them.
 - **Idempotency records** store a hash of the client's key, never the raw key next to what it unlocks.
