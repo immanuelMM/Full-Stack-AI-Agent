@@ -175,7 +175,11 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   login email), parse it the way MVC binds it (case-insensitive) and reject bodies with duplicate/ambiguous keys
   (`JsonSerializerOptions.AllowDuplicateProperties = false` on .NET 10), or `{"email":"x","Email":"victim"}` gets a
   fresh bucket per request. Normalise like Identity (`Normalize().ToUpperInvariant()`). Add a coarser per-IP limit
-  alongside any per-account limit.
+  alongside any per-account limit. A body-derived key that cannot be read (oversize, malformed) gets the strict limit.
+- **Links in emails** come from a configured public base URL, never the request `Host` header (outside Development);
+  without the setting, emit a relative link and log a warning.
+- **Idempotent replays** that must return a secret (e.g. an order access token stored hashed) keep it sealed (AES-GCM,
+  key derived from the client's Idempotency-Key), never in plain text in the stored response.
 - **Behind a proxy:** `UseForwardedHeaders` (XForwardedFor + XForwardedProto) first in the pipeline, trusting only
   configured `KnownProxies`/`KnownNetworks` (empty = trust nothing); otherwise all clients share the proxy IP in rate
   limits and `Request.IsHttps` is false. Document the setting in the deployment doc.

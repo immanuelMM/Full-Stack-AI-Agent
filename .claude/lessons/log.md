@@ -2,6 +2,23 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop B2a (backend-dotnet-dev)
+- Applied to dotnet-backend-standards §7a (fail-closed body rate-limit keys; email links from configured base URL; sealed secrets in idempotent replays) and qa-automation How to work (own row per parallel request; mutation-check locks).
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: Build links that go into emails (order links with tokens) from a configured public base URL, never from the request Host header, except in Development; without the setting, emit a relative link and log a warning.
+- why: With the Host header an attacker can place an order with a victim's email and a forged Host, so the victim's email links (and bearer token) to the attacker's site.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/agents/qa-automation.md
+- lesson: A parallel test for a per-customer cap or per-key idempotency must give every request its own product/row, otherwise the shared row lock serialises the requests and the test passes without the advisory lock; mutation-check lock tests by removing the lock once and confirming the test fails.
+- why: The COD per-phone cap test passed with the advisory lock removed until each request used a different product; only the mutation run showed it was not testing the lock.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: When a record stores a secret the client must get back on replay (idempotent checkout token), store it sealed (AES-GCM) under a key derived from the client's Idempotency-Key instead of in plain text; and a rate-limit key read from the body must fail closed (apply the strict limit) when the body cannot be read.
+- why: The order access token is hashed at rest, so the stored idempotent response would otherwise have held it in clear for 24h; an oversize or chunked checkout body would otherwise have skipped the COD-only limit.
+
 ## 2026-10-30 · beth-online-shop B1 (backend-dotnet-dev)
 - Applied to dotnet-backend-standards §6 (image header/EXIF orientation; EF project-last) and backend-dotnet-dev (dev seeder environment guard + test; no escape-bearing edits via one-liners).
 ### 2026-10-30 · backend-dotnet-dev · beth-online-shop
