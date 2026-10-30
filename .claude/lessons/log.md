@@ -2,6 +2,18 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS U2 (frontend-react-dev)
+- Applied to frontend-react-dev How to work 5: rebuild before screenshots when the E2E stack serves a prebuilt dist. Dropped the grid-cell z-index note (general CSS, not a workspace rule).
+### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
+- target: .claude/agents/frontend-react-dev.md
+- lesson: Playwright screenshot/E2E runs serve a prebuilt `frontend/dist` and only rebuild with `E2E_REBUILD_FRONTEND=1`; set it (or run `npm run build`) after every CSS/TSX change before capturing screenshots.
+- why: the first u2 screenshots were taken from a stale dist, so a fix (z-index on the phone Log out button) looked like it had not worked and cost two 2.5 minute screenshot runs.
+
+### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: When one grid cell holds two items (phone app bar plus a Log out button that is a sibling in the same cell), give the overlaid item `position: relative; z-index: 1`, because the later item's background paints over it.
+- why: the phone Log out button was fully hidden behind the app bar background and no jsdom test could see it; only a screenshot did.
+
 ## 2026-10-30 · IMMAN_HRIS F0/U1 (frontend-react-dev)
 - Applied to react-frontend-standards §5 CSS structure (layer split winner flips; lightningcss drops the @layer statement) and frontend-react-dev Constraints (no heredocs; Prettier endOfLine auto with autocrlf).
 ### 2026-10-30 · frontend-react-dev · IMMAN_HRIS
