@@ -2,6 +2,9 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop B3 verification (lead)
+- Applied to dotnet-backend-standards §6: timestamp-ordered lists need a stable tie-breaker. Found by the lead's re-run: Delivered and Completed shared a timestamp and the timeline came back reversed (failed 3/3 alone though the agent reported green).
+
 ## 2026-10-30 · beth-online-shop B3 (backend-dotnet-dev)
 - Wiki: cash-on-delivery (admin step runner, state table, status), made-to-order (back-office views, status), jwt-refresh-auth (admin reset without token providers). Standards: qa-automation (xmin hides missing locks; differing-outcome races), dotnet-backend-standards §6 (rebuild after migration). Dropped: CA1826 / expression-tree operator notes (compiler reports them).
 ### 2026-10-30 · backend-dotnet-dev · beth-online-shop

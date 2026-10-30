@@ -142,6 +142,8 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   oversized images from header dimensions (`SKCodec.Info`) before decoding; apply the EXIF orientation to the pixels
   before re-encoding (Skia's decode ignores it); test with a JPEG carrying an injected Orientation tag.
   Pipeline + licence notes: `.claude/wiki/features/image-upload-pipeline.md`.
+- Lists ordered by a timestamp (history, timeline, payments) need a stable tie-breaker (identity/sequence column):
+  two rows written in one step share the timestamp and come back in any order.
 - EF queries: filter/order/page before the final `Select` into a record constructor (`new Dto(...)`); filtering or
   ordering on such a projection fails at runtime ("could not be translated").
 - Interceptors for audit fields / soft delete. Optimistic concurrency (`RowVersion` / `xmin`) on entities edited concurrently.
