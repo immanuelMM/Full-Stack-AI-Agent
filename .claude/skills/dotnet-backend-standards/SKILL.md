@@ -235,6 +235,8 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> opt, TimeProvider clo
 - Paging on all list endpoints (`page`, `pageSize` with a max), return `PagedResult<T>`.
 - **OpenAPI:** built-in `Microsoft.AspNetCore.OpenApi` (`AddOpenApi()` / `MapOpenApi()`) with Scalar UI
   in Development — not Swashbuckle on new projects. Add the Bearer security scheme.
+  - String enums: register `JsonStringEnumConverter` in `ConfigureHttpJsonOptions` too (the generator reads those, not
+    the MVC `AddJsonOptions`), then check enum schemas in the snapshot — B0 published `DayOfWeek` as integer.
   - Commit the document as `backend/openapi/v1.json`, generated at build time on demand
     (`Microsoft.Extensions.ApiDescription.Server`, `dotnet build -p:OpenApiGenerateDocuments=true`), plus a test
     that the live `/openapi/v1.json` equals the snapshot. The frontend generates its types from that file.

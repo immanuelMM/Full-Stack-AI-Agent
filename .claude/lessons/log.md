@@ -2,6 +2,18 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop B0 (backend-dotnet-dev)
+- Applied to dotnet-backend-standards OpenAPI section (string enums via ConfigureHttpJsonOptions) and backend-dotnet-dev Constraints (no heredocs, incl. edit scripts).
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/skills/dotnet-backend-standards/SKILL.md
+- lesson: When controllers use AddJsonOptions(JsonStringEnumConverter), also call services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter())), and check enum schemas in the regenerated openapi/v1.json: the OpenAPI generator reads the minimal-API options, not the MVC ones.
+- why: The B0 snapshot published DayOfWeek as {"type":"integer"} while the API serialised "Monday", so generated frontend types would have been wrong; found only by reading the snapshot.
+
+### 2026-10-30 · backend-dotnet-dev · beth-online-shop
+- target: .claude/agents/backend-dotnet-dev.md
+- lesson: Never feed multi-line code to Bash with heredocs when it contains single quotes, including `python - <<PY` edit scripts and C# test files: the whole command fails or truncates. Write the script/file with the Write tool (scratchpad for scripts) and run it.
+- why: Three bash calls in this run failed with "unexpected EOF" and one silently truncated PhoneNumber.cs mid-line; only the Write tool was reliable.
+
 ## 2026-10-30 · beth-online-shop plan (research-planner, reported in final message)
 - Applied to research-planner "What to research" (free-plan SMTP/disk limits; wallet-app return page from URL token; llms.txt for blank provider docs) and dotnet-backend-standards §6 (check licences; SkiaSharp over ImageSharp).
 - Free-plan limits: Render free blocks SMTP 25/465/587 since Sep 2025 and has no persistent disk; SMTP or local-disk images pass local tests and fail after deploy.
