@@ -2,6 +2,17 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · IMMAN_HRIS U0 baseline (qa-automation)
+- Applied to qa-automation: zero-tolerance screenshot flags + 3-frame check (E2E rules, visual baseline bullet); Write/Edit over heredocs (Constraints; second time it bit an agent).
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: For a zero-tolerance screenshot baseline, mock `/api/**` with `context.route`, freeze the date with `page.clock.setFixedTime`, stub `getUserMedia`, launch Chromium with `--disable-gpu --disable-lcd-text --font-render-hinting=none --force-color-profile=srgb --disable-gpu-compositing --disable-partial-raster`, and shoot until 3 consecutive frames are byte-identical; never add `--disable-threaded-compositing` (screenshots fail with "Unable to capture screenshot").
+- why: with only a 2-frame stability check and no flags, a double run differed by 10-70 px (rounded-corner and canvas text antialiasing) on 1-5 of 80 shots; with the flags plus the 3-frame check three double runs gave 80/80 identical.
+### 2026-10-30 · qa-automation · IMMAN_HRIS
+- target: .claude/agents/qa-automation.md
+- lesson: When Bash heredocs with several quotes/apostrophes in one command fail with "unexpected EOF while looking for matching quote", write the files with the Write tool instead of retrying the heredoc.
+- why: two multi-file `cat <<'EOF'` commands failed to parse on Windows Git Bash and wrote nothing.
+
 ## 2026-10-30 · IMMAN_HRIS F3 (backend-dotnet-dev)
 - Applied to dotnet-backend-standards §7 Secrets: env-scoped fail-fast validator with a unit test; grep all consumers before removing a committed secret.
 ### 2026-10-30 · backend-dotnet-dev · IMMAN_HRIS

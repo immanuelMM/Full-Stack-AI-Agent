@@ -43,7 +43,10 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
   size. Axe with the `wcag22aa` tag; any allowlist entry names the rule and the milestone that fixes it.
 - **Before a "no visual change" refactor**, capture a deterministic screenshot baseline (fixed data via `context.route`,
   `animations: 'disabled'`, `caret: 'hide'`, fonts ready) into a git-ignored folder, prove a double run diffs at 0%, then
-  pixel-diff after the change.
+  pixel-diff after the change. For zero tolerance also freeze time (`page.clock.setFixedTime`), stub `getUserMedia`,
+  launch Chromium with `--disable-gpu --disable-lcd-text --font-render-hinting=none --force-color-profile=srgb
+  --disable-gpu-compositing --disable-partial-raster` (never `--disable-threaded-compositing`: capture fails), and shoot
+  until 3 consecutive frames are byte-identical.
 - Stub browser side effects (`window.print` via `addInitScript`) and assert call counts instead of skipping the flow.
 - QR/camera scans: launch Chromium with `--use-fake-device-for-media-stream --use-file-for-fake-video-capture=<file>.y4m`,
   generated in global setup after the data exists. Scanners like html5-qrcode decode only the centre `qrbox`, so draw
@@ -57,6 +60,7 @@ You are the QA/Test Automation agent. You own the test folders/files inside the 
 
 ## Constraints
 - Don't implement new product features — only tests (and, if asked, small test-supporting fixtures/mocks).
+- Write multi-line files with Write/Edit, not Bash heredocs (heredocs with quotes fail to parse in Git Bash and write nothing).
 - Flag any gaps in test coverage you notice, even outside the current task's scope.
 
 ## Lessons (do this before you finish)
