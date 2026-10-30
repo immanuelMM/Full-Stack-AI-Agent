@@ -40,7 +40,8 @@ modules `<thing>Model.ts` or `<thing>Schema.ts`.
   via an npm script that reads the backend's **committed** snapshot, not a running server
   (`"gen:api": "openapi-typescript ../backend/openapi/v1.json -o src/api/schema.d.ts"`); commit the generated file
   and let CI fail when regenerating it produces a diff. If another agent has an uncommitted snapshot in the shared
-  working copy, generate from `git show HEAD:backend/openapi/v1.json` instead.
+  working copy, generate from `git show HEAD:backend/openapi/v1.json` instead. A custom `querySerializer` repeats the
+  key for arrays (`Status=A&Status=B`), never `String(array)`; unit-test it with an array.
   Use `openapi-fetch` (or a thin typed `fetch` wrapper) so request/response shapes are checked at compile time.
   Regenerate whenever the backend contract changes — a contract change should break the build, not production.
 - API base URL from `import.meta.env.VITE_API_BASE_URL`.
@@ -77,6 +78,7 @@ modules `<thing>Model.ts` or `<thing>Schema.ts`.
 - Custom radios/checkboxes/chips keep the real input stretched over the control (`position:absolute; inset:0;
   opacity:0`), not 1px `sr-only`; hidden file inputs use the `hidden` attribute.
 - A shared Modal keeps the caller's latest `onClose` in a ref and runs its focus/Escape/scroll-lock effect once per open.
+- Namespace class names per bundle/area (admin vs storefront): same-layer rules from two bundles merge silently.
 - **CSS structure:** tokens (custom properties) plus `@layer` files (reset, tokens, base, layout, components, features,
   utilities); the layer-order statement is the first CSS the bundle emits (import it first in `main.tsx`). Print CSS
   needing `!important` stays unlayered; runtime brand colours stay inline vars that tokens reference. When splitting a
