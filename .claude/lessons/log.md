@@ -2,6 +2,28 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop F0 (frontend-react-dev)
+- Applied to react-frontend-standards §5 (non-empty layer blocks in eager CSS; flex-column shell; sticky phone action bar; field errors outside the label via aria-describedby instead of regex label queries) and frontend-react-dev (backend-free screenshot harness; run Prettier from frontend/).
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: In the CSS layer rule, keep at least one non-empty `@layer features` block in the eagerly loaded stylesheet (for example shared prose/empty-state styles), not only in lazy route chunks. Lightningcss drops the leading `@layer a, b, c` statement in minified builds, so a layer that first appears in a lazy chunk lands above `utilities`.
+- why: In the Beth F0 build the minified main CSS began with `@layer reset{...}` and had no `features` layer, so the admin chunk's `features` styles would have outranked `utilities`; adding `shared.css` (`@layer features`) before `utilities.css` restored the order.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: Build the app shell as a flex column (header `flex: none`, scroll area `flex: 1 1 0; min-height: 0`), not a CSS grid with a fixed row list, when an optional child (demo banner) may be absent.
+- why: A 3-row grid `auto auto minmax(0,1fr)` put the scroll area in an `auto` row when the banner was missing, leaving a blank strip under the footer; only the opened screenshot showed it, all tests and axe passed.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/agents/frontend-react-dev.md
+- lesson: When a screenshot harness has no backend, build the frontend with `VITE_API_BASE_URL=/api/v1` into a separate outDir and fulfil `**/api/v1/**` with `context.route`; collect un-mocked calls and assert the list is empty. Run `prettier --write` from the frontend folder (or pass its ignore file), because running it from `e2e/` reformatted the generated `schema.d.ts`.
+- why: Same-origin routing avoided CORS preflights for Authorization/JSON requests; the e2e `.prettierignore` did not list `schema.d.ts`, so a `prettier --write ../frontend/src` rewrote it.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/skills/react-frontend-standards/SKILL.md
+- lesson: Field errors rendered inside the `<label>` change the control's accessible name; tests and E2E should query labels with a `^Label` regex, and a long-form phone page needs a sticky primary-action bar so the button stays inside the 375x667 viewport.
+- why: `getByLabelText('Password')` failed after validation added "Password is required" inside the label, and the Change password button sat 55px below the 667px fold until it was made sticky.
+
 ## 2026-10-30 · beth-online-shop B0 (backend-dotnet-dev)
 - Applied to dotnet-backend-standards OpenAPI section (string enums via ConfigureHttpJsonOptions) and backend-dotnet-dev Constraints (no heredocs, incl. edit scripts).
 ### 2026-10-30 · backend-dotnet-dev · beth-online-shop

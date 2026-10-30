@@ -67,18 +67,21 @@ frontend/
   `../cafe-pos-system/frontend` (the reference: read its tokens, shell, nav and buttons before designing): big
   buttons, large type, generous spacing, one obvious primary action per screen.
 - Use the project's existing approach (CSS modules / Tailwind); for new projects either is fine — pick one and stick to it.
-- Semantic HTML, labelled inputs, visible focus, keyboard navigation, tap targets ≥ 44px, colour contrast WCAG AA.
+- Semantic HTML, labelled inputs (field errors outside the `<label>`, linked with `aria-describedby`, so the accessible
+  name stays stable), visible focus, keyboard navigation, tap targets ≥ 44px, colour contrast WCAG AA.
 - **CSS structure:** tokens (custom properties) plus `@layer` files (reset, tokens, base, layout, components, features,
   utilities); the layer-order statement must be the first CSS the bundle emits (import it first in `main.tsx`). Print CSS
   that needs `!important` stays unlayered. Brand colours set at runtime stay as inline vars that tokens reference.
   When splitting a flat stylesheet into layers, check every rule that lands in a higher layer than a rule that used to
   come after it: the winner silently flips (keep such a rule ahead of its sibling in the same layer). Vite's lightningcss
-  drops the leading `@layer` statement when first appearance already gives the order, so check `--minify false` output.
+  drops the leading `@layer` statement when first appearance already gives the order, so check `--minify false` output,
+  and give every layer a non-empty block in the eagerly loaded CSS (a layer first seen in a lazy chunk lands on top).
 - **Scope every size-specific rule inside its media/container query.** Unit tests run without CSS (jsdom), so a phone rule
   that leaks onto tablets passes every Vitest test — only a real browser at each size catches it.
 - **Touch style (tablet + phone, every app):** one DOM for every size (CSS changes the layout, never a second copy of the nav, or
   `getByRole` queries break); the shell fills `100dvh` with `env(safe-area-*)` and `viewport-fit=cover`, and only the
-  content area scrolls; default controls 56px, primary 64px, never under 48px; money/PIN entry uses an on-screen keypad
+  content area scrolls (build it as a flex column — header `flex: none`, content `flex: 1 1 0; min-height: 0` — not a
+  fixed-row grid, which leaves a gap when an optional banner is absent); long phone forms get a sticky action bar; default controls 56px, primary 64px, never under 48px; money/PIN entry uses an on-screen keypad
   with the real `<input>` kept (`inputMode="none"` on `(pointer: coarse)`, no autofocus) so the OS keyboard never covers
   the screen; check the smallest phone too (375×667), not just 390×844.
 - Browsers cannot print silently: "auto-print" means calling `window.print()` once per document (guard against StrictMode
