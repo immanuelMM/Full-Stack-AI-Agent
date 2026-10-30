@@ -203,6 +203,19 @@ Register repositories as **Scoped** (same lifetime as the DbContext).
   when the DB is slow to start; add `GSS Encryption Mode=Disable` to Npgsql connection strings in containers
   unless Kerberos is used.
 
+- **Lockout per (account, client IP)**, never per account alone: a per-account lock checked before the password lets
+  anyone keep the owner locked out. A correct login from an IP without recent failures succeeds.
+- **Unknown login emails** run a dummy password-hash verify (no timing oracle for which accounts exist); lookups that
+  email a link take the same time on a match and a miss.
+- **Disabled users:** reject their still-valid access tokens (`OnTokenValidated` checks the user is active, short cache).
+- **Body-derived rate-limit keys:** put `[RequestSizeLimit]` on the endpoint so padded/chunked bodies can't skip them.
+- **Idempotency records** store a hash of the client's key, never the raw key next to what it unlocks.
+- **SPA responses** send `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`
+  and a CSP with `frame-ancestors 'none'` (URLs carry tokens). Warn at startup outside Development when no trusted
+  proxy is configured (every client would share one rate-limit bucket).
+- **Abuse caps** that hold stock or capacity (unpaid/COD orders) need a shop-wide cap too: per-contact caps cost an
+  attacker nothing (fresh phone/email).
+
 Reference implementation (token service, atomic rotation, lockout, SPA client): `.claude/wiki/features/jwt-refresh-auth.md`.
 
 ## 8. API layer

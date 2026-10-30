@@ -2,6 +2,9 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop security + code review (lead)
+- dotnet-backend-standards §7a: lockout per (account, IP); dummy hash for unknown emails; reject disabled users' tokens; RequestSizeLimit for body-derived keys; hashed idempotency keys; SPA security headers + no-proxy warning; shop-wide abuse caps. react-frontend-standards §3: provider-only https redirects; timestamps in app time zone. Source: beth security review M1–M3, L1–L5 and code review findings 4, 8.
+
 ## 2026-10-31 · beth-online-shop F3 (frontend-react-dev)
 - Standards: react-frontend-standards §3 (array query serializer) and §5 (namespace classes per bundle). Wiki: touch-ui-shell, e2e-playwright-harness (radio check, layered mocks, realistic fixtures), windows-dev-machine (cp1252), apps/beth-online-shop (back office, status).
 ### 2026-10-31 · frontend-react-dev · beth-online-shop

@@ -56,6 +56,8 @@ modules `<thing>Model.ts` or `<thing>Schema.ts`.
   - Re-authentication prompts (e.g. "exit kiosk" asking for the admin password) call the login endpoint outside the
     shared client's 401 handling (a wrong password must not sign the device out). Discard the returned token.
   - Reference client: `.claude/wiki/features/jwt-refresh-auth.md`.
+- Redirects to a payment provider allow only `https:` and the provider's exact hostname.
+- Show timestamps in the app's time zone (`Intl` with `timeZone`), never by slicing an ISO UTC string.
 - **Query keys are derived from the params actually sent** (`queryKey: ['orders', query]`), never maintained
   separately from them.
 - Validate `VITE_API_BASE_URL` format at startup with a clear error rather than string-replacing path suffixes.
