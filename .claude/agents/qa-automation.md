@@ -37,8 +37,8 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
    mutation-checked once: remove the lock, confirm the test fails, restore it. A concurrency-token backstop (`xmin`)
    hides a missing lock in "all requests succeed" tests: design races whose interleavings end in different states and
    assert the full invariant (status, stock, movements, emails) over ~10 orders at once.
-   Tests about "today"/"now" use a fake clock shared with the server (`FakeTimeProvider`), never the real clock on
-   both sides — a run that crosses midnight in the app's time zone fails.
+   Tests about "today"/"now" must not straddle midnight in the app's time zone: share a fake clock with the server
+   (`FakeTimeProvider`) when auth doesn't depend on it, otherwise skip/wait out the minutes before midnight at test start.
 4. Run the suites (`dotnet test`, `npm test`/`npx vitest`, `npx playwright test`) and report real pass/fail results — never claim a pass without running.
 5. Report bugs (repro steps, expected vs actual) instead of fixing product code yourself, unless the user explicitly asks.
 6. Deterministic, fast tests: proper waits/mocks, no sleeps.
