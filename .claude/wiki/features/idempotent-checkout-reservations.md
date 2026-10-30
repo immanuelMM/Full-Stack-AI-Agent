@@ -1,8 +1,8 @@
 # Idempotent checkout + stock reservations
 
 Status: **implemented** — cafe-pos-system `d04812d` (order completion with `Idempotency-Key` + atomic stock decrement);
-beth-online-shop `00a4328` (B2a: full checkout with reservations; its tests were not yet committed at that commit —
-check `git log` before relying on them). PayMongo payment side: planned (B2b, [PayMongo](../platforms/paymongo.md)).
+beth-online-shop `00a4328` + tests `19c543e` (B2a: full checkout with reservations; parallel last-unit, MTO-slot,
+COD-cap and idempotency tests in `beth-online-shop/backend/tests/BethShop.Api.IntegrationTests/CheckoutConcurrencyTests.cs`, mutation-checked). PayMongo payment side: planned (B2b, [PayMongo](../platforms/paymongo.md)).
 
 ## What it does
 - Client sends an `Idempotency-Key` header (new UUID per attempt). The server stores an `IdempotencyRecord`
