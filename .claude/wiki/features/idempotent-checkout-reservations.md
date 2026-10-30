@@ -57,6 +57,11 @@ One path for webhook, reconcile-on-read and sweeper (`beth-online-shop/backend/s
 Sweep each overdue order in its own transaction under the same lock. Tests: webhook vs reconcile, webhook vs sweeper,
 8 concurrent deliveries — in `beth-online-shop/backend/tests/BethShop.Api.IntegrationTests/`.
 
+## Client side (beth F2)
+One Idempotency-Key per request body: `beth-online-shop/frontend/src/features/checkout/useIdempotencyKey.ts` reuses it on
+retry after a timeout/5xx and makes a new one when the body changes (edited field, new `expectedTotal` after 409
+PriceChanged) — the server answers 422 IdempotencyKeyReused for the same key with a different body.
+
 ## Gotchas
 - Lock in one global order (keys, then contacts, then products, then variants, each sorted) or concurrent checkouts deadlock.
 - Return pages must work from the URL token alone: wallet apps return into a different browser.

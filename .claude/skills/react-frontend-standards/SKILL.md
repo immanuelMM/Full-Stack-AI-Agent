@@ -39,7 +39,8 @@ modules `<thing>Model.ts` or `<thing>Schema.ts`.
 - **Types come from the backend's OpenAPI spec**, generated with `openapi-typescript` into `src/api/schema.d.ts`
   via an npm script that reads the backend's **committed** snapshot, not a running server
   (`"gen:api": "openapi-typescript ../backend/openapi/v1.json -o src/api/schema.d.ts"`); commit the generated file
-  and let CI fail when regenerating it produces a diff.
+  and let CI fail when regenerating it produces a diff. If another agent has an uncommitted snapshot in the shared
+  working copy, generate from `git show HEAD:backend/openapi/v1.json` instead.
   Use `openapi-fetch` (or a thin typed `fetch` wrapper) so request/response shapes are checked at compile time.
   Regenerate whenever the backend contract changes — a contract change should break the build, not production.
 - API base URL from `import.meta.env.VITE_API_BASE_URL`.
@@ -88,7 +89,8 @@ modules `<thing>Model.ts` or `<thing>Schema.ts`.
   `getByRole`); the shell fills `100dvh` with `env(safe-area-*)` and `viewport-fit=cover`, and only the content scrolls
   (a flex column — header `flex: none`, content `flex: 1 1 0; min-height: 0` — not a fixed-row grid, which leaves a gap
   when an optional banner is absent); long phone forms get a sticky action bar; hide the phone tab bar only while a text field or textarea has focus, never
-  for selects, radios, checkboxes or chips; controls 56px, primary 64px, never
+  for selects, radios, checkboxes or chips, and show it again ~250 ms after blur (not at blur, or the next tap is lost);
+  give scroll containers `position: relative` so absolutely positioned children (`sr-only`) can't grow the page; controls 56px, primary 64px, never
   under 48px; money/PIN entry uses an on-screen keypad with the real `<input>` kept (`inputMode="none"` on
   `(pointer: coarse)`, no autofocus) so the OS keyboard never covers the screen; check 375×667, not just 390×844.
 - Browsers cannot print silently: "auto-print" means calling `window.print()` once per document (guard against StrictMode

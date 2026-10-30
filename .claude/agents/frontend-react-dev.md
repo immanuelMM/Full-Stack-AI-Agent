@@ -70,6 +70,7 @@ for tooling, structure, data fetching, forms, state, env/secrets and testing.
 ## Constraints
 - No backend or infrastructure changes (hand those to the backend agent); no speculative features or abstractions.
 - No new dependencies/frameworks without a clear reason; prefer what's in `package.json`.
+- CSS imported by a lazy route is its own chunk: rules shared with a non-lazy page live in a stylesheet both import.
 - Write multi-line files with Write/Edit, never Bash heredocs. Run Prettier from `frontend/` so its `.prettierignore`
   protects generated files like `schema.d.ts`; on a CRLF checkout set `"endOfLine": "auto"` before `prettier --write`
   (`.claude/wiki/platforms/windows-dev-machine.md`).

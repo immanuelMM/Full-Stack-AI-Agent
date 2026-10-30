@@ -2,6 +2,38 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-30 · beth-online-shop F2 (frontend-react-dev)
+- Standards: react-frontend-standards §3 (generate from committed snapshot) and §5 (tab bar back ~250 ms after blur; positioned scroll containers); frontend-react-dev (lazy-route CSS chunks). Wiki: touch-ui-shell, e2e-playwright-harness, idempotent-checkout-reservations (client key hook), openapi-contract, apps/beth-online-shop (PSGC data, status).
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/wiki/features/touch-ui-shell.md
+- lesson: A phone tab bar that hides on text-field focus (`:has(input:focus)`) must come back a moment AFTER the blur (about 250 ms, a data attribute set by focus/blur handlers on the shell), not at it. Tapping a sticky Pay button or a radio blurs the field at mousedown, the bar pops back, the layout shifts under the finger and the click lands on the page, so the first tap is lost. The admin shell `layout.css` still uses the instant `:has(:focus)` form.
+- why: Playwright `click()` on the checkout Pay button after typing did nothing; a document click listener showed the target was `div.store`, not the button.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/wiki/features/e2e-playwright-harness.md
+- lesson: Two checks that caught real CSS bugs: (1) an `.sr-only` (absolute) element inside an `overflow: auto` shell panel that has no positioned ancestor escapes the clipping and makes the document 7-11 px taller than the viewport, so give the scroll container `position: relative`; (2) a full-card radio (`input` absolutely covering a label) must not have a positioned sibling face painted over it, or Playwright reports "intercepts pointer events"; put the decorative dot on the wrapper's `::before` with `pointer-events: none` and leave the face unpositioned.
+- why: `expectBodyDoesNotScroll` failed at 375x667 on checkout only; `check()` timed out on the pickup radio at 390x844.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/wiki/features/idempotent-checkout-reservations.md
+- lesson: Client side: keep one Idempotency-Key per request body (hook `frontend/src/features/checkout/useIdempotencyKey.ts`): reuse it on retry after a timeout/5xx, and make a new one when the body changes (an edited field, or the `expectedTotal` after a 409 PriceChanged), because the server answers 422 IdempotencyKeyReused for the same key with a different body. Mutation-checked by RTL test "reuses the Idempotency-Key when the same request is retried".
+- why: the 409 PriceChanged flow changes `expectedTotal`, so reusing the old key there would have turned every refreshed quote into a 422.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/wiki/apps/beth-online-shop.md
+- lesson: PSGC data for address selects: `frontend/scripts/build-psgc.mjs` builds `src/features/checkout/psgc.json` (25 kB, 82 provinces, 1,634 cities) from `https://psgc.gitlab.io/api/{provinces,cities-municipalities}.json`. The API's 10-digit code is `psgc10DigitCode` (9-digit `code` differs); Metro Manila has no province (cities carry a `districtCode`), so it is listed under the NCR code `1300000000` which the default zone includes; City of Isabela and City of Cotabato have no province and map to Basilan and Maguindanao. Checkout is a lazy route so the JSON stays out of the main bundle; the province select lists only provinces found in `/shipping/zones`.
+- why: needed real codes that match the seeded zones; the first guess (province-level code only) would have missed NCR.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/wiki/features/openapi-contract.md
+- lesson: When another agent has an uncommitted `openapi/v1.json` in the shared working copy, generate the frontend types from the committed snapshot (`git show HEAD:backend/openapi/v1.json > $TEMP/v1.json` then `openapi-typescript $TEMP/v1.json -o src/api/schema.d.ts`), not from the working file, or the frontend commit carries someone else's in-progress types.
+- why: mid-run the backend working copy gained the B3 admin endpoints (+4,000 lines) while B2b's committed snapshot only added `/pay`.
+
+### 2026-10-30 · frontend-react-dev · beth-online-shop
+- target: .claude/agents/frontend-react-dev.md
+- lesson: Feature CSS imported by a lazy route is a separate chunk: classes shared with a non-lazy page (here the order page reusing checkout line and summary rules) must live in a stylesheet the other page imports too. Vitest runs with `css: false`, so only a screenshot of the page opened directly (empty cache, no prior visit to the lazy route) shows it.
+- why: caught while reviewing the build output (`CheckoutPage-*.css` chunk) before the order page screenshots; moved the shared rules to `cart.css`.
+
 ## 2026-10-30 · beth-online-shop B2b (backend-dotnet-dev)
 - Wiki: platforms/paymongo.md rewritten (confirmed vs assumed, reference files, FakePayMongo test double — placed there instead of same-origin deploy); features/idempotent-checkout-reservations.md gained the payment-apply recipe. Standards: dotnet-backend-standards §7a (required settings in test factory; layered guards tested alone; xmin lock via SELECT 1 FOR UPDATE). Dropped: CA1068 and internal typed-client notes (compiler tells you).
 ### 2026-10-30 · backend-dotnet-dev (beth-b2b) · beth-online-shop

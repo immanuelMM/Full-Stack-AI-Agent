@@ -44,6 +44,11 @@ Container queries (`container-type: inline-size`) inside components whose layout
 3. Copy the layout helpers + Playwright projects and screenshot every screen at each size before calling it done.
 
 ## Gotchas
+- Tab bar hidden while typing: restore it ~250 ms after blur via a data attribute set by focus/blur handlers on the
+  shell (beth `beth-online-shop/frontend/src/app/StoreShell.tsx`, `store.css`). Instant `:has(:focus)` loses the first
+  tap on sticky buttons. beth's admin `layout.css` still uses the instant form (fix in F3).
+- Full-card radios: the real input covers the label; draw the dot on the wrapper's `::before` with `pointer-events: none`
+  and leave the face unpositioned, or Playwright reports "intercepts pointer events".
 - Splitting a flat stylesheet into layers can silently flip which rule wins; Vite/lightningcss may drop the leading
   `@layer` statement — check `--minify false` output and give every layer a non-empty block in eager CSS.
 - A fixed-row grid shell leaves a gap when an optional banner is absent; use the flex column.

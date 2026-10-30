@@ -31,6 +31,8 @@ Copy the `OpenApi/` folder, `BuildEnvironment.cs`, the `Microsoft.Extensions.Api
 `ContractTests.cs`, the `gen:api` script and the CI `contract` job.
 
 ## Gotchas
+- Shared working copy with an uncommitted snapshot from another agent: `git show HEAD:backend/openapi/v1.json > $TEMP/v1.json`
+  and generate from that.
 - Register `JsonStringEnumConverter` in `ConfigureHttpJsonOptions` (the generator reads it), then check enum schemas
   in the snapshot are strings.
 - .NET 10 emits `["number","string"]` for numbers: strip the union with a schema transformer.

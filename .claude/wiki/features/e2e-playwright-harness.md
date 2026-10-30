@@ -50,6 +50,8 @@ Status: **implemented** — cafe-pos-system `d04812d`, IMMAN_HRIS `d4c2e28`, bet
   small (cell ≤ 6px). Every other spec on a camera page stubs `getUserMedia` to reject, or the fake QR scans by itself.
 
 ## Gotchas
+- `expectBodyDoesNotScroll` catches `sr-only` elements escaping an unpositioned `overflow:auto` panel (page 7–11 px
+  too tall); "intercepts pointer events" on `check()` means a positioned sibling paints over a full-card input.
 - cafe-pos `npm run stack:up` (`docker-compose.e2e.yml` alone) **reuses the dev container names** — always add the
   `-iso` override with `-p cafepos-e2e`.
 - Rebuild the frontend before shooting if the stack serves a prebuilt `dist`.

@@ -1,6 +1,6 @@
 # beth-online-shop
 
-Reflects app commit `855f2a6` (2026-10-30: B2a verified — 455 backend tests; F1 storefront + admin products verified — 101 Vitest, E2E green at 5 viewports; B2b in progress).
+Reflects app commit `5cf759c` (2026-10-30: B0–B2b verified — 528 backend tests; F0–F2 verified — 153 Vitest, E2E at 5 viewports; B3 admin orders in progress).
 Paths are relative to `C:\Users\merin\AI\Agentic-fullstack-web-dev\`.
 
 ## Purpose
@@ -42,6 +42,13 @@ docs/plan/online-shop-plan.md, docker-compose.yml (db on :5434)
 - `cd backend && dotnet test` (Testcontainers, or `TEST_PG_CONNECTION`).
 - Frontend: lint/build/test/format:check. E2E harness: `cd e2e && npm run screens:<project>` (builds into
   `dist-e2e`, `vite preview` on :4175, API fulfilled by `context.route`).
+
+## PH address data (PSGC)
+`beth-online-shop/frontend/scripts/build-psgc.mjs` builds `frontend/src/features/checkout/psgc.json` (82 provinces,
+1,634 cities) from `https://psgc.gitlab.io/api/{provinces,cities-municipalities}.json`. Use `psgc10DigitCode` (the
+9-digit `code` differs). Metro Manila has no province: list it under NCR `1300000000` (in the default zone); City of
+Isabela and City of Cotabato map to Basilan and Maguindanao. Checkout is a lazy route so the JSON stays out of the main
+bundle; the province select lists only provinces present in `/shipping/zones`.
 
 ## Features implemented here
 - [JWT + refresh auth](../features/jwt-refresh-auth.md) (password change revokes sessions) ·
