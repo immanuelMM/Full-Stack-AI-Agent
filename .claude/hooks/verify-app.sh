@@ -21,7 +21,14 @@ for app in "$root"/*/; do
   changed=$(git -C "$app" status --porcelain 2>/dev/null) || continue
 
   if [ -d "$app/backend" ] && echo "$changed" | grep -qE '^.. "?backend/'; then
-    check "$(basename "$app")/backend" "$app/backend" "dotnet build -nologo -v q"
+    if compgen -G "$app/backend/*.sln*" >/dev/null || compgen -G "$app/backend/*.csproj" >/dev/null; then
+      check "$(basename "$app")/backend" "$app/backend" "dotnet build -nologo -v q"
+    else
+      # No solution at the backend root (e.g. an app before its restructure): build each project below it.
+      while IFS= read -r proj; do
+        check "$(basename "$app")/backend/${proj#"$app/backend/"}" "$app/backend" "dotnet build \"$proj\" -nologo -v q"
+      done < <(find "$app/backend" -maxdepth 4 -name '*.csproj' -not -path '*/bin/*' -not -path '*/obj/*' | sort)
+    fi
   fi
   if [ -f "$app/frontend/package.json" ] && echo "$changed" | grep -qE '^.. "?frontend/'; then
     check "$(basename "$app")/frontend" "$app/frontend" "npm run lint --if-present && npm run build --if-present"
