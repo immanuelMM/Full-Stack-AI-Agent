@@ -2,6 +2,43 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop QA pass 1 (qa-automation)
+- Wiki: e2e-playwright-harness (full-stack harness + payment stub recipe, teardown on throw, kept-DB hygiene, DB-driven expiry, URL-driven radios). Standards: qa-automation (worktree mutation checks, no serialising lock, await before isVisible branch, docker ps comparison). Dropped: midnight guard (already a rule). Dev-container disappearance reported to the user (cause unproven; Docker Desktop did not restart).
+### 2026-10-31 · qa-automation · beth-online-shop
+- target: .claude/wiki/features/e2e-playwright-harness.md
+- lesson: Full-stack harness with a hosted-payment stub (reference: `beth-online-shop/e2e/playwright.fullstack.config.ts`, `e2e/support/stack/{globalSetup,payMongoStub,fixtures,db,shopApi}.ts`). Recipe: compose project with tmpfs DB on its own port; build the SPA with `VITE_API_BASE_URL=/api/v1` into `e2e/.stack/wwwroot` and serve it from the API (`Spa__RootPath`); `dotnet build -o e2e/.stack/api` and run `dotnet BethShop.Api.dll` directly (no `dotnet run` wrapper child, dev `bin/` untouched); keep `ASPNETCORE_ENVIRONMENT=Development` because the dev seeder only runs there and override `ConnectionStrings__Default` by env (beats appsettings.Development.json, which points at the dev DB); set `Storage__Local__RootPath` into the stack folder; raise every `RateLimiting__*` (all traffic is 127.0.0.1). The stub is a plain `node:http` server started inside globalSetup (the runner process lives for the whole run) with `/__control/*` endpoints the specs call (list sessions, pay with/without webhook, replay the stored signed event N times, fail next create).
+- why: 120 specs (52 desktop, 34 tablet-landscape, 34 phone-small) pass on a fresh stack, on a kept stack run twice, and all three projects in one invocation.
+
+### 2026-10-31 · qa-automation · beth-online-shop
+- target: .claude/wiki/features/e2e-playwright-harness.md
+- lesson: When the SPA only follows an allowlisted payment host (`https://checkout.paymongo.com`), have the stub return that host in `checkout_url` and answer it per context with `context.route('https://checkout.paymongo.com/**', r => r.fetch({url: STUB + path, maxRedirects: 0}).then(res => r.fulfill({response: res})))`; put it in an extended `context` fixture and in every `browser.newContext` helper (the "return from a wallet app opens another browser" spec needs a fresh context with empty storage). Make the stub's "Pay" send the signed webhook before redirecting, and give it a "pay without webhook" control so a spec can land on the return page first and then replay the event to watch the page flip.
+- why: it made checkout -> stub page -> pay/cancel -> order page, cancel -> "Pay now" retry, and webhook-after-return all drivable in a real browser against the real API.
+
+### 2026-10-31 · qa-automation · beth-online-shop
+- target: .claude/agents/qa-automation.md
+- lesson: Mutation-check every race test with the lock removed in a throwaway `git worktree` (short `$TEMP` path, point the stack at it with an env var such as `E2E_BACKEND_PROJECT`, `git worktree remove --force` afterwards), and design the race so no OTHER lock serialises the racers. My first "two COD orders race for the last slot of the shop-wide cap" test passed with the cap's advisory lock deleted, because both racers bought the same product and its variant row lock serialised them; with one product per racer and three rounds the mutation failed it. The stock/MTO-capacity races failed correctly with their row locks removed (two orders for the last unit, 17 held of 5, 6 accepted of capacity 3).
+- why: the green run looked identical with and without the lock until the mutation was run.
+
+### 2026-10-31 · qa-automation · beth-online-shop
+- target: .claude/wiki/features/e2e-playwright-harness.md
+- lesson: Specs that create data through the API must not poison later runs or other specs on a kept database: name everything with a prefix (`E2E `), archive by prefix in `beforeAll`/`afterAll`, and assert on EXACT names, because the catalogue search is fuzzy (`pg_trgm`) and time-based unique tokens share a long prefix, so a search for this run's name returned the previous run's product (a "draft must not be listed" assertion failed). Also: lists are paged newest-first, so leftover test products push the seeded ones off page 1.
+- why: a kept-stack second run failed 3 Q1 specs (category page without the mug, two "Made to order · 5 days" badges, draft product "found") until cleanup by prefix and exact-name matching were added.
+
+### 2026-10-31 · qa-automation · beth-online-shop
+- target: .claude/wiki/features/e2e-playwright-harness.md
+- lesson: Refine the radio gotcha: `getByRole('radio').check()` fails with "Clicking the checkbox did not change its state" when the checked state is driven by the URL or async state (shop filters); use `.click()` then `await expect(radio).toBeChecked()` there. Keep `.check()` for plain form radios.
+- why: `check()` on the shop's availability filter failed on tablet-landscape and, intermittently, phone-small; click + toBeChecked passed every time.
+
+### 2026-10-31 · qa-automation · beth-online-shop
+- target: .claude/agents/qa-automation.md
+- lesson: To test "window expired" without a clock switch, move the deadline in the test database (`docker exec <e2e-db> psql ... UPDATE "Orders" SET "ReservationExpiresAt" = now() - interval '1 minute'` plus the stock-hold rows) instead of waiting out the configured minimum; no npm DB driver needed. Wait for async UI before branching on it: `if (await toggle.isVisible())` right after navigation skipped a collapsed summary because the quote had not rendered yet; await a field from the same form first. Specs that compare "today" (ship dates, daily capacity) call a `stayClearOfManilaMidnight()` guard at start.
+- why: the expiry spec runs in ~6 s; the phone-small mixed-cart spec failed on the un-awaited toggle until fixed.
+
+### 2026-10-31 · qa-automation · beth-online-shop
+- target: .claude/wiki/platforms/windows-dev-machine.md
+- lesson: A Playwright `globalSetup` that throws does not run its returned teardown, so wrap the bring-up in try/catch that kills the API (`taskkill /F /T /PID`) and stops the stub, and run the "port is busy" check BEFORE that wrapper so a second run never tears down the first one's stack. The dev DB container `beth-online-shop-db` vanished during this session (volume `beth_online_shop_pgdata` intact) although every E2E command targeted only project `beth-e2e`; most likely another agent's compose command: re-check `docker ps` against the start-of-run state after every heavy run.
+- why: found by the final `docker ps` check; no `destroy` event for it appeared in `docker events` (history lost), so the cause could not be proven.
+
 ## 2026-10-31 · beth-online-shop E2E collision (lead)
 - Applied to qa-automation and frontend-react-dev: check E2E ports are free before running; never run Playwright while the lead says it is. A fix agent ran Playwright during the lead's run despite being told not to: both runs shared preview port 4175, 89 tests timed out in the lead's run and the agent lost four runs.
 

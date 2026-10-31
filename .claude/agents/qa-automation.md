@@ -34,7 +34,8 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 2. Prioritise what just changed plus critical paths (money handling, data correctness).
 3. Assert real behavior and edge cases (empty states, invalid input, validation failures, concurrency), not just the happy path.
    Parallel tests for a lock or cap give each request its own row/product unless the shared row is the point, and are
-   mutation-checked once: remove the lock, confirm the test fails, restore it. A concurrency-token backstop (`xmin`)
+   mutation-checked once: remove the lock (in a throwaway `git worktree` when another agent shares the tree), confirm
+   the test fails, restore it; make sure no other lock (a shared row) serialises the racers. A concurrency-token backstop (`xmin`)
    hides a missing lock in "all requests succeed" tests: design races whose interleavings end in different states and
    assert the full invariant (status, stock, movements, emails) over ~10 orders at once.
    Tests about "today"/"now" must not straddle midnight in the app's time zone: share a fake clock with the server
@@ -75,6 +76,8 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 - Navigate like the user at each size (e.g. phone manage pages via the "More" sheet) and wait on content inside
   `getByRole('main')`, never on nav text that may be hidden at that size. With sticky bars, scroll a control to the
   centre (`scrollIntoView({block:'center'})`) and click normally; never `force: true`.
+- Await a field of the async form before branching on `isVisible()` — an early check silently skips the branch.
+- After every heavy run compare `docker ps` with the start-of-run state; report any missing container at once.
 - Before a Playwright run, check its preview/API ports are free (`netstat -ano | grep :<port>`); a busy port means another
   run is active — wait for it, never start a second one. When the lead says it is running E2E, don't run Playwright.
 - Testcontainers/Playwright suites are heavy: don't run them while another agent runs its suites; report instead of

@@ -49,7 +49,27 @@ Status: **implemented** — cafe-pos-system `d04812d`, IMMAN_HRIS `d4c2e28`, bet
   generated in global setup after the data exists. html5-qrcode decodes only the centre `qrbox` (~240px): draw the QR
   small (cell ≤ 6px). Every other spec on a camera page stubs `getUserMedia` to reject, or the fake QR scans by itself.
 
+## Full-stack harness with a hosted-payment stub (beth `72e880b`)
+- Reference: `beth-online-shop/e2e/playwright.fullstack.config.ts`, `beth-online-shop/e2e/support/stack/{globalSetup,payMongoStub,fixtures,db,shopApi}.ts`; run `npm run e2e:full:<project>`.
+- Recipe: compose project with a tmpfs DB on its own port; SPA built with `VITE_API_BASE_URL=/api/v1` into
+  `e2e/.stack/wwwroot` and served by the API (`Spa__RootPath`); `dotnet build -o e2e/.stack/api` then run the dll
+  directly (no `dotnet run` child; dev `bin/` untouched); keep `ASPNETCORE_ENVIRONMENT=Development` for the seeder but
+  override `ConnectionStrings__Default` by env (beats `appsettings.Development.json`, which points at the dev DB);
+  `Storage__Local__RootPath` in the stack folder; raise every `RateLimiting__*` (all traffic is 127.0.0.1).
+- Payment stub: plain `node:http` server started in globalSetup with `/__control/*` endpoints (list sessions, pay
+  with/without webhook, replay the signed event N times, fail next create). It returns the real allowlisted host in
+  `checkout_url`; specs answer that host per context with `context.route(host/**, r => r.fetch({url: STUB+path,
+  maxRedirects: 0}).then(res => r.fulfill({response: res})))`, in the context fixture and every `newContext` helper.
+- globalSetup that throws skips its teardown: wrap bring-up in try/catch that kills the API tree and the stub; run the
+  "port busy" check before it so a second run never tears down the first.
+- Kept-database hygiene: prefix created data (`E2E `), archive by prefix in before/afterAll, assert exact names (fuzzy
+  `pg_trgm` search returns earlier runs' rows; newest-first paging hides seeded rows).
+- Expiry without waiting: move the deadline in the test DB (`docker exec <e2e-db> psql … UPDATE … = now() - interval
+  '1 minute'`).
+
 ## Gotchas
+- Radios whose checked state comes from the URL/async state: `.click()` then `expect(radio).toBeChecked()` (`.check()`
+  reports "did not change its state"); keep `.check()` for plain form radios.
 - Stopping a backgrounded `playwright test` by its CLI pid leaves `serve-preview.mjs`/`vite preview` holding the port
   ("already used" on every later run): kill the tree (`taskkill //F //T /PID <pid>`) or the port's listener.
 - When the app allowlists redirect hosts (beth: `https://checkout.paymongo.com`), answer that host with `context.route`
