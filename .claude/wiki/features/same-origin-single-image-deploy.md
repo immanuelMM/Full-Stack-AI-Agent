@@ -40,6 +40,10 @@ Give the user example values: IANA zone `Asia/Manila` (not `GMT+8`), VAT `12`.
 2. Add the CI `docker` job (build + smoke) and, for Render, a `render.yaml` ([Render](../platforms/render.md)).
 
 ## Gotchas
+- Smoke script to copy: `beth-online-shop/deploy/smoke-single-image.sh` (Production with dummy values + Render trusted
+  networks; headers, JSON 404, no `/scalar`, bad-signature webhook 401, owner login, stored client IP = sent
+  `X-Forwarded-For`, seeded zones, restart with `RENDER_EXTERNAL_URL`). Capture tokens right after login — a later
+  wrong-password call overwrites the same response file.
 - Render sets `RENDER_EXTERNAL_URL` on every web service: outside Development, when the public-origin setting is empty,
   add it to `builder.Configuration` (in-memory, before options validate), https only, log the source (beth
   `Http/PublicBaseUrlFallback.cs`).

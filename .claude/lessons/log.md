@@ -2,6 +2,38 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop D1 (devops-engineer)
+- Standards: devops-engineer How to work (npm ci --dry-run before first build; list fresh-production gaps and raise them). Wiki: platforms/render (RENDER_EXTERNAL_URL), platforms/paymongo (dashboard steps), features/same-origin-single-image-deploy (smoke script), platforms/windows-dev-machine (MSYS path conversion). Backslash-in-heredoc part dropped (already a rule).
+### 2026-10-31 · devops-engineer · beth-online-shop
+- target: .claude/agents/devops-engineer.md
+- lesson: Before the first CI/image build, run `npm ci --dry-run` in every folder with a lockfile (it only simulates, so it is safe next to a running dev session). A lockfile written by `npm install` can be out of sync and `npm ci` (CI, Dockerfile) then fails. Fix with `npm install --package-lock-only --ignore-scripts` in a temp copy, then have the owner of the folder commit it.
+- why: beth's frontend/package-lock.json failed `npm ci` (ajv 6 vs 8, fast-uri, json-schema-traverse) at the first `docker build`, after the whole backend and frontend had been built with `npm install` for days.
+
+### 2026-10-31 · devops-engineer · beth-online-shop
+- target: .claude/agents/devops-engineer.md
+- lesson: Before writing deploy docs, list what a fresh production database lacks (no seed outside Development) and which settings have no screen, by grepping the frontend for the field and the backend for the seeder. Raise each gap to the lead instead of documenting a workaround.
+- why: beth's production had no shipping zones (checkout had no delivery price) and `DemoMode` could not be set in any admin screen; both were found only by reading the seeder and the settings tabs, and fixed in the app afterwards.
+
+### 2026-10-31 · devops-engineer · beth-online-shop
+- target: .claude/wiki/platforms/render.md
+- lesson: Render sets `RENDER_EXTERNAL_URL` (the service's https address) on every web service. Do not make the user type the public URL at Blueprint creation (a guess, and Render may append a suffix): let the app fall back to it outside Development (explicit setting wins, https only). Settings that need the URL after creation (webhook secrets) get a placeholder at creation, then one "Save, rebuild and deploy" after registering the webhook.
+- why: beth's host refuses to start without `Seo__PublicBaseUrl` and `PayMongo__WebhookSecret`, but the URL, and so the webhook secret, only exist after the service is created. The fallback is smoke-tested in `beth-online-shop/deploy/smoke-single-image.sh`; that Render really sets the variable on a free service is still unconfirmed.
+
+### 2026-10-31 · devops-engineer · beth-online-shop
+- target: .claude/wiki/platforms/paymongo.md
+- lesson: From the docs (2026-10-31): test keys exist from sign-up, before activation (dashboard Settings > Product Settings > Developers; another page says Developer Tools > API Keys); webhooks are added under Developer Tools > Webhooks > Add Endpoint, need a domain name over HTTPS (IP literals are rejected with 400), and the endpoint's secret is shown only after saving. Live methods are activated per method (Settings > Payment Methods > Request Activation); cards and GCash need a registered business type. Test and live modes each have their own webhook endpoint and secret (mode switch in the dashboard header).
+- why: needed for the beth deploy guide (`beth-online-shop/docs/deployment.md`); not yet tried against a real account.
+
+### 2026-10-31 · devops-engineer · beth-online-shop
+- target: .claude/wiki/features/same-origin-single-image-deploy.md
+- lesson: Reusable smoke script for the single image: `beth-online-shop/deploy/smoke-single-image.sh` goes beyond cafe-pos's. It runs Production with every required dummy value and Render's trusted networks, and checks security headers, the JSON 404, no `/scalar`, a bad-signature webhook (401), bootstrap owner login, the stored client IP equal to a sent `X-Forwarded-For` (proves proxy trust), the seeded zones, and a second start with `RENDER_EXTERNAL_URL` and no public-URL setting. Capture the access token right after the successful login: a later wrong-password login overwrites the same response file.
+- why: the first run failed on exactly that overwritten file (401 on the settings call), the second run passed 25 checks.
+
+### 2026-10-31 · devops-engineer · beth-online-shop
+- target: .claude/wiki/platforms/windows-dev-machine.md
+- lesson: In Git Bash, `docker run ... ls /app` has its path rewritten to `C:/Program Files/Git/app`: set `MSYS_NO_PATHCONV=1` (or use `//app`) for container paths. Also `\\` in a bash heredoc sent through the tool may collapse to `\`, so write scripts that contain backslash escapes with the Write/Edit tools, not python-in-heredoc.
+- why: the non-root/no-Development-settings check printed a path error until the variable was set; two script edits silently failed to apply.
+
 ## 2026-10-31 · beth-online-shop lockfile (frontend-react-dev)
 - Applied to react-frontend-standards §1 Tooling (npm ci --dry-run at scaffold and on dependency changes; npm ci in CI and Docker). Found by the deploy agent's first Docker build.
 ### 2026-10-31 · frontend-react-dev (beth-final-fe) · beth-online-shop

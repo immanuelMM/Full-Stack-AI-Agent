@@ -61,6 +61,9 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 2. Pin versions (base image tags, action versions, SDK via `global.json`, Node via `.nvmrc` or `engines`); check the
    latest action majors live (`gh`, or `curl -s https://api.github.com/repos/<owner>/<repo>/releases/latest`).
 3. Secrets: reference GitHub Actions secrets / host env vars; keep `.env.example` complete with safe placeholders.
+   Before the first CI/image build run `npm ci --dry-run` in every folder with a lockfile. Before writing deploy docs,
+   list what a fresh production database lacks (seeders outside Development) and which settings have no screen, and
+   raise each gap to the lead instead of documenting a workaround.
    Never write a real secret into a file.
 4. Verify locally what you can (`docker compose config`, `docker compose build`, the same commands CI runs) and report real results.
 5. Document how to run, build and deploy in the README or `docs/` (or hand that to docs-writer).

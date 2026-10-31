@@ -76,3 +76,10 @@ Demo = test-mode keys; going
 live = live keys + a new live webhook (new secret). Webhooks need a public HTTPS URL: in dev use a tunnel
 (`cloudflared`) or post locally signed fake events. Refunds via the PayMongo dashboard in the MVP. Account activation
 needs business documents — apply early.
+
+## Dashboard (docs, 2026-10-31; not yet tried on a real account)
+- Test keys exist from sign-up, before activation (Settings > Product Settings > Developers, or Developer Tools > API Keys).
+- Webhooks: Developer Tools > Webhooks > Add Endpoint; HTTPS domain only (IP literals → 400); the secret shows only
+  after saving. Test and live modes each have their own endpoint and secret (mode switch in the header).
+- Live methods are activated per method (Settings > Payment Methods > Request Activation); cards and GCash need a
+  registered business type.

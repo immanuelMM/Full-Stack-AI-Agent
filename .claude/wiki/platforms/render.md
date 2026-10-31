@@ -43,3 +43,9 @@ sources checked 2026-10-29.
 ## Paid
 Paid DB (no expiry, backups) + paid service (no sleep, `preDeployCommand` for a migration bundle, then
 `Database__MigrateOnStartup=false`). Steps: `cafe-pos-system/docs/deployment.md` ("Upgrading to paid").
+
+## Public URL
+- Render sets `RENDER_EXTERNAL_URL` (https) on web services: let the app fall back to it outside Development instead
+  of making the user type a guessed URL (explicit setting wins). Settings that need the URL after creation (webhook
+  secrets) get a placeholder at creation, then one "Save, rebuild and deploy" after registering. That Render sets it on
+  free services is still unconfirmed (beth smoke-tests the fallback only).
