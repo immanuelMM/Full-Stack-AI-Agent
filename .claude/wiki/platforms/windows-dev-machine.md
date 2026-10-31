@@ -17,6 +17,7 @@
 - Ports in use by dev databases: 5432 (IMMAN_HRIS), 5433 (cafe-pos), 5434 (beth); pick free ones for new apps and E2E stacks (15xxx).
 
 ## Git Bash and Docker
+- Node doesn't understand Git Bash paths like `/c/Users/...`: pass `C:/Users/...` or `cygpath -m` output.
 - Git Bash rewrites container paths (`ls /app` → `C:/Program Files/Git/app`): set `MSYS_NO_PATHCONV=1` or use `//app`.
 
 ## Python

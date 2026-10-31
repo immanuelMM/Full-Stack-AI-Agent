@@ -68,6 +68,11 @@ Status: **implemented** — cafe-pos-system `d04812d`, IMMAN_HRIS `d4c2e28`, bet
   '1 minute'`).
 
 ## Gotchas
+- Admin flows (beth `e2e/support/stack/{adminUi,orderFlows,db}.ts`, `e2e/full/q3-*.spec.ts`): set orders up via the
+  API, do staff steps as clicks, re-read the customer page in a fresh empty context after each step. Different client IPs:
+  `ForwardedHeaders__KnownProxies__0=127.0.0.1` in the stack env + `X-Forwarded-For` from the API helper.
+- Phone nav helpers: wait for `.shell[data-typing]` to clear before branching on `isVisible()` after typing. Iterate with
+  `E2E_KEEP_STACK=1 E2E_SKIP_BUILD=1`; check ports with `netstat -ano | grep LISTENING` (TIME_WAIT isn't busy).
 - Radios whose checked state comes from the URL/async state: `.click()` then `expect(radio).toBeChecked()` (`.check()`
   reports "did not change its state"); keep `.check()` for plain form radios.
 - Stopping a backgrounded `playwright test` by its CLI pid leaves `serve-preview.mjs`/`vite preview` holding the port

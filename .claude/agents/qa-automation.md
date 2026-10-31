@@ -35,7 +35,10 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 3. Assert real behavior and edge cases (empty states, invalid input, validation failures, concurrency), not just the happy path.
    Parallel tests for a lock or cap give each request its own row/product unless the shared row is the point, and are
    mutation-checked once: remove the lock (in a throwaway `git worktree` when another agent shares the tree), confirm
-   the test fails, restore it; make sure no other lock (a shared row) serialises the racers. A concurrency-token backstop (`xmin`)
+   the test fails, restore it; make sure no other lock (a shared row) serialises the racers.
+   Assert the loser's exact error code (e.g. `409 InvalidTransition`, not just "one succeeded") - a concurrency backstop
+   answers a different 409 when the lock is missing. Pin a known product bug with `test.fail(true, reason)` (wait for
+   the refetch first if it is a timing flash) instead of a red test or a deleted assertion. A concurrency-token backstop (`xmin`)
    hides a missing lock in "all requests succeed" tests: design races whose interleavings end in different states and
    assert the full invariant (status, stock, movements, emails) over ~10 orders at once.
    Tests about "today"/"now" must not straddle midnight in the app's time zone: share a fake clock with the server
