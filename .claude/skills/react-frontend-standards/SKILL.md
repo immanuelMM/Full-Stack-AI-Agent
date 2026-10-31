@@ -15,7 +15,9 @@ implementation (API client, touch shell, keypad, E2E harness) before writing it 
 - **Vite** + `@vitejs/plugin-react` for SPAs. Latest React (19+).
 - ESLint (flat config, `typescript-eslint`, `eslint-plugin-react-hooks`) + Prettier. `npm run lint` and
   `npm run build` (which runs `tsc --noEmit`) must pass before a task is done.
-- Commit `package-lock.json`. Use `npm ci` in CI. Check the latest stable version before adding a package.
+- Commit `package-lock.json`. Use `npm ci` in CI and Docker. Run `npm ci --dry-run` before the first commit of a scaffold
+  and whenever dependencies change (a lock `npm install` tolerates can still fail `npm ci`); fix with
+  `npm install --package-lock-only --ignore-scripts`, then a real `npm ci` and the full checks. Check the latest stable version before adding a package.
 
 ## 2. Folder structure (organise by feature)
 ```

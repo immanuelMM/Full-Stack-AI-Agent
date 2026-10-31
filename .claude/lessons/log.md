@@ -2,6 +2,13 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop lockfile (frontend-react-dev)
+- Applied to react-frontend-standards §1 Tooling (npm ci --dry-run at scaffold and on dependency changes; npm ci in CI and Docker). Found by the deploy agent's first Docker build.
+### 2026-10-31 · frontend-react-dev (beth-final-fe) · beth-online-shop
+- target: .claude/agents/frontend-react-dev.md
+- lesson: Before the first commit of a scaffold and whenever dependencies change, run `npm ci --dry-run` in `frontend/` (and `e2e/`); a lockfile that `npm install` tolerates can still fail `npm ci` and so the Docker build and CI. Fix with `npm install --package-lock-only --ignore-scripts`, then a real `npm ci`, then lint, build, test, format:check.
+- why: beth's `frontend/package-lock.json` was out of sync from the scaffold commit (`2846845`) on: it hoisted ajv@6 while `@hookform/resolvers` needs ajv@8 (also missing fast-uri, json-schema-traverse@1), so `npm ci` failed until `f7bb8b8` regenerated it. No `package.json` edit caused it; the lock was generated wrongly at scaffold time and nobody ran `npm ci`.
+
 ## 2026-10-31 · beth-online-shop final changes (backend + frontend)
 - Wiki: same-origin-single-image-deploy (RENDER_EXTERNAL_URL fallback, SeedMarkers one-time defaults). Standards: react-frontend-standards §4 (remounted forms lose local state; sticky Save bar). Dropped: the navigation-state workaround for "payment not started" — the backend added `paymentStarted` (6a5c103) and the frontend was told to use it.
 ### 2026-10-31 · backend-dotnet-dev (beth-be-final) · beth-online-shop
