@@ -132,6 +132,68 @@
   .feed li .what { color: var(--muted); word-break: break-word; }
   .feed li time { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 
+  /* ---------- tabs ---------- */
+  [hidden] { display: none !important; }
+  .tabs { display: inline-flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+  .tab { border: 0; background: transparent; color: var(--muted); padding: 5px 12px; border-radius: 7px; }
+  .tab:hover { color: var(--text); background: transparent; }
+  .tab[aria-selected="true"] { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+  .tab:focus-visible, .desk:focus-visible { outline: 2px solid #7c5cf5; outline-offset: 2px; }
+
+  /* ---------- avatars (shared by floor and roster) ---------- */
+  .face { display: block; width: 100%; height: 100%; }
+  .face svg, .portrait svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .desk { cursor: pointer; }
+
+  /* ---------- team roster ---------- */
+  .team { padding: 4px 20px 28px; max-width: 1320px; margin: 0 auto; }
+  @media (max-width: 600px) { .team { padding: 4px 16px 20px; } }
+  .team-head { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; padding: 18px; border-radius: 20px;
+    border: 1px solid var(--line);
+    background: radial-gradient(ellipse at 0% 0%, rgba(124,92,245,.2), transparent 55%),
+                radial-gradient(ellipse at 100% 100%, rgba(34,211,238,.14), transparent 55%), var(--panel); }
+  .team-emblem { width: 56px; height: 56px; flex: none; border-radius: 16px; display: grid; place-items: center; font-size: 28px;
+    background: linear-gradient(135deg, #7c5cf5, #1fb5d6); }
+  .team-head .t { flex: 1 1 320px; min-width: 0; }
+  .team-head .kicker { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .team-head h1 { margin: 2px 0 4px; font-size: 22px; }
+  .team-head p { margin: 0; color: var(--muted); max-width: 75ch; }
+  .team-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .team-stats .stat { min-width: 76px; }
+  .group-title { display: flex; align-items: baseline; gap: 10px; margin: 26px 0 12px; }
+  .group-title h2 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .group-title span { color: var(--muted); font-size: 12px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 14px; }
+  .card { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 18px 16px 16px; border-radius: 16px;
+    background: var(--panel); border: 1px solid var(--line); overflow: hidden; scroll-margin-top: 16px; }
+  .card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: var(--c); }
+  .card.flash { animation: flash 1.8s ease-out; }
+  .card-top { display: flex; gap: 14px; align-items: center; }
+  .portrait { width: 76px; height: 76px; flex: none; border-radius: 50%; padding: 2px;
+    background: color-mix(in srgb, var(--c) 30%, var(--panel)); border: 2px solid var(--c); }
+  .card h3 { margin: 0; font-size: 17px; line-height: 1.2; }
+  .card .id { font: 12px ui-monospace, Consolas, monospace; color: var(--muted); word-break: break-all; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tag { font-size: 11px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .tag.strong { border-color: var(--c); color: var(--text); }
+  .card .about { margin: 0; }
+  .card h4 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .duties { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+  .duties li { margin: 2px 0; }
+  .duties li::marker { color: var(--c); }
+  .skills { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .skill { padding: 8px 10px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line);
+    border-left: 3px solid var(--c); }
+  .skill .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; align-items: baseline; }
+  .skill b { font: 600 12.5px ui-monospace, Consolas, monospace; }
+  .skill small { font-size: 10.5px; color: var(--muted); }
+  .skill p { margin: 3px 0 0; color: var(--muted); font-size: 12.5px; }
+  .noskill { margin: 0; padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 12.5px; }
+  .card .tools { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
+  .card .tools code { font: 11.5px ui-monospace, Consolas, monospace; color: var(--text); }
+  .card .floor-link { font-size: 12px; padding: 4px 10px; }
+
+  @keyframes flash { 0% { box-shadow: 0 0 0 3px var(--c); } 100% { box-shadow: 0 0 0 3px transparent; } }
   @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(61,220,151,.6); } 100% { box-shadow: 0 0 0 8px rgba(61,220,151,0); } }
   @keyframes pulse { 50% { transform: scale(1.15); } }
   @keyframes glow { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 55%, transparent); }
@@ -149,6 +211,10 @@
 <body>
 <header>
   <div class="brand"><span class="logo">✦</span>Agent Studio</div>
+  <div class="tabs" role="tablist" aria-label="View">
+    <button class="tab" role="tab" id="tabFloor" aria-controls="viewFloor" aria-selected="true">🏢 Office floor</button>
+    <button class="tab" role="tab" id="tabTeam" aria-controls="viewTeam" aria-selected="false" tabindex="-1">👥 Team roster</button>
+  </div>
   <span class="chip">App <b id="app">—</b></span>
   <span class="chip" id="conn"><span class="dot"></span><span id="connText">Connecting…</span></span>
   <span class="spacer"></span>
@@ -157,6 +223,7 @@
   <button id="resetBtn">Reset</button>
 </header>
 
+<div id="viewFloor" role="tabpanel" aria-labelledby="tabFloor">
 <nav class="pipeline" id="pipeline"></nav>
 
 <main>
@@ -174,6 +241,9 @@
     <div class="feed"><h2>Team activity</h2><ol id="feed"></ol></div>
   </aside>
 </main>
+</div>
+
+<section class="team" id="viewTeam" role="tabpanel" aria-labelledby="tabTeam" hidden></section>
 
 <script>
 const STAGES = ['Plan', 'Build', 'Test', 'Review', 'Docs', 'Deploy'];
@@ -191,7 +261,63 @@ const EXTRA = {
   'Plan':               { name: 'Architect', role: 'Design',     icon: '🗺️', color: '#38bdf8', stage: 'Plan' },
   'dotnet-backend-dev': { name: 'Backend',  role: '.NET API',    icon: '🛠️', color: '#60a5fa', stage: 'Build' },
   'claude-code-guide':  { name: 'Guide',    role: 'Docs lookup', icon: '📚', color: '#c084fc' },
+  'code-explorer':      { name: 'Scout',    role: 'Code explorer',  icon: '🔎', color: '#eab308', stage: 'Plan' },
+  'code-architect':     { name: 'Architect', role: 'Blueprints',    icon: '📐', color: '#22c55e', stage: 'Plan' },
+  'code-reviewer':      { name: 'Reviewer', role: 'Code review',    icon: '🔍', color: '#ef4444', stage: 'Review' },
 };
+
+/* ---------- avatars ---------- */
+// Drawn people (SVG) with the role icon as a badge — one look per agent, reused on the floor and in the roster.
+const LOOKS = {
+  'lead':               { skin: '#f1c27d', hair: '#2d1b0e', style: 'short', extra: 'headset' },
+  'research-planner':   { skin: '#e0ac69', hair: '#4a2c17', style: 'bun',   extra: 'glasses' },
+  'backend-dotnet-dev': { skin: '#8d5524', hair: '#1b1b1b', style: 'curly' },
+  'frontend-react-dev': { skin: '#ffdbac', hair: '#b5523b', style: 'long' },
+  'qa-automation':      { skin: '#c68642', hair: '#222222', style: 'cap' },
+  'docs-writer':        { skin: '#f1c27d', hair: '#6b4423', style: 'long',  extra: 'glasses' },
+  'devops-engineer':    { skin: '#e0ac69', hair: '#151515', style: 'short', extra: 'beard' },
+  'code-explorer':      { skin: '#ffdbac', hair: '#d6a756', style: 'curly' },
+  'code-architect':     { skin: '#a86b3c', hair: '#2b2b2b', style: 'bun' },
+  'code-reviewer':      { skin: '#e8b88a', hair: '#5a5a5a', style: 'short', extra: 'glasses' },
+};
+const SKINS = ['#ffdbac', '#f1c27d', '#e0ac69', '#c68642', '#8d5524'], STYLES = ['short', 'long', 'curly', 'bun', 'cap'];
+let avatarSeq = 0;
+function lookFor(type) {
+  if (LOOKS[type]) return LOOKS[type];
+  let h = 0; for (const ch of type) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return { skin: SKINS[h % 5], hair: ['#222', '#4a2c17', '#b5523b', '#6b4423'][(h >> 3) % 4], style: STYLES[(h >> 5) % 5] };
+}
+function avatarSVG(type) {
+  const info = infoFor(type), lk = lookFor(type), c = info.color, id = 'av' + (++avatarSeq);
+  const hair = {
+    short: `<path d="M31 43C29 26 39 19 50 19c12 0 21 8 19 24-3-9-11-13-19-12-8-1-16 3-19 12Z" fill="${lk.hair}"/>`,
+    long:  `<path d="M30 46C27 25 39 18 50 18c12 0 23 7 20 28l3 18c-7 2-9-4-7-13-2-13-8-19-16-19s-14 6-16 19c2 9 0 15-7 13Z" fill="${lk.hair}"/>`,
+    curly: [[34,34],[40,26],[50,23],[60,26],[66,34],[31,42],[69,42]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="${lk.hair}"/>`).join(''),
+    bun:   `<circle cx="50" cy="17" r="7" fill="${lk.hair}"/><path d="M31 43C29 27 39 21 50 21c12 0 21 7 19 22-3-8-11-12-19-11-8-1-16 3-19 11Z" fill="${lk.hair}"/>`,
+    cap:   `<path d="M30 39C30 25 39 19 50 19s20 6 20 20Z" fill="${c}"/><rect x="29" y="36" width="42" height="5" rx="2.5" fill="${c}" opacity=".7"/>`,
+  }[lk.style];
+  const extra = {
+    glasses: `<g fill="none" stroke="#1a2040" stroke-width="1.6"><circle cx="43" cy="43" r="5"/><circle cx="57" cy="43" r="5"/><path d="M48 43h4"/></g>`,
+    beard:   `<path d="M33 46c1 12 8 16 17 16s16-4 17-16c-4 6-10 7-17 7s-13-1-17-7Z" fill="${lk.hair}"/>`,
+    headset: `<path d="M29 44c0-16 9-25 21-25s21 9 21 25" fill="none" stroke="#1a2040" stroke-width="3"/><rect x="25" y="40" width="7" height="11" rx="3" fill="${c}"/><rect x="68" y="40" width="7" height="11" rx="3" fill="${c}"/><path d="M28 50c0 8 6 10 14 10" fill="none" stroke="#1a2040" stroke-width="2"/><circle cx="43" cy="60" r="2.5" fill="#1a2040"/>`,
+  }[lk.extra] || '';
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <defs><clipPath id="${id}"><circle cx="50" cy="50" r="50"/></clipPath></defs>
+    <g clip-path="url(#${id})">
+      <circle cx="50" cy="50" r="50" fill="${c}" fill-opacity=".22"/>
+      <path d="M12 104c0-25 17-36 38-36s38 11 38 36Z" fill="${c}"/>
+      <path d="M41 69l9 11 9-11" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.5"/>
+      <rect x="44" y="55" width="12" height="15" rx="5" fill="${lk.skin}"/>
+      <circle cx="50" cy="42" r="19" fill="${lk.skin}"/>
+      ${hair}
+      <circle cx="43" cy="43" r="2.1" fill="#1a2040"/><circle cx="57" cy="43" r="2.1" fill="#1a2040"/>
+      <path d="M44 50q6 5 12 0" fill="none" stroke="#1a2040" stroke-width="2" stroke-linecap="round"/>
+      ${extra}
+    </g>
+    <circle cx="83" cy="83" r="14" fill="${c}" style="stroke: var(--panel)" stroke-width="3"/>
+    <text x="83" y="84" text-anchor="middle" dominant-baseline="central" font-size="15">${info.icon}</text>
+  </svg>`;
+}
 const TOOL_ICON = { Read: '📖', Edit: '✏️', MultiEdit: '✏️', Write: '📝', Bash: '⌨️', PowerShell: '⌨️', Grep: '🔍',
   Glob: '🔍', WebSearch: '🌐', WebFetch: '🌐', Agent: '📨', Task: '📨', Skill: '🧩', SendMessage: '💬' };
 const REVIEW_SKILLS = /review|security/i;
@@ -227,12 +353,17 @@ function ensureDesk(type) {
   el.className = 'desk idle' + (type === 'lead' ? ' lead' : '');
   el.style.setProperty('--c', info.color);
   el.innerHTML = `<div class="bubble"></div>
-    <div class="avatar">${type === 'lead' ? '<span class="orbit"></span>' : ''}<span class="face">${info.icon}</span></div>
+    <div class="avatar">${type === 'lead' ? '<span class="orbit"></span>' : ''}<span class="face">${avatarSVG(type)}</span></div>
     <span class="badge"></span>
     <div class="laptop"><i></i><i></i><i></i></div>
     <div class="name"></div><div class="role"></div><div class="status">idle</div>`;
   el.querySelector('.name').textContent = info.name;
   el.querySelector('.role').textContent = info.role;
+  el.tabIndex = 0;
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', `${info.name} — open profile`);
+  el.onclick = () => openProfile(type);
+  el.onkeydown = (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openProfile(type); } };
   floor.appendChild(el);
   const wire = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   wire.setAttribute('class', 'wire');
@@ -577,8 +708,126 @@ $('demoBtn').onclick = () => {
   if (EMBED) demoTimers.push(setTimeout(() => $('demoBtn').click(), at + 6000));
 };
 
+/* ---------- team roster (agent office: one entry per team) ---------- */
+// Mirrors .claude/agents/*.md (frontmatter `skills:`) and .claude/skills/. Update both when an agent or skill changes.
+const SKILLS = {
+  'brainstorming':            { src: 'obra/superpowers', what: 'Turns a vague request into an agreed design: asks questions one at a time, compares 2–3 approaches, then writes down the chosen design before any plan or code.' },
+  'writing-plans':            { src: 'obra/superpowers', what: 'Breaks the agreed design into a step-by-step implementation plan with small, testable milestones the build agents can follow.' },
+  'executing-plans':          { src: 'obra/superpowers', what: 'Works through a written plan task by task with review checkpoints, so nothing in the plan is skipped or left half done.' },
+  'skill-creator':            { src: 'anthropics/skills', what: 'Drafts a new skill when a repeated workflow or lesson deserves its own reusable instructions (the lead adds it to the workspace).' },
+  'dotnet-backend-standards': { src: 'workspace', what: 'House rules for .NET APIs: Clean Architecture layout, repository + unit of work, JWT access/refresh tokens, validation, error handling, OpenAPI and testing.' },
+  'react-frontend-standards': { src: 'workspace', what: 'House rules for React + TypeScript: Vite, folder structure, TanStack Query, API types generated from OpenAPI, React Hook Form + Zod, accessibility, and Astro for static sites.' },
+  'frontend-design':          { src: 'anthropics/claude-plugins-official', what: 'Design direction so screens look intentional rather than templated: typography, colour, layout and visual identity.' },
+  'ui-ux-pro-max':            { src: 'nextlevelbuilder/ui-ux-pro-max-skill', what: 'Searchable design library (50 styles, 190+ palettes, 74 font pairings, 119 UX guidelines, chart types) used to pick a design system for each app.' },
+  '/feature-dev':             { src: 'anthropics/claude-plugins-official', what: 'Guided big-feature workflow: discovery, codebase exploration, clarifying questions and architecture, then hands the build to the team.' },
+  '/code-review':             { src: 'Claude Code', what: 'Reviews the changes for bugs at a chosen depth (low → max) before work is accepted.' },
+  '/security-review':         { src: 'Claude Code', what: 'Security pass whenever auth, payments, user data, uploads or secrets were touched.' },
+};
+const PROFILES = {
+  'lead': { model: 'Opus · main session', about: 'Claude in your main session. Talks with you, checks the knowledge base so finished features get reused, briefs each agent, verifies every report itself and runs the reviews.',
+    duties: ['Asks for the app name and type before a new app starts', 'Dispatches agents in pipeline order; backend and frontend run in parallel', 'Re-runs builds, tests and git checks before accepting any work', 'Routes lessons into agents, skills and the wiki'],
+    skills: ['/feature-dev', '/code-review', '/security-review'], tools: 'All tools · dispatches agents' },
+  'research-planner': { model: 'Opus', about: 'Researches current UI/UX trends and stack best practices on the web, then writes a milestone plan the build agents execute. Never writes app code.',
+    duties: ['Needs the app name and “static or full stack” before it starts', 'Saves the plan in the app’s docs/plan/ folder', 'Returns open questions with sensible defaults'],
+    skills: ['brainstorming', 'writing-plans', 'executing-plans', 'skill-creator'], tools: 'WebSearch, WebFetch, Read, Write, Glob, Grep' },
+  'backend-dotnet-dev': { model: 'Sonnet', about: 'Builds the ASP.NET Core Web API on .NET 10: endpoints, EF Core models and migrations on PostgreSQL, authentication and business logic.',
+    duties: ['Commits the OpenAPI snapshot, the contract the frontend builds against', 'Keeps secrets in user-secrets, never in the repo', 'Builds and tests before reporting back'],
+    skills: ['dotnet-backend-standards'], tools: 'Read, Write, Edit, Bash, Glob, Grep' },
+  'frontend-react-dev': { model: 'Sonnet', about: 'Builds React + TypeScript screens (or Astro pages for static sites): responsive layouts, client state and the typed API client generated from the backend contract.',
+    duties: ['Generates API types from the OpenAPI snapshot', 'Mobile-first, accessible layouts for phone, tablet and desktop', 'Picks a design system for each app'],
+    skills: ['react-frontend-standards', 'frontend-design', 'ui-ux-pro-max'], tools: 'Read, Write, Edit, Bash, Glob, Grep' },
+  'qa-automation': { model: 'Sonnet', about: 'Writes and runs automated tests against what was built: xUnit + Testcontainers for the API, Vitest + React Testing Library for components, Playwright for end-to-end flows.',
+    duties: ['Runs end-to-end tests on an isolated stack, never your dev database', 'Reports real pass/fail counts', 'Pins every bug it finds with a test'],
+    skills: [], noSkills: 'Works from its own built-in test rules plus the wiki’s Playwright harness recipe.', tools: 'Read, Write, Edit, Bash, Glob, Grep' },
+  'docs-writer': { model: 'Sonnet', about: 'Writes the README, setup guides, API docs and architecture overviews, only for behavior that has been built and verified.',
+    duties: ['Documents after the tests pass', 'Keeps setup steps copy-pasteable'],
+    skills: [], noSkills: 'Works from its own built-in documentation rules.', tools: 'Read, Write, Edit, Bash, Glob, Grep' },
+  'devops-engineer': { model: 'Sonnet', about: 'Sets up Docker, docker-compose, GitHub Actions CI (build, lint, test on every push) and hosting config with health checks and environment secrets.',
+    duties: ['Runs once per app, then whenever build or infrastructure changes', 'Can ship API + SPA as one same-origin service on PaaS hosts', 'Never pushes or deploys without asking'],
+    skills: [], noSkills: 'Works from its own built-in rules plus the wiki’s platform pages (Render, GitHub Actions…).', tools: 'Read, Write, Edit, Bash, Glob, Grep' },
+  'code-explorer': { model: 'Sonnet', about: 'Traces how an existing feature works (execution paths, layers, dependencies) so a big change starts from facts.',
+    duties: ['Read-only: it never edits code'], skills: [], noSkills: 'No skills; called by the lead during /feature-dev.', tools: 'Glob, Grep, Read, WebFetch, WebSearch' },
+  'code-architect': { model: 'Sonnet', about: 'Turns what the explorer found into an implementation blueprint: files to create or change, components, data flow and build order.',
+    duties: ['Read-only: it designs and the build agents implement'], skills: [], noSkills: 'No skills; called by the lead during /feature-dev.', tools: 'Glob, Grep, Read, WebFetch, WebSearch' },
+  'code-reviewer': { model: 'Sonnet', about: 'Reviews changes for bugs, security issues and broken conventions, reporting only high-confidence problems.',
+    duties: ['Runs alongside /code-review in the review step'], skills: [], noSkills: 'No skills; called by the lead in the review step.', tools: 'Glob, Grep, Read, WebFetch, WebSearch' },
+};
+const TEAMS = [{
+  id: 'full-stack', name: 'Full Stack Team', emblem: '🏗️', kicker: 'Agent office · Team 1',
+  blurb: 'Builds full stack web apps and static websites end to end: React + TypeScript front ends, ASP.NET Core (.NET 10) APIs on PostgreSQL, tests, docs and deployment. Each app gets its own folder and git repo.',
+  groups: [
+    { title: 'Lead', note: 'runs the team', members: ['lead'] },
+    { title: 'Core crew', note: 'Plan → Build → Test → Docs → Deploy', members: ['research-planner', 'backend-dotnet-dev', 'frontend-react-dev', 'qa-automation', 'docs-writer', 'devops-engineer'] },
+    { title: 'Lead’s specialists', note: 'big features and reviews', members: ['code-explorer', 'code-architect', 'code-reviewer'] },
+  ],
+}];
+
+function renderTeams() {
+  const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  $('viewTeam').innerHTML = TEAMS.map((team) => {
+    const ids = team.groups.flatMap((g) => g.members);
+    const skillCount = new Set(ids.flatMap((id) => PROFILES[id].skills)).size;
+    const card = (id) => {
+      const info = infoFor(id), p = PROFILES[id];
+      const skills = p.skills.length
+        ? `<ul class="skills">${p.skills.map((s) => `<li class="skill"><div class="row"><b>${esc(s)}</b><small>${esc(SKILLS[s].src)}</small></div><p>${esc(SKILLS[s].what)}</p></li>`).join('')}</ul>`
+        : `<p class="noskill">${esc(p.noSkills)}</p>`;
+      return `<article class="card" id="card-${id}" style="--c:${info.color}">
+        <div class="card-top">
+          <div class="portrait">${avatarSVG(id)}</div>
+          <div><h3>${esc(info.name)}</h3><div class="id">${esc(id)}</div>
+            <div class="tags"><span class="tag strong">${esc(info.role)}</span><span class="tag">${esc(p.model)}</span>${info.stage ? `<span class="tag">Stage: ${info.stage}</span>` : ''}</div></div>
+        </div>
+        <p class="about">${esc(p.about)}</p>
+        <div><h4>Responsibilities</h4><ul class="duties">${p.duties.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>
+        <div><h4>Skills (${p.skills.length})</h4>${skills}</div>
+        <div class="tools">Tools: <code>${esc(p.tools)}</code></div>
+      </article>`;
+    };
+    return `<header class="team-head">
+        <div class="team-emblem" aria-hidden="true">${team.emblem}</div>
+        <div class="t"><div class="kicker">${esc(team.kicker)}</div><h1>${esc(team.name)}</h1><p>${esc(team.blurb)}</p></div>
+        <div class="team-stats">
+          <div class="stat"><b>${ids.length}</b><span>agents</span></div>
+          <div class="stat"><b>${skillCount}</b><span>skills</span></div>
+          <div class="stat"><b>${STAGES.length}</b><span>stages</span></div>
+        </div>
+      </header>
+      ${team.groups.map((g) => `<div class="group-title"><h2>${esc(g.title)}</h2><span>${esc(g.note)}</span></div>
+        <div class="cards">${g.members.map(card).join('')}</div>`).join('')}`;
+  }).join('');
+}
+
+/* ---------- tabs ---------- */
+function showView(view, focus) {
+  const team = view === 'team';
+  $('viewFloor').hidden = team;
+  $('viewTeam').hidden = !team;
+  for (const [tab, on] of [[$('tabFloor'), !team], [$('tabTeam'), team]]) {
+    tab.setAttribute('aria-selected', String(on));
+    tab.tabIndex = on ? 0 : -1;
+  }
+  if (focus) (team ? $('tabTeam') : $('tabFloor')).focus();
+  if (!team) layout();   // the floor measured 0×0 while hidden
+  history.replaceState(null, '', location.pathname + location.search + (team ? '#team' : ''));
+}
+function openProfile(type) {
+  const card = document.getElementById('card-' + type);
+  if (!card) return;
+  showView('team');
+  card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+  card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+}
+$('tabFloor').onclick = () => showView('floor');
+$('tabTeam').onclick = () => showView('team');
+document.querySelector('.tabs').onkeydown = (ev) => {
+  if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') showView($('viewTeam').hidden ? 'team' : 'floor', true);
+};
+
+renderTeams();
 initRoster();
 connect();
+if (location.hash === '#team') showView('team');
 if (params.has('demo') || EMBED) $('demoBtn').click();
 </script>
 </body>
