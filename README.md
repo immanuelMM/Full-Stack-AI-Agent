@@ -53,8 +53,8 @@ server and opens <http://localhost:4747> in your browser. The page shows the Lea
 Plan → Build → Test → Review → Docs → Deploy pipeline, and a live activity feed.
 
 - **Team roster** tab (or <http://localhost:4747/#team>): every agent in the Full Stack Team with its avatar,
-  what it does, its skills and tools. At the top, **How the team works** shows the flow from step to step as agents
-  joined by arrows (the main pipeline and the `/feature-dev` lane, defined in `flows` on each team). Click an agent
+  what it does, its skills and tools. At the top, **How the team works** is an org chart: the Lead on top, how it orchestrates and assigns in
+  the middle, arrows down to every agent below, and dashed links for what agents pass to each other (`org` on each team). Click an agent
   on the office floor or in the flow to open its profile. The roster data
   (`TEAMS`, `PROFILES`, `SKILLS` in `index.html`) mirrors `.claude/agents/` and `.claude/skills/` — update it when
   an agent or skill changes; add a new entry to `TEAMS` for the next team in the agent office.

@@ -207,49 +207,74 @@
   .card .tools code { font: 11.5px ui-monospace, Consolas, monospace; color: var(--text); }
   .card .floor-link { font-size: 12px; padding: 4px 10px; }
 
-  /* ---------- team flow (agents joined by arrows) ---------- */
-  .flows { display: flex; flex-direction: column; gap: 14px; }
-  .lane { padding: 14px 16px 16px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); }
-  .lane-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 12px; }
-  .lane-head h3 { margin: 0; font-size: 14px; }
-  .lane-head span { color: var(--muted); font-size: 12px; }
-  .flow { list-style: none; margin: 0; padding: 0; display: grid; align-items: center;
-    grid-template-columns: minmax(0, 1fr) repeat(calc(var(--n) - 1), 30px minmax(0, 1fr)); }
-  .flow > li { display: contents; }
-  .flow-arrow { width: 30px; height: 30px; display: grid; place-items: center; color: var(--muted); }
-  .flow-arrow svg { width: 30px; height: 12px; overflow: visible; }
-  .flow-arrow line { stroke: currentColor; stroke-width: 2; stroke-dasharray: 4 6; animation: flow 1s linear infinite; }
-  .flow-arrow path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .node { flex: 1 1 0; min-width: 0; align-self: stretch; display: flex; flex-direction: column; gap: 8px; padding: 10px;
-    border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); border-top: 3px solid var(--c); }
-  .node .step { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  .node .step b { color: var(--text); }
-  .node .who { display: flex; flex-direction: column; gap: 4px; }
-  .agent-link { display: flex; align-items: center; gap: 8px; width: 100%; padding: 3px; text-align: left;
-    background: transparent; border: 1px solid transparent; border-radius: 10px; font-size: 13px; font-weight: 600; }
-  .agent-link:hover { background: var(--panel); border-color: var(--line); }
-  .agent-link:focus-visible { outline: 2px solid #7c5cf5; outline-offset: 1px; }
-  .agent-link .mini { position: relative; width: 38px; height: 38px; flex: none; border-radius: 50%;
-    border: 2px solid var(--ac); background: color-mix(in srgb, var(--ac) 25%, var(--panel)); }
-  .agent-link .mini svg { display: block; width: 100%; height: 100%; }
-  .agent-link .mini .x { position: absolute; top: -6px; right: -8px; padding: 0 5px; border-radius: 999px; font-size: 10px;
+  /* ---------- org chart: Lead on top, orchestration in the middle, agents below ---------- */
+  .org { display: flex; flex-direction: column; align-items: center; padding: 18px 16px 14px; border-radius: 16px;
+    background: var(--panel); border: 1px solid var(--line); }
+  .org .mini { position: relative; flex: none; border-radius: 50%; border: 2px solid var(--ac);
+    background: color-mix(in srgb, var(--ac) 25%, var(--panel)); }
+  .org .mini svg { display: block; width: 100%; height: 100%; }
+  .org .mini .x { position: absolute; top: -6px; right: -10px; padding: 0 5px; border-radius: 999px; font-size: 10px;
     background: var(--ac); color: #0a0e1d; font-weight: 700; }
-  .agent-link .nm { min-width: 0; overflow-wrap: anywhere; line-height: 1.2; }
-  .agent-link.you { cursor: default; }
-  .agent-link.you:hover { background: transparent; border-color: transparent; }
-  .agent-link.you .mini { display: grid; place-items: center; font-size: 20px; }
-  .node .what { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
-  .node .loop { align-self: flex-start; justify-self: start; font-size: 10.5px; padding: 1px 7px; border-radius: 999px; color: var(--warn);
-    border: 1px dashed color-mix(in srgb, var(--warn) 60%, transparent); }
-  @media (max-width: 1080px) {
-    .flow { grid-template-columns: minmax(0, 1fr); }
-    .flow-arrow { justify-self: center; }
-    .flow-arrow svg { transform: rotate(90deg); }
-    .node { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr); align-items: center; gap: 4px 12px; }
-    .node .step { grid-column: 1 / -1; }
-    .node .what, .node .loop { grid-column: 2; }
+  .org button { font-weight: 400; }
+  .org button:focus-visible { outline: 2px solid #7c5cf5; outline-offset: 2px; }
+  .org-lead { display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 10px; border-radius: 16px; text-align: left;
+    background: var(--panel-2); border: 1px solid var(--line); border-top: 3px solid var(--ac); }
+  .org-lead .mini { width: 60px; height: 60px; }
+  .org-lead b { display: block; font-size: 16px; }
+  .org-lead small { color: var(--muted); font-size: 12px; }
+  .org-down { flex: none; width: 12px; height: 34px; color: #a78bfa; }
+  .org-down svg, .drop svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .org-down line, .drop line { stroke: currentColor; stroke-width: 2; stroke-dasharray: 4 5; animation: flow 1s linear infinite; }
+  .org-down path, .drop path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .org-hub { width: min(100%, 820px); padding: 12px 14px; border-radius: 14px; text-align: center;
+    border: 1px dashed color-mix(in srgb, #a78bfa 65%, transparent); background: color-mix(in srgb, #a78bfa 10%, var(--panel-2)); }
+  .org-hub h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
+  .org-hub ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  .org-hub li { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); }
+  .org-hub li b { color: var(--text); font-weight: 600; }
+  .org-crew { list-style: none; margin: 0; padding: 0; width: 100%; display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+  .org-crew > li { position: relative; display: flex; padding: 40px 4px 0; }
+  .org-crew > li::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #a78bfa; opacity: .55; }
+  .org-crew > li:first-child::before { left: 50%; }
+  .org-crew > li:last-child::before { right: 50%; }
+  .drop { position: absolute; top: 0; left: 50%; width: 12px; height: 40px; margin-left: -6px; color: var(--ac); }
+  .member { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px;
+    border-radius: 12px; text-align: center; background: var(--panel-2); border: 1px solid var(--line); border-top: 3px solid var(--ac); }
+  .member.extra { border-style: dashed; border-top-style: solid; }
+  .member .mini { width: 48px; height: 48px; }
+  .member .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .member .nm { font-weight: 600; font-size: 13px; line-height: 1.2; overflow-wrap: anywhere; }
+  .member .st { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .member .task { font-size: 11.5px; line-height: 1.3; color: var(--muted); }
+  .talk { position: relative; width: 100%; height: 72px; }
+  .link { position: absolute; top: 0; border: 2px dashed var(--ac); border-top: 0; border-radius: 0 0 12px 12px; }
+  .link .lbl { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 55%); white-space: nowrap; font-size: 10.5px;
+    padding: 1px 7px; border-radius: 999px; background: var(--panel); border: 1px solid var(--ac); }
+  .link .tip { position: absolute; top: -2px; border: 5px solid transparent; border-top: 0; border-bottom: 7px solid var(--ac); }
+  .link .tip.l { left: -6px; } .link .tip.r { right: -6px; }
+  .org-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+  .talk-list, .member .bf { display: none; }
+  @media (max-width: 980px) {
+    .org { align-items: stretch; }
+    .org-lead { align-self: flex-start; }
+    .org-down { margin-left: 10px; }
+    .org-crew { grid-template-columns: minmax(0, 1fr); }
+    .org-crew > li { padding: 5px 0 5px 36px; }
+    .org-crew > li::before, .org-crew > li:first-child::before { top: 0; bottom: 0; left: 15px; right: auto; width: 2px; height: auto; }
+    .org-crew > li:last-child::before { bottom: 50%; }
+    .drop { top: 50%; left: 16px; width: 20px; height: 2px; margin: 0; background: var(--ac); }
+    .drop svg { display: none; }
+    .member { flex-direction: row; text-align: left; gap: 12px; }
+    .member .mini { width: 42px; height: 42px; }
+    .talk { display: none; }
+    .member .bf { display: inline; }
+    .talk-list { display: block; margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--line); }
+    .talk-list h4 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    .talk-list ul { margin: 0; padding-left: 18px; font-size: 12.5px; color: var(--muted); }
+    .talk-list b { color: var(--text); }
+    .org-legend { justify-content: flex-start; }
   }
-  @media (max-width: 480px) { .node { grid-template-columns: minmax(0, 1fr); } .node .what, .node .loop { grid-column: 1; } }
 
   @keyframes flash { 0% { box-shadow: 0 0 0 3px var(--c); } 100% { box-shadow: 0 0 0 3px transparent; } }
   @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(61,220,151,.6); } 100% { box-shadow: 0 0 0 8px rgba(61,220,151,0); } }
@@ -947,26 +972,33 @@ const TEAMS = [{
     { title: 'Core crew', note: 'Plan → Build → Test → Docs → Deploy', members: ['research-planner', 'backend-dotnet-dev', 'frontend-react-dev', 'qa-automation', 'docs-writer', 'devops-engineer'] },
     { title: 'Lead’s specialists', note: 'helpers the Lead calls on big features', members: ['code-explorer', 'code-architect', 'code-reviewer'] },
   ],
-  // How work moves through the team: each step lists its agents ('you' = the user); arrows join the steps.
-  flows: [
-    { title: 'New app or feature', note: 'The Lead briefs every agent and verifies each report before the next step.', steps: [
-      { step: 'Start', who: ['you', 'lead'], what: 'You name the app and its type; the Lead checks the wiki for features to reuse.' },
-      { step: 'Plan', who: ['research-planner'], what: 'Researches current practice and saves a milestone plan to docs/plan/.' },
-      { step: 'Build', who: ['backend-dotnet-dev', 'frontend-react-dev'], what: 'In parallel; the OpenAPI snapshot is the contract between them.' },
-      { step: 'Test', who: ['qa-automation'], what: 'Unit, integration and end-to-end tests in a visible browser.' },
-      { step: 'Review', who: ['lead', 'code-reviewer'], what: '/code-review and /security-review, plus a second opinion on big features.', loop: '↺ fixes go back to Build' },
-      { step: 'Docs', who: ['docs-writer'], what: 'Documents only what is built and verified.' },
-      { step: 'Deploy', who: ['devops-engineer'], what: 'Docker, CI and hosting; never pushes without asking.' },
-    ] },
-    { title: 'Big feature in an existing app', note: '/feature-dev runs these steps first, then joins the flow above at Build.', steps: [
-      { step: 'Explore', who: [['code-explorer', '×2–3']], what: 'Scouts trace how the existing code works.' },
-      { step: 'Clarify', who: ['lead', 'you'], what: 'The Lead asks you about anything the code leaves open.' },
-      { step: 'Plan', who: ['research-planner'], what: 'Plans from the Scouts’ findings; researches only what is new.' },
-      { step: 'Blueprint', who: [['code-architect', '×2–3']], what: 'Architects turn the plan into 2–3 build options.' },
-      { step: 'Choose', who: ['you'], what: 'You pick a blueprint, then the team builds it.' },
-      { step: 'Build →', who: ['backend-dotnet-dev', 'frontend-react-dev'], what: 'Then Test → Review → Docs → Deploy as above.' },
-    ] },
-  ],
+  // Org chart on the roster: the Lead on top, how it orchestrates in the middle, every agent below (pipeline order).
+  // `talks` are hand-offs between agents (by crew index): files and messages one agent passes to another.
+  org: {
+    lead: 'lead',
+    hub: { title: 'Orchestrates & assigns', points: [
+      ['Briefs', 'each agent with the plan and wiki pages'], ['Dispatches', 'in pipeline order · Backend ∥ Frontend'],
+      ['Verifies', 'every report: builds, tests, git'], ['Reviews', '/code-review + second opinion'] ] },
+    crew: [
+      { id: 'code-explorer', step: 'Explore', task: 'traces the existing code', extra: true, count: '×2–3' },
+      { id: 'research-planner', step: 'Plan', task: 'researches and writes the plan' },
+      { id: 'code-architect', step: 'Blueprint', task: 'drafts 2–3 build options', extra: true, count: '×2–3' },
+      { id: 'backend-dotnet-dev', step: 'Build', task: 'builds the .NET API' },
+      { id: 'frontend-react-dev', step: 'Build', task: 'builds the React UI' },
+      { id: 'qa-automation', step: 'Test', task: 'tests in a visible browser' },
+      { id: 'code-reviewer', step: 'Review', task: 'independent code review', extra: true },
+      { id: 'docs-writer', step: 'Docs', task: 'documents what works' },
+      { id: 'devops-engineer', step: 'Deploy', task: 'Docker, CI and hosting' },
+    ],
+    talks: [
+      { from: 0, to: 1, label: 'findings' },
+      { from: 1, to: 2, label: 'plan' },
+      { from: 2, to: 3, label: 'blueprint' },
+      { from: 3, to: 4, label: 'API contract', both: true },
+      { from: 5, to: 3, label: 'bug reports', level: 2, off: [0, -8] },
+      { from: 5, to: 7, label: 'verified results', level: 2, off: [8, 0] },
+    ],
+  },
 }];
 
 function renderTeams() {
@@ -991,23 +1023,38 @@ function renderTeams() {
         <div class="tools">Tools: <code>${esc(p.tools)}</code></div>
       </article>`;
     };
-    const arrow = '<span class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 30 12"><line x1="1" y1="6" x2="26" y2="6"/><path d="M22 1.5 28 6l-6 4.5"/></svg></span>';
-    const member = (w) => {
-      const [id, count] = Array.isArray(w) ? w : [w, ''];
-      if (id === 'you') return `<div class="agent-link you" style="--ac:#94a3b8"><span class="mini" aria-hidden="true">🙋</span><span class="nm">You</span></div>`;
-      const info = infoFor(id);
-      return `<button class="agent-link" type="button" data-profile="${esc(id)}" style="--ac:${info.color}" title="Open ${esc(info.name)}’s profile">
-        <span class="mini">${avatarSVG(id)}${count ? `<span class="x">${esc(count)}</span>` : ''}</span><span class="nm">${esc(info.name)}</span></button>`;
+    const mini = (id, count) => `<span class="mini" aria-hidden="true">${avatarSVG(id)}${count ? `<span class="x">${esc(count)}</span>` : ''}</span>`;
+    const orgChart = (o) => {
+      const n = o.crew.length, lead = infoFor(o.lead), nameOf = (i) => infoFor(o.crew[i].id).name;
+      const down = '<svg viewBox="0 0 12 34"><line x1="6" y1="0" x2="6" y2="30"/><path d="M1.5 25 6 31l4.5-6"/></svg>';
+      const drop = '<span class="drop" aria-hidden="true"><svg viewBox="0 0 12 40"><line x1="6" y1="2" x2="6" y2="36"/><path d="M1.5 31 6 37l4.5-6"/></svg></span>';
+      const at = (i, px) => `calc(${((i + 0.5) / n) * 100}% + ${px}px)`;
+      const links = o.talks.map((t) => {
+        const a = Math.min(t.from, t.to), b = Math.max(t.from, t.to), [oa, ob] = t.off || [8, -8];
+        const tips = t.both ? '<span class="tip l"></span><span class="tip r"></span>' : `<span class="tip ${t.to > t.from ? 'r' : 'l'}"></span>`;
+        return `<div class="link" style="--ac:${infoFor(o.crew[t.from].id).color};left:${at(a, oa)};width:calc(${((b - a) / n) * 100}% + ${ob - oa}px);height:${t.level === 2 ? 50 : 26}px">
+          ${tips}<span class="lbl">💬 ${esc(t.label)}</span></div>`;
+      }).join('');
+      return `<div class="org">
+        <button class="org-lead" type="button" data-profile="${o.lead}" style="--ac:${lead.color}" title="Open ${esc(lead.name)}’s profile">
+          ${mini(o.lead)}<span><b>${esc(lead.name)}</b><small>${esc(lead.role)} · talks with you</small></span></button>
+        <span class="org-down" aria-hidden="true">${down}</span>
+        <div class="org-hub"><h3>${esc(o.hub.title)}</h3>
+          <ul>${o.hub.points.map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join('')}</ul></div>
+        <span class="org-down" aria-hidden="true">${down}</span>
+        <ol class="org-crew" style="--n:${n}">${o.crew.map((c) => {
+          const info = infoFor(c.id);
+          return `<li style="--ac:${info.color}">${drop}<button class="member${c.extra ? ' extra' : ''}" type="button" data-profile="${c.id}" title="Open ${esc(info.name)}’s profile">
+            ${mini(c.id, c.count)}<span class="txt"><span class="st">${esc(c.step)}${c.extra ? '<span class="bf"> · big features</span>' : ''}</span>
+            <span class="nm">${esc(info.name)}</span><span class="task">${esc(c.task)}</span></span></button></li>`;
+        }).join('')}</ol>
+        <div class="talk" aria-hidden="true">${links}</div>
+        <div class="talk-list"><h4>Agents talking to each other</h4>
+          <ul>${o.talks.map((t) => `<li><b>${esc(nameOf(t.from))}</b> ${t.both ? '⇄' : '→'} <b>${esc(nameOf(t.to))}</b>: ${esc(t.label)}</li>`).join('')}</ul></div>
+        <div class="org-legend"><span>↓ the Lead assigns work · reports come back up to be verified</span>
+          <span>💬 dashed: what agents pass to each other</span><span>dashed card: only on big features (/feature-dev)</span></div>
+      </div>`;
     };
-    const lane = (f) => `<section class="lane"><div class="lane-head"><h3>${esc(f.title)}</h3><span>${esc(f.note)}</span></div>
-      <ol class="flow" style="--n:${f.steps.length}">${f.steps.map((s, i) => {
-        const lead = [s.who[0]].flat()[0];
-        return `<li>${i ? arrow : ''}<div class="node" style="--c:${lead === 'you' ? '#94a3b8' : infoFor(lead).color}">
-          <div class="step"><b>${i + 1}</b> · ${esc(s.step)}</div>
-          <div class="who">${s.who.map(member).join('')}</div>
-          <p class="what">${esc(s.what)}</p>${s.loop ? `<span class="loop">${esc(s.loop)}</span>` : ''}
-        </div></li>`;
-      }).join('')}</ol></section>`;
     return `<header class="team-head">
         <div class="team-emblem" aria-hidden="true">${team.emblem}</div>
         <div class="t"><div class="kicker">${esc(team.kicker)}</div><h1>${esc(team.name)}</h1><p>${esc(team.blurb)}</p></div>
@@ -1017,8 +1064,7 @@ function renderTeams() {
           <div class="stat"><b>${STAGES.length}</b><span>stages</span></div>
         </div>
       </header>
-      ${team.flows ? `<div class="group-title"><h2>How the team works</h2><span>click an agent to open its profile</span></div>
-        <div class="flows">${team.flows.map(lane).join('')}</div>` : ''}
+      ${team.org ? `<div class="group-title"><h2>How the team works</h2><span>click an agent to open its profile</span></div>${orgChart(team.org)}` : ''}
       ${team.groups.map((g) => `<div class="group-title"><h2>${esc(g.title)}</h2><span>${esc(g.note)}</span></div>
         <div class="cards">${g.members.map(card).join('')}</div>`).join('')}`;
   }).join('');
