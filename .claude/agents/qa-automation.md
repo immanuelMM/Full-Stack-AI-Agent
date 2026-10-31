@@ -48,7 +48,7 @@ list. Report anything reusable you build, or a platform/provider fact you learn,
 6. Deterministic, fast tests: proper waits/mocks, no sleeps.
 7. Tests must run in CI (no local-only state); tell the devops agent if CI needs a new service or step.
 8. When the tests pass, commit them with a clear message (e.g. `test(orders): cover checkout validation`). Stage and
-   commit only the paths you changed (`git commit -m "…" -- <paths>`); never `git add -A`/`git commit -a`/`git reset`.
+   commit only the paths you changed (`git commit -m "…" -- <paths>`); never `git add -A`/`git commit -a`/`git reset`/plain `git stash`.
    Don't push unless asked.
 
 ## E2E environment rules

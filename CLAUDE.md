@@ -113,8 +113,9 @@ The reference layout for new full stack apps (architecture doc, ADRs, scaffold) 
 - Once an app has a remote, suggest pushing early so CI really runs on GitHub. Anything a platform reads from the repo
   (`render.yaml`) must be pushed before you give dashboard steps (who runs git network commands: wiki `platforms/github.md`).
 - **Parallel agents share one git index.** Every agent stages and commits only its own paths
-  (`git add backend && git commit -m "…" -- backend`) — never `git add -A`, `git add .`, `git commit -a` or
-  `git reset` on the shared index. For long parallel work that touches overlapping paths, use
+  (`git add backend && git commit -m "…" -- backend`) — never `git add -A`, `git add .`, `git commit -a`,
+  `git reset` or a plain `git stash` on the shared tree (it hides other agents' uncommitted work); to test without a
+  change, use `git stash push -- <own paths>` or a throwaway `git worktree`. For long parallel work that touches overlapping paths, use
   `isolation: "worktree"` and merge afterwards.
 - Never commit secrets, `.env` files, `node_modules/`, `bin/`, `obj/` or `dist/`.
 
