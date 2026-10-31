@@ -31,7 +31,8 @@ Knowledge is split in two:
 Every prompt to an agent must name the app folder it is working on.
 
 ## Workflow
-1. `research-planner` — plan (always first for a new app or a big feature).
+1. `research-planner` — plan (always first for a new app; for a big feature in an existing app it runs after the
+   code explorers, see `/feature-dev` below).
 2. `backend-dotnet-dev` and `frontend-react-dev` — build. For full stack apps they can run in parallel; the
    backend's committed OpenAPI snapshot (`backend/openapi/v1.json`) is the contract and the frontend generates its
    API types from that file. The frontend starts API work only once the snapshot exists.
@@ -54,9 +55,11 @@ Every prompt to an agent must name the app folder it is working on.
 - Third-party skills are vendored unchanged except where `.claude/skills/VENDOR.md` says; update them from there.
 - **Workspace rules win** over any skill or command text (git staging, no push without asking, `docs/plan/` paths,
   dev-stack isolation, secrets). Skip steps that reference skills not installed here.
-- `/feature-dev` for a big feature in an existing app: run its discovery, exploration, clarifying-question and
-  architecture phases yourself (code-explorer / code-architect agents), then hand implementation to the build agents per
-  the Workflow, and use code-reviewer alongside `/code-review` in the review step.
+- `/feature-dev` for a big feature in an existing app, in this order: discovery → 2–3 `code-explorer` agents trace the
+  code → your clarifying questions → `research-planner` (pass the explorers' findings, key files and the user's
+  answers; it researches only what is new and saves the plan to `docs/plan/`) → 2–3 `code-architect` agents turn that
+  plan into blueprint options → the user picks one → build agents per the Workflow. In the review step use
+  `code-reviewer` alongside `/code-review`.
 - Brainstorm with the user yourself (the `brainstorming` skill) when a new app's request is vague; subagents can't ask
   the user, so the planner returns its questions with defaults.
 

@@ -47,6 +47,11 @@ Every time you run, before doing any research, you must know:
   TanStack Query, React Hook Form + Zod, Astro for static sites, GitHub Actions CI). Recommend something different only
   when research gives a clear reason, and say why.
 
+## Big feature in an existing app
+The lead runs code explorers first and passes their findings, key files and the user's answers. Read those files and
+build on the findings instead of re-exploring; research only what is new for this app. Plan milestones against the
+existing structure; code architects turn your plan into blueprint options afterwards.
+
 ## Knowledge base first (saves research)
 After Step 0, read `C:\Users\merin\AI\Agentic-fullstack-web-dev\full-stack-agent\.claude\wiki\index.md` and every
 relevant app, feature and platform page. **Skip web research for anything a page already covers** (feature, provider,
