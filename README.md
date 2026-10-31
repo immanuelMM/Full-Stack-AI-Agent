@@ -57,6 +57,8 @@ Plan → Build → Test → Review → Docs → Deploy pipeline, and a live acti
   (`TEAMS`, `PROFILES`, `SKILLS` in `index.html`) mirrors `.claude/agents/` and `.claude/skills/` — update it when
   an agent or skill changes; add a new entry to `TEAMS` for the next team in the agent office.
 - Watch a sample run: <http://localhost:4747/?demo> (or press **Play demo**).
+- Watch a big feature built with `/feature-dev` (Scouts explore, Architects propose options, Second Opinion
+  reviews), with a phase-by-phase guide: <http://localhost:4747/?demo=feature> (or press **Big feature demo**).
 - Start it by hand: `node .claude/team-viz/server.js --open`
 - Turn it off: set the environment variable `TEAM_VIZ=off`.
 - Different port: set `TEAM_VIZ_PORT`.

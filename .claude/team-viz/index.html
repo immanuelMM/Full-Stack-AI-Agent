@@ -132,6 +132,20 @@
   .feed li .what { color: var(--muted); word-break: break-word; }
   .feed li time { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 
+  /* ---------- narrator (phase guide for the /feature-dev demo) ---------- */
+  .narrator { margin: 0 20px 12px; padding: 10px 14px; border-radius: 14px; background: var(--panel);
+    border: 1px solid #7c5cf5; box-shadow: 0 0 0 3px rgba(124,92,245,.15); display: flex; flex-direction: column; gap: 8px; }
+  @media (max-width: 600px) { .narrator { margin: 0 16px 12px; } }
+  .narrator .kicker { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .phases { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+  .ph { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted);
+    white-space: nowrap; transition: all .3s; }
+  .ph.done { color: var(--text); border-color: var(--ok); }
+  .ph.done::before { content: "✓ "; color: var(--ok); }
+  .ph.active { background: #7c5cf5; border-color: #7c5cf5; color: #fff; }
+  #phaseText { margin: 0; }
+  #phaseText b { margin-right: 4px; }
+
   /* ---------- tabs ---------- */
   [hidden] { display: none !important; }
   .tabs { display: inline-flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
@@ -219,12 +233,18 @@
   <span class="chip" id="conn"><span class="dot"></span><span id="connText">Connecting…</span></span>
   <span class="spacer"></span>
   <button id="voiceBtn" aria-pressed="false" title="Read out what the agents are doing">🔇 Voice off</button>
-  <button class="primary" id="demoBtn">▶ Play demo</button>
+  <button class="primary" id="demoBtn" title="Plan → Build → Test → Review → Docs → Deploy for a feature">▶ Play demo</button>
+  <button class="primary" id="featureBtn" title="How Scout, Architect and Second Opinion work in /feature-dev">▶ Big feature demo</button>
   <button id="resetBtn">Reset</button>
 </header>
 
 <div id="viewFloor" role="tabpanel" aria-labelledby="tabFloor">
 <nav class="pipeline" id="pipeline"></nav>
+<div class="narrator" id="narrator" aria-live="polite" hidden>
+  <span class="kicker">/feature-dev · big feature in an existing app</span>
+  <div class="phases" id="phases"></div>
+  <p id="phaseText"></p>
+</div>
 
 <main>
   <section class="floor" id="floor">
@@ -369,7 +389,7 @@ function ensureDesk(type) {
   wire.setAttribute('class', 'wire');
   wire.style.setProperty('--c', info.color);
   if (type !== 'lead') wires.appendChild(wire);
-  desks[type] = { type, info, el, wire, state: 'idle', ids: new Set(), actions: 0, timer: null, pos: { x: 0, y: 0 } };
+  desks[type] = { type, info, el, wire, state: 'idle', ids: new Set(), actions: 0, timer: null, gen: 0, pos: { x: 0, y: 0 } };
   layout();
   return desks[type];
 }
@@ -571,6 +591,21 @@ function handle(e) {
       if (type) finish(type, e, animate);
       break;
     }
+    case 'Phase': {
+      showPhase(e.i, e.text);
+      feed({ info: { name: `Phase ${e.i + 1} · ${FEATURE_PHASES[e.i]}`, color: '#7c5cf5' } }, e.text, e.t);
+      if (animate) speak('lead', `Phase ${e.i + 1}, ${FEATURE_PHASES[e.i]}. ${e.text}`);
+      break;
+    }
+    case 'Ask': {
+      const lead = desks.lead;
+      lead.state = 'working';
+      setBubble(lead, e.text, '❓');
+      feed(lead, 'asks you: ' + e.text, e.t);
+      refreshLead();
+      if (animate) speak('lead', e.text);
+      break;
+    }
     case 'TaskCompleted': {
       const d = ensureDesk(actorOf(e));
       feed(d, '✅ Completed task' + (e.task ? ': ' + e.task : ''), e.t);
@@ -593,7 +628,9 @@ function dispatch(e, animate) {
   setBubble(lead, `Assigning → ${d.info.name}`, '📨');
   feed(lead, `→ ${d.info.name}: ${e.text}`, e.t);
   if (animate) speak('lead', `${d.info.name}, ${e.text}`);
+  const gen = ++d.gen;
   const arrive = () => {
+    if (gen !== d.gen) return;   // the agent already moved on (packet animation finished late, e.g. background tab)
     setState(d, 'working', 'working');
     setBubble(d, e.text, '📨');
   };
@@ -601,6 +638,7 @@ function dispatch(e, animate) {
 }
 function activity(actor, e, animate) {
   const d = ensureDesk(actor);
+  d.gen++;
   if (actor !== 'lead' && d.state !== 'working') setState(d, 'working', 'working');
   if (actor === 'lead') { d.state = 'working'; refreshLead(); }
   tools++; d.actions++;
@@ -617,6 +655,7 @@ function activity(actor, e, animate) {
 }
 function finish(type, e, animate) {
   const d = ensureDesk(type), lead = desks.lead;
+  d.gen++;
   if (e.agentId) d.ids.delete(e.agentId);
   if (d.ids.size > 0) { setState(d, 'working', 'working'); return; }
   setState(d, 'done', 'done ✓');
@@ -634,7 +673,19 @@ function resetAll() {
   desks = {}; idMap = {}; files = new Set(); tools = 0; startT = 0; lastDispatched = null; stageSeen = new Set();
   $('feed').innerHTML = ''; $('app').textContent = '—'; $('sTime').textContent = '0:00';
   $('empty').style.display = '';
+  $('narrator').hidden = true;
   initRoster();
+}
+const FEATURE_PHASES = ['Discovery', 'Exploration', 'Questions', 'Architecture', 'Build & test', 'Review', 'Wrap-up'];
+function showPhase(i, text) {
+  $('narrator').hidden = false;
+  $('phases').innerHTML = FEATURE_PHASES.map((p, k) =>
+    `<span class="ph${k < i ? ' done' : k === i ? ' active' : ''}">${k + 1}. ${p}</span>`).join('');
+  const t = $('phaseText');
+  t.innerHTML = '<b></b><span></span>';
+  t.firstChild.textContent = FEATURE_PHASES[i] + ':';
+  t.lastChild.textContent = text;
+  layout();   // the narrator takes vertical space from the floor
 }
 function initRoster() {
   Object.keys(ROSTER).forEach(ensureDesk);
@@ -695,18 +746,91 @@ const DEMO = [
   [800, { event: 'SubagentStop', agentType: 'devops-engineer', agentId: 'o1', message: 'CI runs migrations + tests' }],
   [900, { event: 'Stop', message: 'Loyalty points shipped 🎉' }],
 ];
+// /feature-dev: Scouts explore, the Lead asks, Architects propose options, build agents build, Second Opinion reviews.
+const CE = 'code-explorer', CA = 'code-architect', CR = 'code-reviewer';
+const FEATURE_DEMO = [
+  [0, { event: 'UserPromptSubmit', prompt: '/feature-dev Add loyalty points to cafe-pos-system', app: 'cafe-pos-system' }],
+  [900, { event: 'Phase', i: 0, text: 'The Lead restates the feature and checks the wiki for anything already built that can be reused.' }],
+  [1200, { event: 'PreToolUse', tool: 'Read', file: 'wiki/index.md', text: 'Reading wiki/index.md: no loyalty feature yet' }],
+  [2200, { event: 'Phase', i: 1, text: 'Three Scouts each trace one area of the existing code, in parallel. They only read, then report how it works plus a list of key files.' }],
+  [1200, { event: 'PreToolUse', tool: 'Agent', target: CE, text: 'Trace checkout & orders' }],
+  [500, { event: 'PreToolUse', tool: 'Agent', target: CE, text: 'Trace customers & auth' }],
+  [500, { event: 'PreToolUse', tool: 'Agent', target: CE, text: 'Trace how the UI calls the API' }],
+  [700, { event: 'SubagentStart', agentType: CE, agentId: 'e1' }],
+  [150, { event: 'SubagentStart', agentType: CE, agentId: 'e2' }],
+  [150, { event: 'SubagentStart', agentType: CE, agentId: 'e3' }],
+  [800, { event: 'PreToolUse', agentType: CE, tool: 'Grep', text: 'Searching "class Order"' }],
+  [800, { event: 'PreToolUse', agentType: CE, tool: 'Read', file: 'OrderService.cs', text: 'Reading OrderService.cs' }],
+  [800, { event: 'PreToolUse', agentType: CE, tool: 'Read', file: 'Customer.cs', text: 'Reading Customer.cs' }],
+  [800, { event: 'PreToolUse', agentType: CE, tool: 'Read', file: 'client.ts', text: 'Reading api/client.ts' }],
+  [1000, { event: 'SubagentStop', agentType: CE, agentId: 'e1', message: 'Checkout flow mapped, 6 key files' }],
+  [600, { event: 'SubagentStop', agentType: CE, agentId: 'e2', message: 'Customers have no points yet, 4 key files' }],
+  [600, { event: 'SubagentStop', agentType: CE, agentId: 'e3', message: 'UI uses generated API types, 5 key files' }],
+  [1000, { event: 'PreToolUse', tool: 'Read', file: 'OrderService.cs', text: 'Reading the files the Scouts flagged' }],
+  [2000, { event: 'Phase', i: 2, text: 'The Lead asks you what the code could not answer, before anything is designed.' }],
+  [1000, { event: 'Ask', text: 'Points per peso or per order? Do points expire?' }],
+  [2800, { event: 'UserPromptSubmit', prompt: '1 point per ₱10, expire after 12 months' }],
+  [1500, { event: 'Phase', i: 3, text: 'Three Architects design it from different angles: minimal change, clean architecture, pragmatic balance. Read-only, no code written.' }],
+  [1200, { event: 'PreToolUse', tool: 'Agent', target: CA, text: 'Design A: minimal change' }],
+  [500, { event: 'PreToolUse', tool: 'Agent', target: CA, text: 'Design B: clean architecture' }],
+  [500, { event: 'PreToolUse', tool: 'Agent', target: CA, text: 'Design C: pragmatic balance' }],
+  [700, { event: 'SubagentStart', agentType: CA, agentId: 'a1' }],
+  [150, { event: 'SubagentStart', agentType: CA, agentId: 'a2' }],
+  [150, { event: 'SubagentStart', agentType: CA, agentId: 'a3' }],
+  [900, { event: 'PreToolUse', agentType: CA, tool: 'Read', file: 'OrderService.cs', text: 'Reading the Scouts’ key files' }],
+  [900, { event: 'PreToolUse', agentType: CA, tool: 'Grep', text: 'Checking existing discount logic' }],
+  [1100, { event: 'SubagentStop', agentType: CA, agentId: 'a1', message: 'A: points column on Customer, 2 files' }],
+  [600, { event: 'SubagentStop', agentType: CA, agentId: 'a2', message: 'B: Loyalty module + ledger table, 9 files' }],
+  [600, { event: 'SubagentStop', agentType: CA, agentId: 'a3', message: 'C: ledger table, reuses checkout, 5 files' }],
+  [1300, { event: 'Ask', text: 'I recommend C: handles expiry, small change. A, B or C?' }],
+  [2600, { event: 'UserPromptSubmit', prompt: 'Go with C' }],
+  [1500, { event: 'Phase', i: 4, text: 'The chosen blueprint goes to the normal build agents (Backend and Frontend in parallel), then QA tests it.' }],
+  [1100, { event: 'PreToolUse', tool: 'Agent', target: 'backend-dotnet-dev', text: 'Build blueprint C: ledger + endpoints' }],
+  [400, { event: 'PreToolUse', tool: 'Agent', target: 'frontend-react-dev', text: 'Build points card + redeem' }],
+  [800, { event: 'SubagentStart', agentType: 'backend-dotnet-dev', agentId: 'b1' }],
+  [150, { event: 'SubagentStart', agentType: 'frontend-react-dev', agentId: 'f1' }],
+  [800, { event: 'PreToolUse', agentType: 'backend-dotnet-dev', tool: 'Write', file: 'LoyaltyLedger.cs', text: 'Writing LoyaltyLedger.cs' }],
+  [700, { event: 'PreToolUse', agentType: 'frontend-react-dev', tool: 'Write', file: 'PointsCard.tsx', text: 'Writing PointsCard.tsx' }],
+  [900, { event: 'PreToolUse', agentType: 'backend-dotnet-dev', tool: 'Bash', text: 'Running: dotnet build && dotnet test' }],
+  [800, { event: 'PreToolUse', agentType: 'frontend-react-dev', tool: 'Bash', text: 'Running: npm run lint && npm run build' }],
+  [1100, { event: 'SubagentStop', agentType: 'backend-dotnet-dev', agentId: 'b1', message: 'Ledger + 3 endpoints, tests green' }],
+  [700, { event: 'SubagentStop', agentType: 'frontend-react-dev', agentId: 'f1', message: 'Points card + redeem done' }],
+  [900, { event: 'PreToolUse', tool: 'Agent', target: 'qa-automation', text: 'Test earn, redeem and expiry' }],
+  [800, { event: 'SubagentStart', agentType: 'qa-automation', agentId: 'q1' }],
+  [800, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'Bash', text: 'Running: npx playwright test loyalty' }],
+  [1200, { event: 'SubagentStop', agentType: 'qa-automation', agentId: 'q1', message: '18 tests passing' }],
+  [1500, { event: 'Phase', i: 5, text: 'The Lead owns the review: it runs /code-review and asks a Second Opinion to read the code fresh. The Lead decides what gets fixed.' }],
+  [1100, { event: 'PreToolUse', tool: 'Skill', skill: 'code-review', text: 'Running /code-review high' }],
+  [800, { event: 'PreToolUse', tool: 'Agent', target: CR, text: 'Fresh read: bugs & security' }],
+  [800, { event: 'SubagentStart', agentType: CR, agentId: 'r1' }],
+  [800, { event: 'PreToolUse', agentType: CR, tool: 'Read', file: 'LoyaltyLedger.cs', text: 'Reading LoyaltyLedger.cs' }],
+  [1200, { event: 'SubagentStop', agentType: CR, agentId: 'r1', message: 'Points can go negative on a refund' }],
+  [1100, { event: 'PreToolUse', tool: 'Agent', target: 'backend-dotnet-dev', text: 'Fix batch: clamp points at 0 on refund' }],
+  [800, { event: 'SubagentStart', agentType: 'backend-dotnet-dev', agentId: 'b2' }],
+  [900, { event: 'PreToolUse', agentType: 'backend-dotnet-dev', tool: 'Edit', file: 'LoyaltyLedger.cs', text: 'Editing LoyaltyLedger.cs' }],
+  [1000, { event: 'SubagentStop', agentType: 'backend-dotnet-dev', agentId: 'b2', message: 'Fixed, tests re-run green' }],
+  [1500, { event: 'Phase', i: 6, text: 'Docs records the verified feature, and the Lead sums up what was built.' }],
+  [1000, { event: 'PreToolUse', tool: 'Agent', target: 'docs-writer', text: 'Document loyalty points' }],
+  [800, { event: 'SubagentStart', agentType: 'docs-writer', agentId: 'd1' }],
+  [800, { event: 'PreToolUse', agentType: 'docs-writer', tool: 'Edit', file: 'README.md', text: 'Editing README.md' }],
+  [1100, { event: 'SubagentStop', agentType: 'docs-writer', agentId: 'd1', message: 'Loyalty docs added' }],
+  [1000, { event: 'Stop', message: 'Loyalty points shipped with /feature-dev 🎉' }],
+];
 let demoTimers = [];
-$('demoBtn').onclick = () => {
+function playDemo(script) {
   demoTimers.forEach(clearTimeout);
   demoTimers = [];
+  showView('floor');
   resetAll();
   let at = 300;
-  for (const [delay, evt] of DEMO) {
+  for (const [delay, evt] of script) {
     at += delay;
     demoTimers.push(setTimeout(() => handle({ ...evt, t: Date.now() }), at));
   }
-  if (EMBED) demoTimers.push(setTimeout(() => $('demoBtn').click(), at + 6000));
-};
+  if (EMBED) demoTimers.push(setTimeout(() => playDemo(script === DEMO ? FEATURE_DEMO : DEMO), at + 6000));
+}
+$('demoBtn').onclick = () => playDemo(DEMO);
+$('featureBtn').onclick = () => playDemo(FEATURE_DEMO);
 
 /* ---------- team roster (agent office: one entry per team) ---------- */
 // Mirrors .claude/agents/*.md (frontmatter `skills:`) and .claude/skills/. Update both when an agent or skill changes.
@@ -828,8 +952,9 @@ document.querySelector('.tabs').onkeydown = (ev) => {
 renderTeams();
 initRoster();
 connect();
-if (location.hash === '#team') showView('team');
-if (params.has('demo') || EMBED) $('demoBtn').click();
+const startOnTeam = location.hash === '#team';
+if (params.has('demo') || EMBED) playDemo(params.get('demo') === 'feature' ? FEATURE_DEMO : DEMO);
+if (startOnTeam) showView('team');
 </script>
 </body>
 </html>
