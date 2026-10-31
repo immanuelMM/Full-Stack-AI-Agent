@@ -644,13 +644,15 @@ function activity(actor, e, animate) {
   if (actor === 'lead') { d.state = 'working'; refreshLead(); }
   tools++; d.actions++;
   if (e.file) files.add(e.file);
-  setBubble(d, e.text, TOOL_ICON[e.tool] || '⚙️');
+  const browser = /^mcp__playwright__/.test(e.tool || '');
+  setBubble(d, e.text, TOOL_ICON[e.tool] || (browser ? '🌐' : '⚙️'));
   if (e.tool === 'Skill' && REVIEW_SKILLS.test(e.skill)) {
     updateStages('Review');
     if (animate) speak(actor, `Starting ${e.skill.replace(/-/g, ' ')}`);
   }
   if (animate && (e.tool === 'Edit' || e.tool === 'Write' || e.tool === 'MultiEdit') && e.file) floatChip(d, '+ ' + e.file);
   if (animate && /^(Bash|PowerShell)$/.test(e.tool)) floatChip(d, '⌨️ run');
+  if (animate && browser && /screenshot/.test(e.tool)) floatChip(d, '📸 screenshot');
   feed(d, e.text, e.t);
   updateStats();
 }
@@ -733,7 +735,10 @@ const DEMO = [
   [1200, { event: 'SubagentStop', agentType: 'frontend-react-dev', agentId: 'f1', message: 'Loyalty card + redeem flow done' }],
   [1000, { event: 'PreToolUse', tool: 'Agent', target: 'qa-automation', text: 'Test loyalty earn & redeem' }],
   [900, { event: 'SubagentStart', agentType: 'qa-automation', agentId: 'q1' }],
-  [700, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'Write', file: 'LoyaltyTests.cs', text: 'Writing LoyaltyTests.cs' }],
+  [700, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'mcp__playwright__browser_navigate', text: 'Opening localhost:15173/checkout' }],
+  [900, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'mcp__playwright__browser_click', text: 'Clicking Redeem points button' }],
+  [900, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'mcp__playwright__browser_take_screenshot', text: 'Taking a screenshot' }],
+  [800, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'Write', file: 'LoyaltyTests.cs', text: 'Writing LoyaltyTests.cs' }],
   [1000, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'Bash', text: 'Running: npx playwright test loyalty' }],
   [1400, { event: 'SubagentStop', agentType: 'qa-automation', agentId: 'q1', message: '14 tests passing' }],
   [900, { event: 'PreToolUse', tool: 'Skill', skill: 'code-review', text: 'Using skill code-review' }],
@@ -805,6 +810,10 @@ const FEATURE_DEMO = [
   [700, { event: 'SubagentStop', agentType: 'frontend-react-dev', agentId: 'f1', message: 'Points card + redeem done' }],
   [900, { event: 'PreToolUse', tool: 'Agent', target: 'qa-automation', text: 'Test earn, redeem and expiry' }],
   [800, { event: 'SubagentStart', agentType: 'qa-automation', agentId: 'q1' }],
+  [800, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'mcp__playwright__browser_navigate', text: 'Opening localhost:15173/checkout' }],
+  [900, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'mcp__playwright__browser_fill_form', text: 'Filling Customer phone' }],
+  [900, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'mcp__playwright__browser_verify_text_visible', text: 'Checking “120 points” shows' }],
+  [800, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'mcp__playwright__browser_take_screenshot', text: 'Taking a screenshot' }],
   [800, { event: 'PreToolUse', agentType: 'qa-automation', tool: 'Bash', text: 'Running: npx playwright test loyalty' }],
   [1200, { event: 'SubagentStop', agentType: 'qa-automation', agentId: 'q1', message: '18 tests passing' }],
   [1500, { event: 'Phase', i: 6, text: 'The Lead owns the review: it runs /code-review and asks a Second Opinion to read the code fresh. The Lead decides what gets fixed.' }],
@@ -851,6 +860,7 @@ const SKILLS = {
   'react-frontend-standards': { src: 'workspace', what: 'House rules for React + TypeScript: Vite, folder structure, TanStack Query, API types generated from OpenAPI, React Hook Form + Zod, accessibility, and Astro for static sites.' },
   'frontend-design':          { src: 'anthropics/claude-plugins-official', what: 'Design direction so screens look intentional rather than templated: typography, colour, layout and visual identity.' },
   'ui-ux-pro-max':            { src: 'nextlevelbuilder/ui-ux-pro-max-skill', what: 'Searchable design library (50 styles, 190+ palettes, 74 font pairings, 119 UX guidelines, chart types) used to pick a design system for each app.' },
+  'Playwright MCP':           { src: 'microsoft/playwright-mcp', what: 'Opens a visible Chrome window that QA drives step by step (open a page, click, type, check, screenshot) so you can watch it test. Starts with QA and closes when QA finishes.' },
   '/feature-dev':             { src: 'anthropics/claude-plugins-official', what: 'Big-feature workflow for an existing app: Scouts explore the code, the Lead asks questions, the Planner writes the plan, Architects propose blueprints, then the team builds.' },
   '/code-review':             { src: 'Claude Code', what: 'Reviews the changes for bugs at a chosen depth (low → max) before work is accepted.' },
   '/security-review':         { src: 'Claude Code', what: 'Security pass whenever auth, payments, user data, uploads or secrets were touched.' },
@@ -869,8 +879,8 @@ const PROFILES = {
     duties: ['Generates API types from the OpenAPI snapshot', 'Mobile-first, accessible layouts for phone, tablet and desktop', 'Picks a design system for each app'],
     skills: ['react-frontend-standards', 'frontend-design', 'ui-ux-pro-max'], tools: 'Read, Write, Edit, Bash, Glob, Grep' },
   'qa-automation': { model: 'Sonnet', about: 'Writes and runs automated tests against what was built: xUnit + Testcontainers for the API, Vitest + React Testing Library for components, Playwright for end-to-end flows.',
-    duties: ['Runs end-to-end tests on an isolated stack, never your dev database', 'Reports real pass/fail counts', 'Pins every bug it finds with a test'],
-    skills: [], noSkills: 'Works from its own built-in test rules plus the wiki’s Playwright harness recipe.', tools: 'Read, Write, Edit, Bash, Glob, Grep' },
+    duties: ['Opens a visible browser so you can watch it check the app', 'Runs end-to-end tests on an isolated stack, never your dev database', 'Reports real pass/fail counts', 'Pins every bug it finds with a test'],
+    skills: ['Playwright MCP'], tools: 'Read, Write, Edit, Bash, Glob, Grep' },
   'docs-writer': { model: 'Sonnet', about: 'Writes the README, setup guides, API docs and architecture overviews, only for behavior that has been built and verified.',
     duties: ['Documents after the tests pass', 'Keeps setup steps copy-pasteable'],
     skills: [], noSkills: 'Works from its own built-in documentation rules.', tools: 'Read, Write, Edit, Bash, Glob, Grep' },
@@ -913,7 +923,7 @@ function renderTeams() {
         </div>
         <p class="about">${esc(p.about)}</p>
         <div><h4>Responsibilities</h4><ul class="duties">${p.duties.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>
-        <div><h4>Skills (${p.skills.length})</h4>${skills}</div>
+        <div><h4>Skills &amp; tools (${p.skills.length})</h4>${skills}</div>
         <div class="tools">Tools: <code>${esc(p.tools)}</code></div>
       </article>`;
     };
@@ -922,7 +932,7 @@ function renderTeams() {
         <div class="t"><div class="kicker">${esc(team.kicker)}</div><h1>${esc(team.name)}</h1><p>${esc(team.blurb)}</p></div>
         <div class="team-stats">
           <div class="stat"><b>${ids.length}</b><span>agents</span></div>
-          <div class="stat"><b>${skillCount}</b><span>skills</span></div>
+          <div class="stat"><b>${skillCount}</b><span>skills &amp; tools</span></div>
           <div class="stat"><b>${STAGES.length}</b><span>stages</span></div>
         </div>
       </header>

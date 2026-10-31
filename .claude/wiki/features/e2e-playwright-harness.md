@@ -16,6 +16,15 @@ Status: **implemented** — cafe-pos-system `d04812d`, IMMAN_HRIS `d4c2e28`, bet
    `**/api/v1/**` with `context.route`, assert no un-mocked calls.
 7. **Fake camera** for QR scanning (see below).
 
+## Watching QA live (Playwright MCP)
+- `qa-automation` has a visible Chrome (`mcp__playwright__*`, server in its frontmatter); it opens when QA starts and
+  closes when it finishes. Exploratory checks there become specs; it points only at the E2E stack or a preview build.
+- Agent Studio shows each browser step as 🌐 ("Opening localhost:15173/checkout", "Clicking Redeem points"); typed
+  text is never shown.
+- Watching a suite instead: `npx playwright test <spec> --project=<name> --headed --workers=1 --trace=on`, then
+  `npx playwright show-report`. `--ui` is for the user only (it blocks an agent).
+- Smoke-tested 2026-10-31: navigate + `browser_verify_text_visible` + screenshot + close against the studio page.
+
 ## Reference implementation
 - Isolated stack: `cafe-pos-system/e2e/docker-compose.e2e-iso.yml` (`-p cafepos-e2e`, ports 15173/15080/15433),
   `IMMAN_HRIS/e2e/docker-compose.e2e.yml` (`name: hris-e2e`, `hris-e2e-db` on :15432, tmpfs data).

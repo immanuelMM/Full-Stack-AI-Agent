@@ -564,3 +564,7 @@ Applied directly by the lead in `chore(agents): apply Render + tablet UI lessons
 - research-planner: flag platform limits; Public Suffix List check; Decisions section.
 - CLAUDE.md: lead verification (check every suite printed a result, look at screenshots), push early, give exact config
   values, fresh agents per milestone, short temp paths on Windows, the lessons loop itself.
+
+## 2026-10-31 · lead · full-stack-agent
+- Agent definition edits (incl. inline `mcpServers`) are read at session start; a QA run in the same session had no
+  `mcp__playwright__*` tools → CLAUDE.md lead rule "restart before relying on `.claude/` changes".

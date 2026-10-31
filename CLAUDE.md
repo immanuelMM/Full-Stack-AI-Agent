@@ -51,6 +51,7 @@ Every prompt to an agent must name the app folder it is working on.
 | research-planner | `brainstorming`, `writing-plans`, `executing-plans` (superpowers), `skill-creator` | obra/superpowers (MIT), anthropics/skills (Apache-2.0) |
 | frontend-react-dev | `react-frontend-standards`, `frontend-design`, `ui-ux-pro-max` | anthropics/claude-plugins-official (Apache-2.0), nextlevelbuilder/ui-ux-pro-max-skill (MIT) |
 | backend-dotnet-dev | `dotnet-backend-standards` | workspace |
+| qa-automation | Playwright MCP — a visible Chrome it drives step by step (server defined in the agent file) | microsoft/playwright-mcp (Apache-2.0), npm `@playwright/mcp@0.0.83` |
 | lead | `/feature-dev` command + `code-explorer`, `code-architect`, `code-reviewer` agents | anthropics/claude-plugins-official (Apache-2.0) |
 - Third-party skills are vendored unchanged except where `.claude/skills/VENDOR.md` says; update them from there.
 - **Workspace rules win** over any skill or command text (git staging, no push without asking, `docs/plan/` paths,
@@ -92,6 +93,7 @@ The reference layout for new full stack apps (architecture doc, ADRs, scaffold) 
   a design safe.
 - When the user has to type config (env vars, dashboard fields), give exact valid example values up front. Before
   telling them to delete one-time credentials (bootstrap vars), have them confirm they actually logged in.
+- Changes to agents, skills or MCP servers in `.claude/` load only in a new Claude Code session: restart before relying on them.
 - Start a fresh agent for a new milestone once an agent's context is large; send all review fixes in one batch.
 - Clone or build in short temp paths (`$TEMP/<short>`), never the scratchpad (Windows 260-char limit; see the wiki's windows page).
 

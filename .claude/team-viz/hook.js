@@ -24,7 +24,31 @@ const short = (s, n) => {
 };
 const base = (p) => (p ? path.basename(String(p)) : '');
 
+// QA's live browser (Playwright MCP). Typed text is never shown — it may be a password.
+function describeBrowser(action, input) {
+  const what = short(input.element || input.text || '', 50);
+  switch (action) {
+    case 'navigate': try { const u = new URL(input.url); return `Opening ${u.host}${u.pathname === '/' ? '' : short(u.pathname, 30)}`; } catch { return 'Opening a page'; }
+    case 'navigate_back': return 'Going back';
+    case 'snapshot': return 'Reading the page';
+    case 'click': return `Clicking ${what || 'an element'}`;
+    case 'type': case 'fill_form': return `Filling ${short(input.element || '', 50) || 'a form'}`;
+    case 'select_option': return `Choosing in ${short(input.element || '', 50) || 'a list'}`;
+    case 'press_key': return `Pressing ${input.key || 'a key'}`;
+    case 'resize': return `Resizing to ${input.width}×${input.height}`;
+    case 'take_screenshot': return 'Taking a screenshot';
+    case 'console_messages': return 'Checking console errors';
+    case 'wait_for': return 'Waiting for the page';
+    case 'close': return 'Closing the browser';
+    default:
+      if (action.startsWith('verify_')) return `Checking ${what || action.slice(7).replace(/_/g, ' ')}`;
+      return 'Browser: ' + action.replace(/_/g, ' ');
+  }
+}
+
 function describe(tool, input) {
+  const m = /^mcp__playwright__browser_(.+)$/.exec(tool || '');
+  if (m) return describeBrowser(m[1], input);
   switch (tool) {
     case 'Read': return `Reading ${base(input.file_path)}`;
     case 'Edit': case 'MultiEdit': return `Editing ${base(input.file_path)}`;

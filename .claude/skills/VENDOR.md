@@ -14,9 +14,13 @@ review the diff, copy over, re-apply the local changes, and update this file.
 | ui-ux-pro-max | `.claude/skills/ui-ux-pro-max/` | github.com/nextlevelbuilder/ui-ux-pro-max-skill `.claude/skills/ui-ux-pro-max` | `28b3b8d` | MIT (`LICENSE`) | `scripts/tests/` dropped; script path given in `frontend-react-dev.md` (`${CLAUDE_PLUGIN_ROOT}` is unset for project skills) |
 | feature-dev command | `.claude/commands/feature-dev.md` | github.com/anthropics/claude-plugins-official `plugins/feature-dev/commands` | `f8c5e7a` | Apache-2.0 (`_vendor-licenses/feature-dev-LICENSE`) | none |
 | code-explorer, code-architect, code-reviewer | `.claude/agents/` | github.com/anthropics/claude-plugins-official `plugins/feature-dev/agents` | `f8c5e7a` | Apache-2.0 | none |
+| Playwright MCP (not copied) | `mcpServers` in `.claude/agents/qa-automation.md` | npm `@playwright/mcp` (github.com/microsoft/playwright-mcp) | `0.0.83` pinned | Apache-2.0 | runs via `npx`; `browser_run_code_unsafe` disallowed |
 
 Review notes:
 - brainstorming's optional visual companion (`scripts/server.cjs`) is a local, token-protected web page that loads a
   logo from primeradiant.com; the planner is told to skip it.
 - skill-creator's eval scripts run `claude -p` (spends tokens) — only on request.
 - ui-ux-pro-max's scripts read local CSV/JSON only; needs `python` (3.x) — `python3` is the Microsoft Store stub here.
+- Playwright MCP: Microsoft's browser server; `--isolated` (in-memory profile), installed Chrome (no browser download),
+  output in `%TEMP%/qa-browser`. Its `browser_run_code_unsafe` runs arbitrary code in the server process, so QA may not
+  use it. Bump the pinned version deliberately (read the changelog), never `@latest`.

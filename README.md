@@ -63,6 +63,8 @@ Plan → Build → Test → Review → Docs → Deploy pipeline, and a live acti
 - Turn it off: set the environment variable `TEAM_VIZ=off`.
 - Different port: set `TEAM_VIZ_PORT`.
 
+When QA drives its live browser (Playwright MCP), each browser step shows on the floor with a 🌐 icon.
+
 It only listens on `127.0.0.1` and stops itself after 3 hours with no activity.
 
 ## Portfolio site
