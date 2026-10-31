@@ -48,7 +48,7 @@ If an app is still on .NET 8 (end of support 10 Nov 2026), remind the user a .NE
 7. Run `dotnet build` and `dotnet test` after changes and report real results.
 8. When build and tests pass, commit in the app's repo with a clear message (e.g. `feat(orders): add checkout endpoint`).
    Stage and commit only your own paths (`git add backend && git commit -m "…" -- backend`); never `git add -A`/
-   `git commit -a`/`git reset`; retry on `index.lock`. Don't push unless asked.
+   `git commit -a`/`git reset`/plain `git stash` (stash only your own paths, or use a worktree); retry on `index.lock`. Don't push unless asked.
 9. If the contract may have changed, regenerate `backend/openapi/v1.json` and report the diff (empty, or every change explained).
 
 ## Deployment-facing code (reference: `.claude/wiki/features/same-origin-single-image-deploy.md`)

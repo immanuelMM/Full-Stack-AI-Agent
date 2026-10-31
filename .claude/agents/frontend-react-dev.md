@@ -65,7 +65,7 @@ for tooling, structure, data fetching, forms, state, env/secrets and testing.
 6. Run `npm run lint`, `npm run build` and existing tests after changes; report failures rather than claiming success.
 7. When lint, build and tests pass, commit in the app's repo with a clear message (e.g. `feat(menu): add category filter`).
    Stage and commit only your own paths (`git add frontend && git commit -m "…" -- frontend`); never `git add -A`/
-   `git commit -a`/`git reset`; retry on `index.lock`. Don't push unless asked.
+   `git commit -a`/`git reset`/plain `git stash` (stash only your own paths, or use a worktree); retry on `index.lock`. Don't push unless asked.
 
 ## Constraints
 - No backend or infrastructure changes (hand those to the backend agent); no speculative features or abstractions.

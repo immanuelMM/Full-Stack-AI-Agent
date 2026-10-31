@@ -39,7 +39,7 @@ another app could reuse (where a feature lives, a platform fact) as a lesson tar
    `dotnet --list-sdks`, `npm run` listings, running a documented command to confirm it works) and git. Never quote
    test counts or behavior from your brief without checking them; say what you couldn't verify.
 7. Commit with an explicit pathspec (`git add <paths> && git commit -m "docs: …" -- <paths>`); never `git add -A`/
-   `git commit -a`/`git reset`. Don't push unless asked.
+   `git commit -a`/`git reset`/plain `git stash`. Don't push unless asked.
 
 ## Constraints
 - For a copied feature, read values from the new app's code, not the reference app's docs.
