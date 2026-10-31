@@ -263,7 +263,7 @@ const EXTRA = {
   'claude-code-guide':  { name: 'Guide',    role: 'Docs lookup', icon: '📚', color: '#c084fc' },
   'code-explorer':      { name: 'Scout',    role: 'Code explorer',  icon: '🔎', color: '#eab308', stage: 'Plan' },
   'code-architect':     { name: 'Architect', role: 'Blueprints',    icon: '📐', color: '#22c55e', stage: 'Plan' },
-  'code-reviewer':      { name: 'Reviewer', role: 'Code review',    icon: '🔍', color: '#ef4444', stage: 'Review' },
+  'code-reviewer':      { name: 'Second Opinion', role: 'Independent review', icon: '🔍', color: '#ef4444', stage: 'Review' },
 };
 
 /* ---------- avatars ---------- */
@@ -725,7 +725,7 @@ const SKILLS = {
 };
 const PROFILES = {
   'lead': { model: 'Opus · main session', about: 'Claude in your main session. Talks with you, checks the knowledge base so finished features get reused, briefs each agent, verifies every report itself and runs the reviews.',
-    duties: ['Asks for the app name and type before a new app starts', 'Dispatches agents in pipeline order; backend and frontend run in parallel', 'Re-runs builds, tests and git checks before accepting any work', 'Routes lessons into agents, skills and the wiki'],
+    duties: ['Asks for the app name and type before a new app starts', 'Dispatches agents in pipeline order; backend and frontend run in parallel', 'Re-runs builds, tests and git checks before accepting any work', 'Owns the review step: runs /code-review and /security-review, then sends the fixes in one batch', 'Routes lessons into agents, skills and the wiki'],
     skills: ['/feature-dev', '/code-review', '/security-review'], tools: 'All tools · dispatches agents' },
   'research-planner': { model: 'Opus', about: 'Researches current UI/UX trends and stack best practices on the web, then writes a milestone plan the build agents execute. Never writes app code.',
     duties: ['Needs the app name and “static or full stack” before it starts', 'Saves the plan in the app’s docs/plan/ folder', 'Returns open questions with sensible defaults'],
@@ -749,8 +749,9 @@ const PROFILES = {
     duties: ['Read-only: it never edits code'], skills: [], noSkills: 'No skills; called by the lead during /feature-dev.', tools: 'Glob, Grep, Read, WebFetch, WebSearch' },
   'code-architect': { model: 'Sonnet', about: 'Turns what the explorer found into an implementation blueprint: files to create or change, components, data flow and build order.',
     duties: ['Read-only: it designs and the build agents implement'], skills: [], noSkills: 'No skills; called by the lead during /feature-dev.', tools: 'Glob, Grep, Read, WebFetch, WebSearch' },
-  'code-reviewer': { model: 'Sonnet', about: 'Reviews changes for bugs, security issues and broken conventions, reporting only high-confidence problems.',
-    duties: ['Runs alongside /code-review in the review step'], skills: [], noSkills: 'No skills; called by the lead in the review step.', tools: 'Glob, Grep, Read, WebFetch, WebSearch' },
+  'code-reviewer': { model: 'Sonnet', about: 'An independent read on the code. The Lead owns the review step; on big features it also asks this agent, which starts with no context and reads only the code, so it catches what the Lead may overlook.',
+    duties: ['Reports bugs, security issues and broken conventions, only high-confidence ones', 'Read-only: the Lead decides what gets fixed', 'Used on big features alongside /code-review'],
+    skills: [], noSkills: 'No skills; called by the Lead for a second opinion.', tools: 'Glob, Grep, Read, WebFetch, WebSearch' },
 };
 const TEAMS = [{
   id: 'full-stack', name: 'Full Stack Team', emblem: '🏗️', kicker: 'Agent office · Team 1',
@@ -758,7 +759,7 @@ const TEAMS = [{
   groups: [
     { title: 'Lead', note: 'runs the team', members: ['lead'] },
     { title: 'Core crew', note: 'Plan → Build → Test → Docs → Deploy', members: ['research-planner', 'backend-dotnet-dev', 'frontend-react-dev', 'qa-automation', 'docs-writer', 'devops-engineer'] },
-    { title: 'Lead’s specialists', note: 'big features and reviews', members: ['code-explorer', 'code-architect', 'code-reviewer'] },
+    { title: 'Lead’s specialists', note: 'helpers the Lead calls on big features', members: ['code-explorer', 'code-architect', 'code-reviewer'] },
   ],
 }];
 
