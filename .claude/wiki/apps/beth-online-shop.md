@@ -1,6 +1,6 @@
 # beth-online-shop
 
-Reflects app commit `4a44a3a` (2026-10-31: B0–B3 + F0–F3 built; security + code review fixed and verified — 665 backend tests, 216 Vitest, E2E 88–92 per viewport at 5 viewports. Next: full-stack E2E against the real API, D1 deploy, docs).
+Reflects app commit `4a27359` (2026-10-31: MVP complete locally — 679 backend tests, 231 Vitest, backend-free screenshots at 5 viewports, full-stack E2E 75/45/45 (desktop/tablet-landscape/phone-small), Docker smoke 25/25, docs written. Not yet pushed or deployed; the user pushes).
 Paths are relative to `C:\Users\merin\AI\Agentic-fullstack-web-dev\`.
 
 ## Purpose
