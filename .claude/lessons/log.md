@@ -2,6 +2,18 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop docs (docs-writer)
+- Wiki: jwt-refresh-auth (beth vs cafe-pos values). Standards: docs-writer Constraints (read copied values from the new app; format own docs only; link/anchor check). The render.yaml SameSite comment was fixed by the lead (beth 830ecdf).
+### 2026-10-31 · docs-writer · beth-online-shop
+- target: .claude/wiki/features/jwt-refresh-auth.md
+- lesson: Beth copied the cafe-pos auth but changed details: refresh cookie `bethshop_refresh` is `SameSite=Strict` (cafe-pos is Lax), Web Lock `bethshop-refresh`, access token 15 min, and the lockout is per account AND client IP (`LoginFailures`, 5 failures in 5 minutes lock that pair for 5 minutes, 423), not Identity's per-account lockout. When documenting a copied feature, read the values from the new app's code, not the reference app's docs.
+- why: `beth-online-shop/render.yaml` line 5 still says "SameSite=Lax refresh cookie" while `AuthController.cs` sets `SameSiteMode.Strict` (devops should fix that comment); cafe-pos ADRs 0005/0006 would have been copied with the wrong cookie and lockout values.
+
+### 2026-10-31 · docs-writer · beth-online-shop
+- target: .claude/agents/docs-writer.md
+- lesson: No repo format setup covers `docs/` (the frontend/e2e Prettier configs only cover their own folders), so `prettier --check` on Markdown fails on every file by default, existing docs included. Format only the files you own with the frontend config (`cd frontend && npx prettier --write --config .prettierrc.json ../README.md ../docs/<your files>`; it aligns small tables and adds blank lines after headings, and leaves code fences and wide tables alone), never other agents' docs such as `deployment.md`. Also run a small script that checks every relative link and `#anchor` before committing.
+- why: the check flagged all 20 Markdown files including the devops-written `docs/deployment.md`; after `--write` on the 19 owned files `--check` was clean and the link/anchor script found 0 broken links.
+
 ## 2026-10-31 · beth-online-shop D1 (devops-engineer)
 - Standards: devops-engineer How to work (npm ci --dry-run before first build; list fresh-production gaps and raise them). Wiki: platforms/render (RENDER_EXTERNAL_URL), platforms/paymongo (dashboard steps), features/same-origin-single-image-deploy (smoke script), platforms/windows-dev-machine (MSYS path conversion). Backslash-in-heredoc part dropped (already a rule).
 ### 2026-10-31 · devops-engineer · beth-online-shop

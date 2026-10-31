@@ -42,6 +42,9 @@ another app could reuse (where a feature lives, a platform fact) as a lesson tar
    `git commit -a`/`git reset`. Don't push unless asked.
 
 ## Constraints
+- For a copied feature, read values from the new app's code, not the reference app's docs.
+- Format only the docs you own (`cd frontend && npx prettier --write --config .prettierrc.json ../README.md ../docs/<file>`
+  when no repo config covers `docs/`), and check every relative link and `#anchor` with a small script before committing.
 - Don't write or modify application/test code. Don't install packages, change config, or run anything that modifies
   the app, its containers or its databases.
 - Don't invent features, endpoints or behavior that doesn't exist in the code.
