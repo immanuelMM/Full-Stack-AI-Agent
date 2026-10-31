@@ -2,6 +2,18 @@
 
 Applied lessons, newest first. Each entry says where it was applied.
 
+## 2026-10-31 · beth-online-shop final changes (backend + frontend)
+- Wiki: same-origin-single-image-deploy (RENDER_EXTERNAL_URL fallback, SeedMarkers one-time defaults). Standards: react-frontend-standards §4 (remounted forms lose local state; sticky Save bar). Dropped: the navigation-state workaround for "payment not started" — the backend added `paymentStarted` (6a5c103) and the frontend was told to use it.
+### 2026-10-31 · backend-dotnet-dev (beth-be-final) · beth-online-shop
+- target: .claude/wiki/features/same-origin-single-image-deploy.md
+- lesson: Render sets `RENDER_EXTERNAL_URL` (public https origin) on every web service: outside Development, when the public-origin setting (`Seo:PublicBaseUrl`) is empty, add it to `builder.Configuration` (a `ConfigurationManager`, `AddInMemoryCollection` after `Build()`, before options validate) so every reader sees it; accept only absolute https and log the source. For a one-time production default (default shipping zones) use a tiny `SeedMarkers` table (name PK) written in the same transaction + advisory lock as the rows, instead of a settings column, so owner deletes never resurrect them and the settings row's xmin concurrency token is not touched. Reference: beth `Http/PublicBaseUrlFallback.cs`, `Persistence/DefaultShippingZones.cs`, `StartupDefaultsTests.cs`.
+- why: Render users otherwise had to type the URL by hand; a dev-only seeder left a fresh production database without delivery zones. Moving the zone data into one shared class also changed the dev fees and broke one hard-coded assertion (CartQuoteTests), caught only by the full suite.
+
+### 2026-10-31 · frontend-react-dev (beth-final-fe) · beth-online-shop
+- target: .claude/wiki/apps/beth-online-shop.md
+- lesson: A form remounted with `key={settings.version}` loses any local state set after a save, so a "Saved." note kept in the form never shows: keep it in the parent that does not remount and clear it on the next edit (`form.watch` subscription). A long settings form needs a sticky Save bar (`editor-bar`) so the primary action stays in the 375x667 viewport. The order DTO (`OrderStatusDto`) cannot say whether a PayMongo session exists (`paymentStatus` is only Unpaid/Paid/Refunded), so "payment not started yet" is derived from the checkout navigation state (`linkPending`) and cleared with `navigate(..., { replace: true, state: null })` when Pay now opens a page; an order link opened elsewhere still shows "Confirming". Ask the backend for a `paymentStarted` flag if that case matters.
+- why: The Vitest run after adding the Shop profile tab found "Saved." never appeared on any settings tab (existing COD and Schedule tabs had the same bug); the QA bug "Confirming your payment" for a never-started payment had no DTO signal to key on. QA's `e2e/full/q2-online-payment.spec.ts` line ~303 still asserts the removed "payment link is being prepared" note.
+
 ## 2026-10-31 · beth-online-shop QA pass 1 (qa-automation)
 - Wiki: e2e-playwright-harness (full-stack harness + payment stub recipe, teardown on throw, kept-DB hygiene, DB-driven expiry, URL-driven radios). Standards: qa-automation (worktree mutation checks, no serialising lock, await before isVisible branch, docker ps comparison). Dropped: midnight guard (already a rule). Dev-container disappearance reported to the user (cause unproven; Docker Desktop did not restart).
 ### 2026-10-31 · qa-automation · beth-online-shop

@@ -40,6 +40,12 @@ Give the user example values: IANA zone `Asia/Manila` (not `GMT+8`), VAT `12`.
 2. Add the CI `docker` job (build + smoke) and, for Render, a `render.yaml` ([Render](../platforms/render.md)).
 
 ## Gotchas
+- Render sets `RENDER_EXTERNAL_URL` on every web service: outside Development, when the public-origin setting is empty,
+  add it to `builder.Configuration` (in-memory, before options validate), https only, log the source (beth
+  `Http/PublicBaseUrlFallback.cs`).
+- One-time production defaults (e.g. delivery zones): a `SeedMarkers` table written in the same transaction + advisory
+  lock as the rows, so owner deletes never resurrect them (beth `Persistence/DefaultShippingZones.cs`,
+  `StartupDefaultsTests.cs`).
 - Security headers on the SPA fallback and static files from config (beth `SpaSecurityHeaders.cs`): no-referrer,
   DENY, nosniff, CSP with img-src + R2 origin. Vite output needs no `'unsafe-inline'` (React `style` props are CSSOM).
 - Bootstrap acts only when the users table is empty, inside a transaction with an advisory lock; validates every value

@@ -68,6 +68,8 @@ modules `<thing>Model.ts` or `<thing>Schema.ts`.
 - **React Router** (v7+) with lazy-loaded route modules for large pages.
 - Forms: **React Hook Form + Zod** (`@hookform/resolvers/zod`). One Zod schema per form, shared with the
   TypeScript type via `z.infer`.
+- A form remounted with `key={version}` after save loses its local state: keep save notes in the parent and clear them
+  on the next edit. Long settings forms get a sticky Save bar.
 - Client-only state (cart, UI toggles): local state first, **Zustand** when it must be shared. Not for server data.
 
 ## 5. Styling, responsive, accessibility
